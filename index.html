@@ -1,0 +1,2095 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>렌탈수수료 시스템</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1e40af">
+  <link rel="icon" href="icon-192.png">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <style>
+*{box-sizing:border-box;margin:0;padding:0;touch-action:manipulation}
+button{touch-action:manipulation}
+body{font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif;background:#eef2fb;}
+.login-wrap{display:flex;align-items:center;justify-content:center;min-height:100svh;padding:16px}
+.login-box{background:#fff;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,.12);padding:28px 20px;width:100%;max-width:480px}
+.login-logo{text-align:center;margin-bottom:20px}
+.login-logo h1{font-size:1.6rem;color:#1e3a8a;font-weight:800}
+.login-logo p{font-size:1rem;color:#94a3b8;margin-top:4px}
+.login-tab{display:flex;background:#f1f5f9;border-radius:8px;padding:3px;margin-bottom:18px}
+.login-tab button{flex:1;padding:12px;border:none;background:none;border-radius:6px;font-size:1rem;font-weight:600;color:#64748b;cursor:pointer;transition:.2s}
+.login-tab button.active{background:#fff;color:#1e3a8a;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.form-group{margin-bottom:12px}
+.form-group label{display:block;font-size:.95rem;color:#475569;margin-bottom:5px;font-weight:600}
+.form-group input,.form-group select{width:100%;padding:14px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:1rem;outline:none;font-family:inherit}
+.form-group input:focus,.form-group select:focus{border-color:#2563eb}
+.btn-primary{width:100%;padding:16px;background:#2563eb;color:#fff;border:none;border-radius:8px;font-size:1.1rem;font-weight:700;cursor:pointer;margin-top:6px}
+.btn-primary:hover{background:#1d4ed8}
+.msg{text-align:center;font-size:.9rem;margin-top:10px;padding:10px;border-radius:8px}
+.msg.error{background:#fef2f2;color:#dc2626}
+.msg.success{background:#f0fdf4;color:#16a34a}
+.msg.info{background:#eff6ff;color:#2563eb}
+#app{display:none}
+.topbar{background:#1e3a8a;color:#fff;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:nowrap;gap:8px}
+.topbar .logo{font-size:1.1rem;font-weight:800;white-space:nowrap;flex-shrink:0}
+.topbar .user-info{font-size:.9rem;opacity:.85;display:flex;align-items:center;gap:8px;min-width:0;flex:1;justify-content:flex-end}
+#userLabel{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.topbar .logout-btn{background:rgba(255,255,255,.15);border:none;color:#fff;padding:8px 12px;border-radius:8px;font-size:.85rem;cursor:pointer;font-family:inherit;font-weight:600;white-space:nowrap;flex-shrink:0}
+#hubPage{padding:16px 12px}
+.hub-btn-search{width:100%;padding:20px 16px;background:linear-gradient(135deg,#1e3a8a,#2563eb);color:#fff;border:none;border-radius:16px;margin-bottom:12px;font-family:inherit;cursor:pointer;display:block;-webkit-tap-highlight-color:transparent;box-shadow:0 4px 14px rgba(37,99,235,.35);transition:transform .15s;text-align:center;}
+.hub-btn-search:active{transform:scale(.98)}
+.hub-btn-quote{width:100%;padding:20px 16px;background:#fff;color:#1e3a8a;border:2.5px solid #2563eb;border-radius:16px;font-family:inherit;cursor:pointer;display:block;-webkit-tap-highlight-color:transparent;box-shadow:0 3px 10px rgba(37,99,235,.12);transition:transform .15s;margin-bottom:12px;text-align:center;}
+.hub-btn-quote:active{transform:scale(.98)}
+.hub-btn-shop{width:100%;padding:20px 16px;background:linear-gradient(135deg,#ea580c,#f97316);color:#fff;border:none;border-radius:16px;font-family:inherit;cursor:pointer;display:block;-webkit-tap-highlight-color:transparent;box-shadow:0 4px 14px rgba(249,115,22,.35);transition:transform .15s;margin-bottom:12px;text-align:center;}
+    .hub-btn-shop:active{transform:scale(.98)}
+    .hub-btn-prospect{width:100%;padding:20px 16px;background:#fff;color:#0e7490;border:2.5px solid #06b6d4;border-radius:16px;font-family:inherit;cursor:pointer;display:block;-webkit-tap-highlight-color:transparent;box-shadow:0 3px 10px rgba(6,182,212,.15);transition:transform .15s;margin-bottom:12px;text-align:center;}
+    .hub-btn-prospect:active{transform:scale(.98)}
+    .hub-btn-trend{width:100%;padding:20px 16px;background:#fff;color:#059669;border:2.5px solid #10b981;border-radius:16px;font-family:inherit;cursor:pointer;display:block;-webkit-tap-highlight-color:transparent;box-shadow:0 3px 10px rgba(16,185,129,.15);transition:transform .15s;margin-bottom:12px;text-align:center;text-decoration:none;}
+.hub-btn-trend:active{transform:scale(.98)}
+.hub-btn-trend .hub-btn-desc{color:#64748b;opacity:1}
+.hub-btn-promo{width:100%;padding:20px 16px;background:#fff;color:#7c3aed;border:2.5px solid #8b5cf6;border-radius:16px;font-family:inherit;cursor:pointer;display:block;-webkit-tap-highlight-color:transparent;box-shadow:0 3px 10px rgba(139,92,246,.15);transition:transform .15s;margin-bottom:12px;text-align:center;}
+.hub-btn-promo:active{transform:scale(.98)}
+.hub-btn-promo .hub-btn-desc{color:#64748b;opacity:1}
+.hub-btn-icon{font-size:2.2rem;margin-bottom:6px}
+.hub-btn-label{font-size:1.4rem;font-weight:800;margin-bottom:4px}
+.hub-btn-desc{font-size:.95rem;opacity:.8}
+.hub-btn-quote .hub-btn-desc{color:#64748b;opacity:1}
+.back-btn{display:inline-flex;align-items:center;gap:6px;color:#fff;font-size:1.1rem;font-weight:700;cursor:pointer;margin-bottom:16px;background:#2563eb;border:none;font-family:inherit;padding:14px 22px;border-radius:10px;box-shadow:0 3px 10px rgba(37,99,235,.3)}
+.back-btn:active{transform:scale(.97)}
+h1{text-align:center;font-size:1.4rem;color:#1e3a8a;margin-bottom:18px}
+.sw{display:flex;gap:8px;max-width:100%;margin:0 auto 12px}
+.sw input{flex:1;padding:16px 14px;border:2px solid #cbd5e1;border-radius:12px;font-size:1.2rem;outline:none;background:#fff}
+.sw input:focus{border-color:#2563eb}
+.sw button{padding:14px 24px;background:#2563eb;color:#fff;border:none;border-radius:12px;font-size:1.2rem;font-weight:700;cursor:pointer;white-space:nowrap}
+.fw{max-width:100%;margin:0 auto 16px;display:none;flex-wrap:wrap;gap:8px}
+.fw.show{display:flex}
+.fl{width:100%;font-size:1rem;color:#94a3b8;margin-bottom:2px}
+.fb{flex:1;min-width:70px;padding:14px 6px;border:2px solid #e2e8f0;border-radius:8px;background:#fff;color:#475569;font-size:1.05rem;font-weight:600;cursor:pointer;text-align:center}
+.fb.active{border-color:#2563eb;background:#2563eb;color:#fff}
+.promo-toggle{max-width:100%;margin:0 auto 14px;display:flex;align-items:center;gap:8px;background:#fff7ed;border:2px solid #fed7aa;border-radius:8px;padding:14px 16px}
+.promo-toggle label{font-size:1.1rem;color:#92400e;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px}
+.promo-toggle input[type=checkbox]{width:26px;height:26px;accent-color:#f97316;cursor:pointer}
+.promo-badge{background:#f97316;color:#fff;font-size:.9rem;font-weight:700;padding:3px 8px;border-radius:20px;margin-left:4px}
+#st{text-align:center;color:#94a3b8;font-size:1.05rem;margin-bottom:16px}
+.rs{max-width:100%;margin:0 auto;padding:0 2px}
+.card{background:#fff;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,.08);margin-bottom:16px;overflow:hidden}
+.card.promo-card{box-shadow:0 2px 12px rgba(249,115,22,.2);border:2px solid #fed7aa}
+.ch{background:linear-gradient(130deg,#1e3a8a,#2563eb);color:#fff;padding:18px 20px}
+.ch.promo-ch{background:linear-gradient(130deg,#92400e,#f97316)}
+.ch .pn{font-size:1.4rem;font-weight:800;line-height:1.3}
+.ch .pm{font-size:1rem;opacity:.75;margin-top:6px}
+.cr{display:flex;align-items:center;gap:10px;padding:14px 18px;background:#f0f4fb;border-bottom:1px solid #e2e8f0}
+.cr label{font-size:1.1rem;color:#1e3a8a;font-weight:800;white-space:nowrap}
+.cr select{flex:1;min-width:0;width:100%;text-overflow:ellipsis;white-space:nowrap;overflow:hidden;padding:14px 12px;border:2px solid #93c5fd;border-radius:10px;font-size:1.05rem;font-weight:600;outline:none;background:#fff;cursor:pointer;color:#1e293b;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%232563eb' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:40px;}
+.cr select:focus{border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.15)}
+.cb{display:flex;flex-wrap:wrap}
+.ib{flex:1;min-width:120px;padding:18px 20px;border-right:1px solid #f0f4fb}
+.ib:last-child{border-right:none}
+.ib .lb{font-size:1rem;color:#94a3b8;margin-bottom:8px;font-weight:600}
+.ib .vl{font-size:1.8rem;font-weight:800}
+.blue{color:#2563eb}.green{color:#16a34a}.orange{color:#f97316}
+.empty{text-align:center;padding:40px 0;color:#94a3b8;font-size:1.1rem}
+.fab{position:fixed;bottom:90px;right:20px;width:auto;height:auto;background:#2563eb;color:#fff;border:none;border-radius:50px;font-size:1rem;font-weight:700;cursor:pointer;box-shadow:0 6px 20px rgba(37,99,235,.5);z-index:999;transition:transform .2s;display:flex;align-items:center;justify-content:center;padding:14px 22px;gap:8px;}
+.fab:hover{transform:scale(1.06)}.fab:active{transform:scale(.96)}
+.ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:1000;align-items:center;justify-content:center}
+.ov.show{display:flex}
+.modal{background:#fff;border-radius:14px;padding:24px 20px;width:92%;max-width:440px;box-shadow:0 8px 32px rgba(0,0,0,.18)}
+.modal h2{font-size:1.15rem;color:#1e3a8a;margin-bottom:14px}
+.modal input,.modal textarea{width:100%;padding:12px 14px;border:1.5px solid #cbd5e1;border-radius:8px;font-size:1rem;margin-bottom:10px;outline:none;font-family:inherit}
+.modal input:focus,.modal textarea:focus{border-color:#2563eb}
+.modal textarea{height:110px;resize:none}
+.mbtns{display:flex;gap:8px;margin-top:4px}
+.mbtns button{flex:1;padding:14px;border:none;border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer;font-family:inherit}
+.mbtn-cancel{background:#f1f5f9;color:#64748b}.mbtn-send{background:#2563eb;color:#fff}
+.q-section{background:#fff;border-radius:12px;padding:20px 16px;margin-bottom:14px;box-shadow:0 2px 12px rgba(0,0,0,.08)}
+.q-section-title{font-weight:700;color:#1e3a8a;margin-bottom:14px;font-size:1.2rem}
+.q-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.q-grid .full{grid-column:1/-1}
+.q-input{width:100%;padding:13px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:1rem;outline:none;font-family:inherit}
+.q-input:focus{border-color:#2563eb}
+.q-search-row{display:flex;gap:8px;margin-bottom:12px}
+.q-search-row input{flex:1}
+.q-search-btn{padding:13px 20px;background:#2563eb;color:#fff;border:none;border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer;font-family:inherit}
+.q-product-card{background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:10px;margin-bottom:10px;overflow:hidden}
+.q-product-card.promo{background:#fffbf5;border-color:#fed7aa}
+.q-product-img-row{display:flex;gap:0;align-items:stretch}
+.q-product-img{width:100px;min-height:100px;flex-shrink:0;background:#fff;display:flex;align-items:center;justify-content:center;border-right:1.5px solid #e2e8f0;overflow:hidden}
+.q-product-img img{width:100%;height:100px;object-fit:contain;display:block}
+.q-product-img .no-img{font-size:.8rem;color:#cbd5e1;text-align:center;padding:8px}
+.q-product-body{flex:1;padding:12px 14px}
+.q-product-name{font-weight:700;color:#1e3a8a;margin-bottom:8px;font-size:1rem;display:flex;align-items:center;flex-wrap:wrap;gap:5px}
+.q-product-name.promo-name{color:#92400e}
+.q-promo-tag{font-size:.85rem;background:#f97316;color:#fff;padding:2px 7px;border-radius:8px;font-weight:700}
+.q-product-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.q-product-row select{flex:1;min-width:0;padding:12px;border:1.5px solid #cbd5e1;border-radius:8px;font-size:1rem;outline:none;background:#fff}
+.q-product-row input[type=number]{width:60px;padding:12px;border:1.5px solid #cbd5e1;border-radius:8px;text-align:center;font-size:1rem;outline:none;flex-shrink:0}
+.q-add-btn{padding:12px 16px;background:#2563eb;color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer;white-space:nowrap;font-size:1rem;font-family:inherit;flex-shrink:0}
+.q-add-btn.promo{background:#f97316}
+.q-fee-bar{display:flex;margin-top:10px;border-radius:8px;overflow:hidden;border:1px solid #e2e8f0}
+.q-fee-cell{flex:1;padding:10px 12px;text-align:center}
+.q-fee-cell+.q-fee-cell{border-left:1px solid #e2e8f0}
+.q-fee-label{font-size:.9rem;color:#94a3b8;margin-bottom:3px}
+.q-fee-value{font-size:1.1rem;font-weight:700}
+.q-item{display:flex;align-items:center;gap:8px;padding:12px;background:#fff;border:1.5px solid #e2e8f0;border-radius:8px;margin-bottom:8px}
+.q-item.promo-item{border-color:#fed7aa;background:#fffbf5}
+.q-item-info{flex:1}
+.q-item-name{font-weight:600;font-size:1rem;color:#1e3a8a;display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.q-item-sub{font-size:.9rem;color:#94a3b8;margin-top:3px}
+.q-item-comm{color:#16a34a;font-weight:600}.q-item-comm.promo-comm{color:#f97316}
+.q-item-del{background:none;border:none;color:#dc2626;font-size:1.5rem;cursor:pointer;padding:4px 6px}
+.q-btn-row{display:flex;gap:10px}
+.q-btn-preview{flex:1;padding:18px;background:#f1f5f9;color:#1e3a8a;border:2px solid #cbd5e1;border-radius:10px;font-size:1.05rem;font-weight:700;cursor:pointer;font-family:inherit}
+.q-btn-generate{flex:2;padding:18px;background:#2563eb;color:#fff;border:none;border-radius:10px;font-size:1.05rem;font-weight:700;cursor:pointer;font-family:inherit}
+.preview-modal{background:#fff;border-radius:14px;width:95%;max-width:700px;max-height:90vh;overflow-y:auto;padding:24px}
+.preview-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.preview-close{background:none;border:none;font-size:1.6rem;cursor:pointer}
+.send-modal{background:#fff;border-radius:14px;width:90%;max-width:460px;padding:24px}
+.send-email-row{display:flex;gap:8px;margin-top:4px}
+.send-email-row input{flex:1;padding:12px 14px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:1rem;outline:none;font-family:inherit}
+.send-email-btn{padding:12px 16px;background:#2563eb;color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit}
+.send-close-btn{width:100%;padding:14px;background:#f1f5f9;color:#64748b;border:none;border-radius:8px;font-weight:700;cursor:pointer;margin-top:8px;font-family:inherit;font-size:1rem}
+.loading-overlay{display:none;position:fixed;inset:0;background:rgba(255,255,255,.85);z-index:2000;align-items:center;justify-content:center;flex-direction:column;gap:14px}
+.loading-overlay.show{display:flex}
+.loading-spinner{width:48px;height:48px;border:4px solid #e2e8f0;border-top-color:#2563eb;border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{font-size:1.05rem;color:#1e3a8a;font-weight:600}
+.search-error{background:#fef2f2;border:1.5px solid #fca5a5;border-radius:8px;padding:14px 16px;color:#dc2626;font-size:1rem;font-weight:600;margin-bottom:10px;text-align:center}
+/* ── 프로모션 ── */
+.promo-wrap{max-width:100%;margin:0 auto;padding:16px 12px}
+.promo-ctrl{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
+.promo-ctrl select{flex:1;min-width:140px;padding:13px 36px 13px 12px;border:2px solid #cbd5e1;border-radius:10px;font-size:1rem;font-weight:600;outline:none;background:#fff;color:#1e293b;font-family:inherit;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%237c3aed' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;cursor:pointer;}
+.promo-ctrl select:focus{border-color:#7c3aed}
+.promo-count-badge{background:#8b5cf6;color:#fff;font-size:.85rem;font-weight:700;padding:6px 12px;border-radius:20px;white-space:nowrap;flex-shrink:0}
+.promo-card{background:#fff;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,.08);margin-bottom:16px;overflow:hidden;border:1px solid #ede9fe}
+.promo-card-hdr{background:linear-gradient(130deg,#4c1d95,#7c3aed);color:#fff;padding:14px 18px;display:flex;align-items:center;gap:10px}
+.promo-card-hdr-title{font-size:1.1rem;font-weight:800}
+.promo-sec-hdr{background:#ede9fe;color:#4c1d95;font-size:.9rem;font-weight:700;padding:7px 14px;border-bottom:1px solid #ddd6fe}
+.promo-tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.promo-tbl{width:100%;border-collapse:collapse;font-size:.85rem;table-layout:auto}
+.promo-tbl th{background:#f5f3ff;color:#5b21b6;font-weight:700;padding:8px 10px;text-align:center;border-bottom:1.5px solid #ddd6fe;white-space:nowrap;font-size:.82rem}
+.promo-tbl td{padding:8px 10px;border-bottom:1px solid #f1f5f9;color:#1e293b;vertical-align:top;word-break:keep-all}
+.promo-tbl tr:last-child td{border-bottom:none}
+.promo-tbl tr:hover td{background:#faf5ff}
+.promo-tbl td:first-child{font-weight:600;color:#4c1d95;white-space:nowrap}
+.promo-tbl td.td-after{font-weight:800;color:#2563eb}
+.promo-tbl td.td-before{color:#94a3b8;text-decoration:line-through;font-size:.8rem}
+.promo-note{font-size:.82rem;color:#64748b;padding:10px 14px;background:#f8fafc;border-top:1px solid #f1f5f9;line-height:1.6}
+.promo-loading{text-align:center;padding:40px 0;color:#94a3b8;font-size:1.05rem}
+.promo-empty{text-align:center;padding:40px 0;color:#94a3b8;font-size:1rem}
+.promo-ym-badge{display:inline-block;background:#ede9fe;color:#5b21b6;font-size:.85rem;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:14px}
+.promo-coming{text-align:center;padding:60px 20px;color:#94a3b8}
+.promo-coming-icon{font-size:3.5rem;margin-bottom:16px}
+.promo-coming p{font-size:1rem;line-height:1.8}
+@media(max-width:400px){
+  .promo-tbl{font-size:.78rem}
+  .promo-tbl th{font-size:.75rem;padding:7px 6px}
+  .promo-tbl td{padding:7px 6px}
+}
+/* ── 특판 토글 ── */
+.sp-toggle{display:flex;border:1.5px solid #e2e8f0;border-radius:10px;overflow:hidden;margin-bottom:10px}
+.sp-toggle button{flex:1;padding:10px 0;border:none;font-size:1rem;font-weight:700;cursor:pointer;font-family:inherit;background:#f8fafc;color:#94a3b8;transition:.15s;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.sp-toggle button.t-rental{background:#eff6ff;color:#1e3a8a}
+.sp-toggle button.t-special{background:#fff7ed;color:#92400e}
+.sp-toggle button.t-rental{background:#eff6ff;color:#1e3a8a}
+.sp-toggle button.t-special{background:#fff7ed;color:#92400e}
+.sp-section{padding:14px 18px;border-top:1px solid #f0f4fb}
+.disc-row{display:flex;gap:8px;margin-bottom:10px}
+.disc-btn{flex:1;padding:10px 0;border:1.5px solid #e2e8f0;border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer;background:#f8fafc;color:#475569;font-family:inherit;transition:.15s}
+.disc-btn.on{background:#fff7ed;color:#92400e;border-color:#fcd34d}
+.maint-row{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.maint-btn{padding:10px 14px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.95rem;font-weight:600;cursor:pointer;background:#f8fafc;color:#475569;font-family:inherit}
+.maint-btn.on{background:#f0fdf4;color:#166534;border-color:#86efac}
+.sp-result{background:#f8fafc;border-radius:10px;padding:14px 16px;margin-top:4px}
+.sp-result-row{display:flex;justify-content:space-between;font-size:1rem;padding:4px 0;border-bottom:1px solid #f0f4fb}
+.sp-result-row:last-child{border-bottom:none}
+.sp-result-row .sr-label{color:#64748b}
+.sp-result-row .sr-val{font-weight:700}
+.compare-box{margin-top:12px;background:#fff;border:1.5px solid #e2e8f0;border-radius:10px;overflow:hidden}
+.compare-box .cb-title{background:#f1f5f9;padding:8px 14px;font-size:.9rem;font-weight:700;color:#475569}
+.compare-grid{display:flex}
+.compare-cell{flex:1;padding:12px;text-align:center;border-right:1px solid #f0f4fb}
+.compare-cell:last-child{border-right:none}
+.compare-cell .cc-label{font-size:.85rem;color:#94a3b8;margin-bottom:4px}
+.compare-cell .cc-val{font-size:1.3rem;font-weight:800}
+.compare-diff{text-align:center;padding:8px;font-size:.9rem;font-weight:700;border-top:1px solid #f0f4fb}
+.diff-rental{background:#eff6ff;color:#1e3a8a}
+.diff-special{background:#fff7ed;color:#92400e}
+.diff-same{background:#f0fdf4;color:#166534}
+.compare-toggle-btn{width:100%;margin-top:10px;padding:12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.95rem;font-weight:700;cursor:pointer;font-family:inherit;background:#f8fafc;color:#475569}
+/* ── AI 챗봇 ── */
+.ai-fab{
+  position:fixed;bottom:24px;right:20px;z-index:999;
+  background:linear-gradient(135deg,#7c3aed,#2563eb);color:#fff;
+  border:none;border-radius:50px;padding:14px 22px;
+  font-family:inherit;font-size:1rem;font-weight:700;cursor:pointer;
+  box-shadow:0 6px 20px rgba(124,58,237,.4);
+  display:flex;align-items:center;gap:8px;
+  transition:transform .2s
+}
+.ai-fab:hover{transform:scale(1.06)}
+.ai-fab:active{transform:scale(.96)}
+.ai-fab .ai-fab-dot{
+  width:8px;height:8px;border-radius:50%;background:#22d3ee;
+  box-shadow:0 0 8px #22d3ee;animation:aiPulse 1.8s infinite
+}
+@keyframes aiPulse{
+  0%,100%{opacity:1}
+  50%{opacity:.4}
+}
+.main-fab{
+  position:fixed;bottom:156px;right:20px;z-index:999;
+  background:#1e3a8a;color:#fff;
+  border:none;border-radius:50px;padding:14px 22px;
+  font-family:inherit;font-size:1rem;font-weight:700;cursor:pointer;
+  box-shadow:0 6px 20px rgba(30,58,138,.4);
+  display:flex;align-items:center;gap:8px;
+  transition:transform .2s
+}
+.main-fab:hover{transform:scale(1.06)}
+.main-fab:active{transform:scale(.96)} 
+.chat-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1000;
+  display:none;opacity:0;transition:opacity .25s
+}
+.chat-overlay.show{display:block;opacity:1}
+ 
+.chat-panel{
+  position:fixed;left:0;right:0;bottom:0;z-index:1001;
+  height:85vh;max-height:760px;background:#fff;
+  border-radius:20px 20px 0 0;
+  box-shadow:0 -10px 40px rgba(0,0,0,.18);
+  display:flex;flex-direction:column;
+  transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1)
+}
+.chat-panel.open{transform:translateY(0)}
+ 
+.chat-header{
+  background:linear-gradient(135deg,#7c3aed,#2563eb);color:#fff;
+  padding:16px 20px;
+  border-radius:20px 20px 0 0;
+  display:flex;justify-content:space-between;align-items:center;
+  flex-shrink:0
+}
+.chat-header-title{font-size:1.15rem;font-weight:800;display:flex;align-items:center;gap:8px}
+.chat-header-sub{font-size:.78rem;opacity:.85;margin-top:2px;font-weight:500}
+.chat-close{
+  background:rgba(255,255,255,.2);border:none;color:#fff;
+  width:34px;height:34px;border-radius:50%;
+  font-size:1.1rem;cursor:pointer;font-family:inherit;
+  display:flex;align-items:center;justify-content:center
+}
+.chat-close:active{background:rgba(255,255,255,.35)}
+ 
+.chat-messages{
+  flex:1;overflow-y:auto;padding:18px 14px;
+  display:flex;flex-direction:column;gap:10px;
+  background:#f8fafc;-webkit-overflow-scrolling:touch
+}
+ 
+.chat-msg{
+  max-width:88%;padding:12px 15px;border-radius:18px;
+  font-size:.95rem;line-height:1.55;word-break:keep-all;
+  box-shadow:0 1px 2px rgba(0,0,0,.04)
+}
+.chat-msg-user{
+  align-self:flex-end;
+  background:linear-gradient(135deg,#2563eb,#3b82f6);color:#fff;
+  border-bottom-right-radius:6px
+}
+.chat-msg-bot{
+  align-self:flex-start;background:#fff;color:#1e293b;
+  border:1px solid #e2e8f0;border-bottom-left-radius:6px
+}
+.chat-msg-bot strong{color:#7c3aed}
+.chat-msg-bot table{
+  border-collapse:collapse;margin:8px 0;font-size:.88rem;width:100%
+}
+.chat-msg-bot th,.chat-msg-bot td{
+  border:1px solid #e2e8f0;padding:6px 8px;text-align:left
+}
+.chat-msg-bot th{background:#f1f5f9;font-weight:700;color:#4c1d95}
+.chat-msg-bot code{
+  background:#f1f5f9;color:#7c3aed;padding:2px 6px;border-radius:4px;
+  font-size:.88em
+}
+.chat-msg-bot ul,.chat-msg-bot ol{padding-left:20px;margin:6px 0}
+.chat-msg-bot li{margin:2px 0}
+.chat-msg-source{
+  font-size:.78rem;color:#94a3b8;margin-top:6px;font-style:italic
+}
+ 
+.chat-loading{
+  align-self:flex-start;display:flex;gap:5px;padding:14px 18px;
+  background:#fff;border:1px solid #e2e8f0;border-radius:18px;
+  border-bottom-left-radius:6px
+}
+.chat-loading span{
+  width:8px;height:8px;background:#94a3b8;border-radius:50%;
+  animation:chatBounce 1.4s infinite ease-in-out
+}
+.chat-loading span:nth-child(2){animation-delay:.15s}
+.chat-loading span:nth-child(3){animation-delay:.3s}
+@keyframes chatBounce{
+  0%,80%,100%{transform:scale(.6);opacity:.5}
+  40%{transform:scale(1);opacity:1}
+}
+ 
+.chat-suggest{
+  display:flex;flex-wrap:wrap;gap:6px;margin-top:8px
+}
+.chat-suggest-btn{
+  background:#fff;border:1.5px solid #ddd6fe;color:#5b21b6;
+  padding:8px 12px;border-radius:18px;font-size:.85rem;
+  cursor:pointer;font-family:inherit;font-weight:600;
+  transition:all .15s
+}
+.chat-suggest-btn:hover{background:#ede9fe}
+.chat-suggest-btn:active{transform:scale(.97)}
+ 
+.chat-input-wrap{
+  flex-shrink:0;padding:12px 14px;border-top:1px solid #e2e8f0;
+  background:#fff;display:flex;gap:8px;align-items:flex-end
+}
+.chat-input{
+  flex:1;border:1.5px solid #e2e8f0;border-radius:20px;
+  padding:12px 16px;font-size:.95rem;outline:none;
+  font-family:inherit;resize:none;line-height:1.4;
+  max-height:120px;min-height:44px
+}
+.chat-input:focus{border-color:#7c3aed;box-shadow:0 0 0 3px rgba(124,58,237,.12)}
+.chat-send{
+  width:44px;height:44px;border-radius:50%;
+  background:linear-gradient(135deg,#7c3aed,#2563eb);color:#fff;
+  border:none;font-size:1.4rem;cursor:pointer;flex-shrink:0;
+  font-family:inherit;font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 3px 10px rgba(124,58,237,.3)
+}
+.chat-send:disabled{
+  background:#cbd5e1;cursor:not-allowed;box-shadow:none
+}
+.chat-send:not(:disabled):active{transform:scale(.94)}
+/* ── 모바일 레이아웃 픽스 ── */
+.cb{flex-wrap:nowrap}
+.ib{min-width:0;flex:1}
+.ib .vl{font-size:1.4rem}
+
+.sp-toggle button{
+  font-size:clamp(0.8rem,3.5vw,1rem);
+  white-space:nowrap;
+  padding:10px 4px
+}
+
+.q-product-row{flex-wrap:nowrap;align-items:center}
+.q-product-row select{flex:1;min-width:0}
+.q-product-row input[type=number]{width:52px;flex-shrink:0}
+.q-add-btn{flex-shrink:0;padding:12px 10px;font-size:.9rem}
+
+.promo-ctrl{flex-wrap:nowrap;align-items:center}
+.promo-ctrl select{min-width:0;flex:1}
+.promo-count-badge{flex-shrink:0}
+
+@media(max-width:380px){
+  .ib .vl{font-size:1.2rem}
+  .q-product-row select{font-size:.9rem}
+  .q-add-btn{padding:12px 8px;font-size:.85rem}
+  .promo-ctrl select{font-size:.9rem}
+}
+.hub-btn-card{width:100%;padding:20px 16px;background:#fff;color:#334155;border:2.5px solid #475569;border-radius:16px;font-family:inherit;cursor:pointer;display:block;-webkit-tap-highlight-color:transparent;box-shadow:0 3px 10px rgba(71,85,105,.15);transition:transform .15s;margin-bottom:12px;text-align:center;}
+.hub-btn-card:active{transform:scale(.98)}
+.hub-btn-card .hub-btn-desc{color:#64748b;opacity:1}
+#exitToast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:rgba(30,41,59,.92);color:#fff;padding:12px 20px;border-radius:24px;font-size:.95rem;font-weight:600;z-index:3000;display:none;white-space:nowrap}
+</style>
+</head>
+<body>
+
+<!-- 로그인 -->
+<div class="login-wrap" id="loginWrap">
+  <div class="login-box">
+    <div class="login-logo">
+      <h1>🏢 렌탈수수료 시스템</h1>
+      <p>청호나이스 렌탈 관리 플랫폼</p>
+    </div>
+    <div class="login-tab">
+      <button class="active" id="tabLogin" onclick="switchTab('login')">로그인</button>
+      <button id="tabJoin" onclick="switchTab('join')">가입 신청</button>
+    </div>
+    <div id="formLogin">
+      <div class="form-group"><label>이름</label><input type="text" id="loginName" placeholder="홍길동"></div>
+      <div class="form-group"><label>연락처</label><input type="tel" id="loginPhone" placeholder="010-1234-5678"></div>
+      <button class="btn-primary" onclick="doLogin()">로그인</button>
+      <div id="loginMsg" class="msg" style="display:none"></div>
+    </div>
+    <div id="formJoin" style="display:none">
+      <div class="form-group"><label>소속 지사</label>
+        <select id="joinDept">
+          <option value="">지사 선택</option>
+          <option value="중구지사">중구지사</option>
+          <option value="유성지사">유성지사</option>
+          <option value="정읍지사">정읍지사</option>
+        </select>
+      </div>
+      <div class="form-group"><label>사번</label><input type="text" id="joinEmpNo" placeholder="예) 50012345" autocomplete="off" autocapitalize="characters"></div>
+      <div class="form-group"><label>이름</label><input type="text" id="joinName" placeholder="홍길동"></div>
+      <div class="form-group"><label>연락처</label><input type="tel" id="joinPhone" placeholder="010-1234-5678"></div>
+      <div class="form-group"><label>이메일</label><input type="email" id="joinEmail" placeholder="example@gmail.com"></div>
+      <button class="btn-primary" onclick="doJoin()">가입 신청</button>
+      <div id="joinMsg" class="msg" style="display:none"></div>
+    </div>
+  </div>
+</div>
+
+<!-- 앱 -->
+<div id="app">
+  <div class="topbar">
+    <div class="logo">🏢 렌탈수수료 시스템</div>
+    <div class="user-info">
+      <span id="userLabel"></span>
+      <button class="logout-btn" onclick="doLogout()">로그아웃</button>
+    </div>
+  </div>
+
+  <!-- 허브 -->
+  <div id="hubPage" style="padding:16px 12px">
+    <div style="text-align:center;font-size:1.4rem;color:#1e3a8a;font-weight:700;margin-bottom:20px">무엇을 하시겠어요?</div>
+    <button class="hub-btn-shop" onclick="openShopApp()">
+        <div class="hub-btn-icon">🛒</div>
+        <div class="hub-btn-label">내 쇼핑몰</div>
+        <div class="hub-btn-desc">내 전용 판매 페이지</div>
+      </button>
+      <button class="hub-btn-card" onclick="openCardApp()">
+        <div class="hub-btn-icon">📇</div>
+        <div class="hub-btn-label">내 명함</div>
+        <div class="hub-btn-desc">고객에게 보낼 내 연락처 카드</div>
+      </button>
+
+      <button class="hub-btn-search" onclick="showPage('search')">
+      <div class="hub-btn-icon">🔍</div>
+      <div class="hub-btn-label">수수료 검색</div>
+      <div class="hub-btn-desc">렌탈료 &amp; 수수료 조회</div>
+    </button>
+    <!-- ★ 견적서: 내부 페이지로 이동 -->
+    <button class="hub-btn-quote" onclick="openQuoteApp()">
+      <div class="hub-btn-icon">📄</div>
+      <div class="hub-btn-label">견적서 만들기</div>
+      <div class="hub-btn-desc">고객 견적서 작성 &amp; 전송</div>
+    </button>
+    <button class="hub-btn-promo" onclick="showPage('promo')">
+      <div class="hub-btn-icon">🎁</div>
+      <div class="hub-btn-label">이달의 프로모션</div>
+      <div class="hub-btn-desc">할인 렌탈료 &amp; 시상금 안내</div>
+    </button>
+    
+    <button class="hub-btn-prospect" onclick="openProspectApp()">
+        <div class="hub-btn-icon">👥</div>
+        <div class="hub-btn-label">가망고객</div>
+        <div class="hub-btn-desc">만기 임박 고객 조회</div>
+      </button>
+
+      <a href="javascript:void(0)" onclick="openTrendApp()" class="hub-btn-trend">
+      <div class="hub-btn-icon">💰</div>
+      <div class="hub-btn-label">수수료 추이</div>
+      <div class="hub-btn-desc">실적 입력 &amp; 수수료 현황</div>
+    </a>
+  </div>
+
+  <!-- 검색 -->
+  <div id="searchPage" style="display:none">
+    <div style="max-width:100%;margin:0 auto;padding:16px 12px">
+      <button class="back-btn" onclick="showPage('hub')">← 메인으로</button>
+      <h1>🔍 렌탈수수료 검색</h1>
+      <div class="sw">
+        <input type="text" id="kw" placeholder="키워드  예) 정수기 · 비데 · 550">
+        <button onclick="doSearch()">검색</button>
+      </div>
+      <div class="fw" id="fw">
+        <div class="fl">대분류 선택</div>
+        <button class="fb active" onclick="setF('전체')">전체</button>
+        <button class="fb" onclick="setF('얼음냉온')">얼음냉온</button>
+        <button class="fb" onclick="setF('얼음냉정')">얼음냉정</button>
+        <button class="fb" onclick="setF('냉온')">냉온</button>
+        <button class="fb" onclick="setF('냉정')">냉정</button>
+      </div>
+      <div class="promo-toggle" id="promoToggle" style="display:none">
+        <label>
+          <input type="checkbox" id="showPromo" onchange="render()">
+          🎁 프로모션 수수료 함께 보기
+          <span class="promo-badge" id="promoCnt"></span>
+        </label>
+      </div>
+      <div id="st">키워드를 입력하고 검색하세요</div>
+      <div class="rs" id="rs"></div>
+    </div>
+  </div>
+
+  <!-- 견적서 -->
+  <div id="quotePage" style="display:none">
+    <div style="max-width:100%;margin:0 auto;padding:16px 12px">
+      <button class="back-btn" onclick="showPage('hub')">← 메인으로</button>
+      <h1>📄 견적서 만들기</h1>
+      <div class="q-section">
+        <div class="q-section-title">👤 고객 정보</div>
+        <div class="q-grid">
+          <div class="form-group full"><label>고객명 / 법인명</label><input type="text" id="qCustomer" class="q-input" placeholder="홍길동 또는 (주)회사명"></div>
+          <div class="form-group"><label>담당자</label><input type="text" id="qStaffName" class="q-input" placeholder="담당자명"></div>
+          <div class="form-group"><label>담당자 연락처</label><input type="tel" id="qStaffPhone" class="q-input" placeholder="010-1234-5678"></div>
+          <div class="form-group full"><label>비고 <span style="font-size:.9rem;color:#94a3b8;font-weight:400">(선택)</span></label><input type="text" id="qRemark" class="q-input" placeholder="특이사항, 요청사항 등"></div>
+        </div>
+      </div>
+      <div class="q-section">
+        <div class="q-section-title">🛒 제품 추가</div>
+        <div class="q-search-row">
+          <input type="text" id="qSearch" class="q-input" placeholder="제품명 검색..." onkeydown="if(event.key==='Enter')searchForQuote()">
+          <button class="q-search-btn" onclick="searchForQuote()">검색</button>
+        </div>
+        <div id="qSearchResult"></div>
+        <div id="qItems" style="display:none">
+          <div style="font-size:1.05rem;color:#64748b;margin-bottom:10px;font-weight:600">📋 견적 제품 목록 <span style="font-size:.85rem;color:#94a3b8;font-weight:400;margin-left:6px">※ 수수료는 담당자 참고용 (PDF 미포함)</span></div>
+          <div id="qItemList"></div>
+        </div>
+        <input type="hidden" id="qDirectWater" value="false">
+      </div>
+      <div class="q-btn-row">
+        <button class="q-btn-preview" onclick="previewQuote()">👁 미리보기</button>
+        <button class="q-btn-generate" id="qGenerateBtn" onclick="generateQuote()">📄 견적서 생성 &amp; 전송</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 프로모션 -->
+  <div id="promoPage" style="display:none">
+    <div class="promo-wrap">
+      <button class="back-btn" onclick="showPage('hub')">← 메인으로</button>
+      <h1>🎁 이달의 프로모션</h1>
+      <div id="promoYmBadge" class="promo-ym-badge" style="display:none"></div>
+      <div class="promo-ctrl">
+        <!-- 왼쪽: 대분류 (할인/제휴카드) -->
+        <select id="promoTypeSel" onchange="promoTypeChange()">
+          <option value="discount">🏷 할인 프로모션</option>
+          <option value="card">💳 제휴카드 프로모션</option>
+        </select>
+        <!-- 오른쪽: 해당 대분류의 카테고리 목록 -->
+        <select id="promoCatSel" onchange="promoCatChange()">
+          <option value="all">전체 항목</option>
+        </select>
+        <span id="promoCountBadge" class="promo-count-badge" style="display:none"></span>
+      </div>
+      <div id="promoContent">
+        <div class="promo-loading">📡 데이터 불러오는 중...</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /#app -->
+<button class="main-fab" id="mainFabBtn" onclick="showPage('hub')" style="display:none">
+  <span style="font-size:1.2rem">🏠</span>
+  <span>메인</span>
+</button>
+<button class="ai-fab" id="aiFabBtn" onclick="openChatbot()" style="display:none">
+  <span style="font-size:1.2rem">🤖</span>
+  <span>AI 비서</span>
+  <span class="ai-fab-dot"></span>
+</button>
+ 
+<!-- AI 챗봇 패널 -->
+<div class="chat-overlay" id="chatOverlay" onclick="closeChatbot()"></div>
+<div class="chat-panel" id="chatPanel">
+  <div class="chat-header">
+    <div>
+      <div class="chat-header-title"><span>🤖</span> AI비서</div>
+      <div class="chat-header-sub">프로모션 · 카드 · 제품 사양 · 수수료 안내</div>
+    </div>
+    <button class="chat-close" onclick="closeChatbot()">✕</button>
+  </div>
+  <div class="chat-messages" id="chatMessages"></div>
+  <div class="chat-input-wrap">
+    <textarea
+      class="chat-input"
+      id="chatInput"
+      placeholder="질문을 입력하세요 (예: A600 이번달 카드 혜택)"
+      rows="1"></textarea>
+    <button class="chat-send" id="chatSend" onclick="sendChat()">↑</button>
+  </div>
+</div>
+
+<button class="fab" onclick="openFB()" id="fabBtn" style="display:none">💬 피드백</button>
+
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-spinner"></div>
+  <div class="loading-text" id="loadingText">검색 중...</div>
+</div>
+
+<div class="ov" id="ov" onclick="closeOv(event)">
+  <div class="modal">
+    <h2>💬 피드백 보내기</h2>
+    <input type="text" id="fb-name" placeholder="이름 (선택사항)">
+    <textarea id="fb-msg" placeholder="오류, 불편한 점, 개선 제안 등 자유롭게 적어주세요 😊"></textarea>
+    <div class="mbtns">
+      <button class="mbtn-cancel" onclick="closeFB()">취소</button>
+      <button class="mbtn-send" onclick="sendFB()">보내기</button>
+    </div>
+  </div>
+</div>
+
+<div class="ov" id="quotePreviewOv" onclick="closeQuotePreview(event)">
+  <div class="preview-modal">
+    <div class="preview-header">
+      <h2 style="color:#1e3a8a;font-size:1.2rem">견적서 미리보기</h2>
+      <button class="preview-close" onclick="closeQuotePreview()">✕</button>
+    </div>
+    <div id="quotePreviewContent"></div>
+    <div style="margin-top:20px">
+      <button onclick="generateQuote()" style="width:100%;padding:18px;background:#2563eb;color:#fff;border:none;border-radius:10px;font-weight:700;cursor:pointer;font-size:1.15rem;font-family:inherit">📄 PDF 생성 &amp; 전송</button>
+    </div>
+  </div>
+</div>
+
+<div class="ov" id="sendOv" onclick="closeSendOv(event)">
+  <div class="send-modal">
+    <h2 style="color:#1e3a8a;margin-bottom:20px;font-size:1.2rem">📤 견적서 전송</h2>
+    <div id="sendLinks" style="margin-bottom:18px"></div>
+    <div class="form-group">
+      <label style="font-size:1.05rem;font-weight:600;color:#475569;margin-bottom:10px;display:block">✉️ 이메일 전송</label>
+      <div class="send-email-row">
+        <input type="email" id="sendEmail" placeholder="customer@email.com">
+        <button class="send-email-btn" onclick="doSendEmail()">전송</button>
+      </div>
+    </div>
+    <button class="send-close-btn" onclick="closeSendOv()">닫기</button>
+  </div>
+</div>
+
+<div id="exitToast">한 번 더 누르면 종료돼요</div>
+
+<div class="ov" id="cardOv" onclick="closeCardModal(event)">
+  <div class="modal" style="max-width:420px;padding:14px;max-height:94vh;overflow-y:auto">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <h2 style="margin:0">내 명함</h2>
+      <button onclick="openCardPage()" style="background:none;border:none;color:#2563eb;font-size:.9rem;font-weight:600;cursor:pointer;font-family:inherit;padding:6px">새 창으로 열기 ↗</button>
+    </div>
+    <iframe id="cardFrame" src="about:blank" style="width:100%;height:60vh;max-height:430px;border:1px solid #e2e8f0;border-radius:10px;background:#f8fafc"></iframe>
+    <div class="mbtns" style="margin-top:10px">
+      <button class="mbtn-send" onclick="copyCardLink()">링크 복사</button>
+      <button class="mbtn-send" onclick="showCardQr()">QR 크게 보기</button>
+    </div>
+    <div class="mbtns"><button class="mbtn-cancel" onclick="closeCardModal()">닫기</button></div>
+  </div>
+</div>
+
+<div class="ov" id="cardQrOv" onclick="closeCardQr(event)">
+  <div class="modal" style="max-width:340px;text-align:center">
+    <h2 id="cardQrName" style="margin-bottom:4px"></h2>
+    <div style="font-size:.9rem;color:#64748b;margin-bottom:14px">카메라로 찍으면 명함이 열려요</div>
+    <div id="cardQrBox" style="background:#fff;padding:12px;display:inline-block;border:1px solid #e2e8f0;border-radius:10px;margin-bottom:14px"></div>
+    <div class="mbtns"><button class="mbtn-cancel" onclick="closeCardQr()">닫기</button></div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+<script>
+/* ── 뒤로가기 보호: 한 번 눌러서는 꺼지지 않고, 2초 안에 두 번 눌러야 꺼짐 ── */
+var _backArmed = false, _backTimer = null;
+function _pushGuard() {
+  try { history.pushState({hubGuard: true}, ''); } catch (e) {}
+}
+function _closeTopLayer() {
+  var qr = document.getElementById('cardQrOv');
+  if (qr && qr.classList.contains('show')) { closeCardQr(); return true; }
+  var card = document.getElementById('cardOv');
+  if (card && card.classList.contains('show')) { closeCardModal(); return true; }
+  var ids = ['quotePreviewOv', 'sendOv'];
+  for (var i = 0; i < ids.length; i++) {
+    var el = document.getElementById(ids[i]);
+    if (el && el.classList.contains('show')) { el.classList.remove('show'); return true; }
+  }
+  var fb = document.getElementById('ov');
+  if (fb && fb.classList.contains('show')) { closeFB(); return true; }
+  var cp = document.getElementById('chatPanel');
+  if (cp && cp.classList.contains('open')) { closeChatbot(); return true; }
+  return false;
+}
+function _showExitToast() {
+  var t = document.getElementById('exitToast');
+  if (t) t.style.display = 'block';
+  clearTimeout(_backTimer);
+  _backTimer = setTimeout(function () {
+    if (t) t.style.display = 'none';
+    _backArmed = false;
+    _pushGuard();
+  }, 2000);
+}
+window.addEventListener('popstate', function () {
+  if (_backArmed) return;
+  if (_closeTopLayer()) { _pushGuard(); return; }
+  var hub = document.getElementById('hubPage');
+  if (hub && hub.style.display === 'none') { showPage('hub'); _pushGuard(); return; }
+  _backArmed = true;
+  _showExitToast();
+});
+document.addEventListener('click', function () {
+  if (!(history.state && history.state.hubGuard)) _pushGuard();
+}, { capture: true, once: true });
+
+function openQuoteApp() {
+  var name  = currentUser ? (currentUser.name  || '') : '';
+  var phone = currentUser ? (currentUser.phone || '') : '';
+  var url = 'https://script.google.com/macros/s/AKfycbxgwTPBdXZhxzf0LWUeG5wOdBFbM13xgb8dj1KYlwOxK4ATpYCDPDOrFfOMXNrd0ebV/exec'
+    + '?name='  + encodeURIComponent(name)
+    + '&phone=' + encodeURIComponent(phone)
+    + _authQuery();
+  window.open(url, '_blank');
+}
+
+function openShopApp() {
+  if (!currentUser) { alert('\uB85C\uADF8\uC778\uC774 \uD544\uC694\uD569\uB2C8\uB2E4'); return; }
+  google.script.run
+    .withSuccessHandler(function(res){
+      if (res && res.ok) {
+        window.open('https://banhyunky.github.io/chungho/?p=' + encodeURIComponent(res.id), '_blank');
+      } else {
+        alert((res && res.msg) || '\uC1FC\uD551\uBAB0 \uC815\uBCF4\uB97C \uCC3E\uC744 \uC218 \uC5C6\uC2B5\uB2C8\uB2E4');
+      }
+    })
+    .withFailureHandler(function(e){ alert('\uC624\uB958: ' + e.message); })
+    .getMyShopId(_cred());
+}
+
+var _cardUrl = '';
+
+function openCardApp() {
+  if (!currentUser) { alert('로그인이 필요합니다'); return; }
+  google.script.run
+    .withSuccessHandler(function(res){
+      if (res && res.ok) {
+        _cardUrl = 'https://banhyunky.github.io/planners-businesscard/?p=' + encodeURIComponent(res.id);
+        document.getElementById('cardFrame').src = _cardUrl;
+        document.getElementById('cardOv').classList.add('show');
+      } else {
+        alert((res && res.msg) || '명함 정보를 찾을 수 없습니다');
+      }
+    })
+    .withFailureHandler(function(e){ alert('오류: ' + e.message); })
+    .getMyShopId(_cred());
+}
+
+function openCardPage() {
+  if (_cardUrl) window.open(_cardUrl, '_blank');
+}
+
+function closeCardModal(e) {
+  if (e && e.target.id !== 'cardOv') return;
+  document.getElementById('cardOv').classList.remove('show');
+  document.getElementById('cardFrame').src = 'about:blank';
+}
+
+function copyCardLink() {
+  if (!_cardUrl) return;
+  function done() { alert('링크를 복사했어요. 카톡이나 문자에 붙여 넣으세요.'); }
+  function fallback() {
+    var t = document.createElement('textarea');
+    t.value = _cardUrl; t.style.position = 'fixed'; t.style.opacity = '0';
+    document.body.appendChild(t); t.focus(); t.select();
+    var ok = false;
+    try { ok = document.execCommand('copy'); } catch (e) {}
+    document.body.removeChild(t);
+    if (ok) done(); else prompt('아래 주소를 길게 눌러 복사하세요', _cardUrl);
+  }
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(_cardUrl).then(done, fallback);
+  } else { fallback(); }
+}
+
+function showCardQr() {
+  if (!_cardUrl) return;
+  var box = document.getElementById('cardQrBox');
+  box.innerHTML = '';
+  if (typeof QRCode === 'undefined') {
+    box.innerHTML = '<div style="font-size:.9rem;color:#64748b;word-break:break-all;padding:12px">QR을 만들지 못했어요. 주소: ' + escHtml(_cardUrl) + '</div>';
+  } else {
+    new QRCode(box, { text: _cardUrl, width: 240, height: 240, correctLevel: QRCode.CorrectLevel.M });
+  }
+  document.getElementById('cardQrName').textContent = currentUser ? (currentUser.name || '') : '';
+  document.getElementById('cardQrOv').classList.add('show');
+}
+
+function closeCardQr(e) {
+  if (!e || e.target.id === 'cardQrOv') document.getElementById('cardQrOv').classList.remove('show');
+}
+
+function openShopOrProspect() { openProspectApp(); }
+
+function openProspectApp() {
+  if (!currentUser) { alert('\uB85C\uADF8\uC778\uC774 \uD544\uC694\uD569\uB2C8\uB2E4'); return; }
+  var url = 'https://script.google.com/macros/s/AKfycbxHR4Z7CQOj2lZNb4UXL2AwSWnAAZuAyTARFaYJBSChKWgr2i0saCVV78h6FA_cCvEgmA/exec'
+    + '?name=' + encodeURIComponent(currentUser.name || '')
+    + '&phone=' + encodeURIComponent(currentUser.phone || '')
+    + '&tab=prospectTab&view=prospect'
+    + _authQuery();
+  window.open(url, '_blank');
+}
+
+function openTrendApp() {
+  var name  = currentUser ? encodeURIComponent(currentUser.name)  : '';
+  var phone = currentUser ? encodeURIComponent(currentUser.phone) : '';
+  var email = currentUser ? encodeURIComponent(currentUser.email || '') : '';
+  
+  var url = 'https://script.google.com/macros/s/AKfycbxHR4Z7CQOj2lZNb4UXL2AwSWnAAZuAyTARFaYJBSChKWgr2i0saCVV78h6FA_cCvEgmA/exec'
+    + '?name=' + name + '&phone=' + phone + _authQuery();
+  window.open(url, '_blank');
+}
+
+// ── 설치형 앱(GitHub Pages)용 서버 호출 (2026-10-27) ──────────────────
+// 기존 google.script.run 호출 모양 그대로 두고, 실제로는 GAS API(doPost)로 fetch
+var API_URL='https://script.google.com/macros/s/AKfycbzIHLR8vqc9tIK-U7EYpApdFNR2jIedP72TrzJ0gjMjF4wTzciPZ6esjHhJ-lDHVkn-QA/exec';
+(function(){
+  // 옛 앱에서 넘어올 때(#mig=...) 기기 키·로그인 정보 이어받기
+  try{
+    var m=location.hash.match(/[#&]mig=([^&]+)/);
+    if(m){
+      var d=JSON.parse(decodeURIComponent(escape(atob(decodeURIComponent(m[1])))));
+      if(d.dk)localStorage.setItem('rentalDeviceKey',d.dk);
+      if(d.user)localStorage.setItem('rentalUser',JSON.stringify(d.user));
+      history.replaceState(null,'',location.pathname+location.search);
+    }
+  }catch(e){}
+  function R(s,f){this._s=s;this._f=f;}
+  R.prototype.withSuccessHandler=function(fn){return new R(fn,this._f);};
+  R.prototype.withFailureHandler=function(fn){return new R(this._s,fn);};
+  ['login','checkSession','requestJoin','getAllImageUrls','getMyShopId','searchRental','searchPromo',
+   'saveFeedback','getCardPromoData','getPromoPageData','getSpecialProducts','logUsage','askChatbot'
+  ].forEach(function(fn){
+    R.prototype[fn]=function(){
+      var s=this._s,f=this._f,args=[].slice.call(arguments);
+      var cred=(typeof _cred==='function')?_cred():null;
+      fetch(API_URL,{method:'POST',body:JSON.stringify({fn:fn,args:args,cred:cred})})
+        .then(function(r){return r.json();})
+        .then(function(d){if(d.ok){if(s)s(d.result);}else{if(f)f(new Error(d.error||'오류'));}})
+        .catch(function(){if(f)f(new Error('인터넷 연결을 확인하고 다시 시도해 주세요.'));});
+    };
+  });
+  window.google={script:{run:new R(null,null)}};
+})();
+
+var all=[],promoAll=[],af='전체';
+var currentUser=null,qItems=[],lastPdfId=null;
+// ── 기기 등록제 (2026-10-02): 이 폰(Chrome)의 고유 키. 로그아웃해도 지우지 않음 ──
+function getDeviceKey(){
+  var k=null; try{k=localStorage.getItem('rentalDeviceKey');}catch(e){}
+  if(!k){
+    k=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():('d'+Date.now().toString(36)+Math.random().toString(36).slice(2)+Math.random().toString(36).slice(2));
+    try{localStorage.setItem('rentalDeviceKey',k);}catch(e){}
+  }
+  return k;
+}
+// 서버 함수에 넘기는 로그인 확인 정보
+function _cred(){ return currentUser?{name:currentUser.name,phone:currentUser.phone,token:currentUser.sessionToken||'',dk:getDeviceKey()}:null; }
+// 다른 앱(견적서·가망고객·수수료추이)으로 넘길 때 붙이는 값
+function _authQuery(){ return '&token='+encodeURIComponent(currentUser?(currentUser.sessionToken||''):'')+'&dk='+encodeURIComponent(getDeviceKey()); }
+var _sessionTimer=null;
+var imageUrlCache={};
+var _searchTimer=null;
+var _promoData=null,_promoYm=null;
+
+function showLoading(t){document.getElementById('loadingText').textContent=t||'처리 중...';document.getElementById('loadingOverlay').classList.add('show');}
+function hideLoading(){document.getElementById('loadingOverlay').classList.remove('show');}
+
+document.addEventListener('DOMContentLoaded',function(){
+  google.script.run.withSuccessHandler(function(res){if(res)imageUrlCache=res;}).getAllImageUrls();
+  var saved=null;
+  try{saved=JSON.parse(localStorage.getItem('rentalUser')||'null');}catch(e){}
+  if(saved){currentUser=saved;enterApp(saved);}
+  else{document.getElementById('loginWrap').style.display='flex';}
+  var kw=document.getElementById('kw');
+  if(kw)kw.addEventListener('keydown',function(e){if(e.key==='Enter')doSearch();});
+});
+
+function _sessionCheckOnce(){
+  if(!currentUser)return;
+  if(!currentUser.sessionToken){doLogout();return;}
+  google.script.run.withSuccessHandler(function(res){
+    if(res&&res.ok===false){
+      if(_sessionTimer){clearInterval(_sessionTimer);_sessionTimer=null;}
+      alert('로그인 정보가 확인되지 않아 로그아웃됩니다. 다시 로그인해 주세요.\n(등록된 폰에서만 사용할 수 있습니다)');
+      doLogout();
+    }
+  }).checkSession(currentUser.name,currentUser.phone,currentUser.sessionToken,getDeviceKey());
+}
+function _startSessionWatch(){
+  if(_sessionTimer){clearInterval(_sessionTimer);_sessionTimer=null;}
+  if(!currentUser)return;
+  _sessionCheckOnce();
+  _sessionTimer=setInterval(_sessionCheckOnce,30000);
+}
+
+function enterApp(u){
+  document.getElementById('loginWrap').style.display='none';
+  document.getElementById('app').style.display='block';
+  document.getElementById('fabBtn').style.display='flex';
+  // AI 비서 숨김 (2026-10-16). 다시 쓰려면 AI_CHAT_ENABLED = true 로 바꾸면 됨
+  var AI_CHAT_ENABLED = false;
+  if (AI_CHAT_ENABLED) {
+    document.getElementById('aiFabBtn').style.display = 'flex';
+  } else {
+    document.getElementById('fabBtn').style.bottom = '24px';
+    document.getElementById('mainFabBtn').style.bottom = '90px';
+  }
+  document.getElementById('mainFabBtn').style.display = 'flex';
+  document.getElementById('userLabel').textContent=u.name+' · '+(u.branch||u.dept||'');
+  var _noTrend=['정읍지사'];var _tb=document.querySelector('.hub-btn-trend');if(_tb)_tb.style.display=_noTrend.indexOf(u.branch||u.dept||'')>-1?'none':'';
+  showPage('hub');
+  _startSessionWatch();
+}
+
+function switchTab(tab){
+  document.getElementById('tabLogin').classList.toggle('active',tab==='login');
+  document.getElementById('tabJoin').classList.toggle('active',tab==='join');
+  document.getElementById('formLogin').style.display=tab==='login'?'block':'none';
+  document.getElementById('formJoin').style.display=tab==='join'?'block':'none';
+}
+
+function doLogin(pin){
+  var name=document.getElementById('loginName').value.trim();
+  var phone=document.getElementById('loginPhone').value.trim();
+  if(!name||!phone){showMsg('loginMsg','이름과 연락처를 입력해주세요','error');return;}
+  showMsg('loginMsg','확인 중...','info');
+  google.script.run
+    .withSuccessHandler(function(res){
+      if(res.ok){currentUser=res.user;localStorage.setItem('rentalUser',JSON.stringify(res.user));enterApp(res.user);}
+      else if(res.needPin){
+        var p=prompt(res.msg||'관리자 PIN을 입력하세요');
+        if(p){doLogin(p);}else{showMsg('loginMsg',res.msg,'error');}
+      }
+      else{showMsg('loginMsg',res.msg,'error');}
+    })
+    .withFailureHandler(function(e){showMsg('loginMsg','오류: '+e.message,'error');})
+    .login(name,phone,getDeviceKey(),(typeof pin==='string')?pin:'');
+}
+
+function doJoin(){
+  var dept=document.getElementById('joinDept').value.trim();
+  var empNo=document.getElementById('joinEmpNo').value.trim();
+  var name=document.getElementById('joinName').value.trim();
+  var phone=document.getElementById('joinPhone').value.trim();
+  var email=document.getElementById('joinEmail').value.trim();
+  if(!dept){showMsg('joinMsg','소속 지사를 선택해주세요','error');return;}
+  if(!empNo){showMsg('joinMsg','사번을 입력해주세요','error');return;}
+  if(!name||!phone){showMsg('joinMsg','이름과 연락처를 입력해주세요','error');return;}
+  if(!email){showMsg('joinMsg','이메일을 입력해주세요','error');return;}
+  showMsg('joinMsg','신청 중...','info');
+  google.script.run
+    .withSuccessHandler(function(res){
+      if(res.status==='approved'){switchTab('login');document.getElementById('loginName').value=name;document.getElementById('loginPhone').value=phone;showMsg('loginMsg','이미 승인된 계정입니다. 로그인을 눌러주세요.','info');}
+      else if(res.status==='pending'){showMsg('joinMsg','가입 신청 완료! 관리자 승인 후 로그인 가능합니다 😊','success');}
+      else if(res.status==='rejected'){showMsg('joinMsg','승인이 거절된 정보입니다. 관리자에게 문의하세요.','error');}
+      else if(res.status==='dupEmpNo'){showMsg('joinMsg','이미 등록된 사번입니다. 관리자에게 문의하세요.','error');}
+      else if(res.status==='needEmpNo'){showMsg('joinMsg','사번을 입력해주세요','error');}
+      else{showMsg('joinMsg','처리 중 문제가 생겼습니다. 다시 시도해주세요.','error');}
+    })
+    .withFailureHandler(function(e){showMsg('joinMsg','오류: '+e.message,'error');})
+    .requestJoin(name,phone,dept,email,empNo);
+}
+
+function doLogout(){
+  if(_sessionTimer){clearInterval(_sessionTimer);_sessionTimer=null;}
+  currentUser=null;localStorage.removeItem('rentalUser');
+  document.getElementById('app').style.display='none';
+  document.getElementById('fabBtn').style.display='none';
+  document.getElementById('aiFabBtn').style.display = 'none';
+  document.getElementById('mainFabBtn').style.display = 'none';
+       _chatHistory = [];
+       _chatGreeted = false;
+       document.getElementById('chatMessages').innerHTML = '';
+  document.getElementById('loginWrap').style.display='flex';
+  document.getElementById('loginName').value='';
+  document.getElementById('loginPhone').value='';
+  _promoData=null;_promoYm=null;
+}
+
+function showMsg(id,msg,type){
+  var el=document.getElementById(id);
+  el.textContent=msg;el.className='msg '+type;el.style.display='block';
+}
+
+function showPage(page){
+  document.getElementById('mainFabBtn').style.display = page==='hub' ? 'none' : 'flex';
+  document.getElementById('hubPage').style.display    =page==='hub'   ?'block':'none';
+  document.getElementById('searchPage').style.display =page==='search'?'block':'none';
+  document.getElementById('quotePage').style.display  =page==='quote' ?'block':'none';
+  document.getElementById('promoPage').style.display  =page==='promo' ?'block':'none';
+  if(page==='search')document.getElementById('kw').focus();
+  if(page==='quote'&&currentUser){
+    document.getElementById('qStaffName').value=currentUser.name||'';
+    document.getElementById('qStaffPhone').value=currentUser.phone||'';
+  }
+  if(page==='promo')promoEntry();
+}
+
+function findImageUrl(n){
+  if(!n)return'';
+  var nn=n.replace(/[^가-힣a-zA-Z0-9]/g,'').toLowerCase();
+  var nums=(n.match(/\d+/g)||[]).join('');
+  var best='',bsc=0;
+  for(var k in imageUrlCache){
+    var kn=k.replace(/[^가-힣a-zA-Z0-9]/g,'').toLowerCase();
+    var kn2=(k.match(/\d+/g)||[]).join('');
+    var sc=0;
+    if(nums&&kn2&&nums===kn2)sc+=50;
+    if(kn.indexOf(nn)!==-1||nn.indexOf(kn)!==-1)sc+=30;
+    var c=0;for(var j=0;j<nn.length;j++){if(kn.indexOf(nn[j])!==-1)c++;}sc+=c;
+    if(sc>bsc&&sc>15){bsc=sc;best=imageUrlCache[k];}
+  }
+  return best;
+}
+
+/* ── 검색 ── */
+function doSearch(){
+  var kw=document.getElementById('kw').value.trim();
+  if(!kw){alert('검색어를 입력해주세요');return;}
+  document.getElementById('st').textContent='';document.getElementById('rs').innerHTML='';
+  showLoading('검색 중... 잠시만 기다려주세요');
+  if(_searchTimer)clearTimeout(_searchTimer);
+  _searchTimer=setTimeout(function(){hideLoading();document.getElementById('rs').innerHTML='<div class="search-error">⏱ 검색 시간이 초과됐습니다.</div>';},40000);
+  var done=0;
+  function onDone(){if(++done===2){clearTimeout(_searchTimer);hideLoading();finishSearch();}}
+  google.script.run.withSuccessHandler(function(r){all=r||[];onDone();}).withFailureHandler(function(e){all=[];document.getElementById('rs').innerHTML='<div class="search-error">오류: '+e.message+'</div>';onDone();}).searchRental(kw,_cred());
+  google.script.run.withSuccessHandler(function(r){promoAll=r||[];onDone();}).withFailureHandler(function(){promoAll=[];onDone();}).searchPromo(kw,_cred());
+}
+
+function finishSearch(){
+  var hasJ=all.some(function(p){return p.group&&p.group.includes('정수기');});
+  document.getElementById('fw').classList.toggle('show',hasJ);
+  af='전체';
+  document.querySelectorAll('.fb').forEach(function(b){b.classList.remove('active');});
+  document.querySelectorAll('.fb')[0].classList.add('active');
+  var pt=document.getElementById('promoToggle');
+  if(promoAll.length>0){pt.style.display='flex';document.getElementById('promoCnt').textContent=promoAll.length+'개';}
+  else{pt.style.display='none';document.getElementById('showPromo').checked=false;}
+  render();
+}
+
+function setF(c){af=c;document.querySelectorAll('.fb').forEach(function(b){b.classList.toggle('active',b.textContent===c);});render();}
+function fmt(v){var n=Math.round(parseFloat(v));return isNaN(n)?'-':n.toLocaleString('ko-KR');}
+
+function getRentalNum(raw, isPromo) {
+  if (raw === null || raw === undefined) return null;
+  
+  // 하이픈(-)이나 문자열 분리 후 첫 번째 숫자 추출
+  var fv = parseFloat(String(raw).split('-')[0].replace(/[^0-9.]/g, ''));
+  if (isNaN(fv)) return null;
+  
+  // ★ 팀장님이 찾아내신 렌탈료 혼재(39.9 vs 39900) 현상 완벽 해결 로직
+  // 숫자가 1000 미만(예: 39.9, 49.9)이면 기존 방식대로 1000을 곱해 단가를 맞춥니다.
+  // 숫자가 이미 1000 이상(예: 29900, 37400)이면 1000을 곱하지 않고 그대로 원화로 인식합니다.
+  if (fv < 1000) {
+    return Math.round(fv * 1000);
+  } else {
+    return Math.round(fv);
+  }
+}
+
+function render(){
+  var st=document.getElementById('st'),rs=document.getElementById('rs');
+  var sp=document.getElementById('showPromo').checked;
+  var fl=af==='전체'?all:all.filter(function(p){return p.name.includes(af);});
+  var pl=sp?(af==='전체'?promoAll:promoAll.filter(function(p){return p.name.includes(af);})):[];
+  
+  if(!fl.length&&!pl.length){st.textContent='검색 결과가 없습니다';rs.innerHTML='<div class="empty">😅 일치하는 제품이 없어요</div>';return;}
+  st.textContent='총 '+fl.length+'개 제품'+(pl.length?' · 프로모션 '+pl.length+'개':'')+' 검색됨';
+  window._allCards=[];var html='';
+  
+  // 일반 제품 처리
+  fl.forEach(function(p){
+    var ci=window._allCards.length;window._allCards.push({p:p,isPromo:false});
+    var opts=p.rules.map(function(r,j){var rn=getRentalNum(r.rental&&r.rental.length?r.rental[0]:null,false);var cm=parseFloat(r.planner);return'<option value="'+j+'">'+r.rule+(rn!==null?' | 렌탈 '+fmt(rn)+'원':'')+(!isNaN(cm)?' | 수수료 '+fmt(cm)+'원':'')+' </option>';}).join('');
+    var f=p.rules[0],fr=getRentalNum(f.rental&&f.rental.length?f.rental[0]:null,false),fc=parseFloat(f.planner);
+    html+='<div class="card">'
+  +'<div class="ch"><div class="pn">'+p.name+'</div><div class="pm">'+p.group+' · '+p.code+'</div></div>'
+  +'<div style="padding:10px 12px 0">'
+  +'<div class="sp-toggle">'
+  +'<button id="tbtn_r_'+ci+'" class="t-rental" onclick="toggleMode('+ci+',\'rental\')">렌탈</button>'
+  +'<button id="tbtn_s_'+ci+'" onclick="toggleMode('+ci+',\'special\')">특판</button>'
+  +'</div></div>'
+  +'<div id="rental_sec_'+ci+'">'
+  +'<div class="cr"><label>📋 규정</label><select id="rule_sel_'+ci+'" onchange="updateCardFee(this,'+ci+',false)">'+opts+'</select></div>'
+  +'<div class="cb">'
+  +'<div class="ib"><div class="lb">💰 월렌탈료</div><div class="vl blue" id="cr_'+ci+'">'+(fr!==null?fmt(fr)+'원':'-')+'</div></div>'
+  +'<div class="ib"><div class="lb">✅ 수수료</div><div class="vl green" id="cc_'+ci+'">'+(!isNaN(fc)?fmt(fc)+'원':'-')+'</div></div>'
+  +'</div>'
+  +'</div>'
+  +'<div id="special_sec_'+ci+'" style="display:none"></div>'
+  +'</div>';
+  });
+
+  // 프로모션 제품 처리 (일반 제품과 동일하게 토글 추가)
+  pl.forEach(function(p){
+    var ci=window._allCards.length;window._allCards.push({p:p,isPromo:true});
+    var opts=p.rules.map(function(r,j){var rn=getRentalNum(r.rental&&r.rental.length?r.rental[0]:null,true);var cm=parseFloat(r.planner);return'<option value="'+j+'">'+r.rule+(rn!==null?' | 렌탈 '+fmt(rn)+'원':'')+(!isNaN(cm)?' | 수수료 '+fmt(cm)+'원':'')+' </option>';}).join('');
+    var f=p.rules[0],fr=getRentalNum(f.rental&&f.rental.length?f.rental[0]:null,true),fc=parseFloat(f.planner);
+    html+='<div class="card promo-card">'
+  +'<div class="ch promo-ch"><div class="pn">🎁 '+p.name+'</div><div class="pm">'+(p.promoName||'')+' · '+p.code+'</div></div>'
+  +'<div style="padding:10px 12px 0">'
+  +'<div class="sp-toggle">'
+  +'<button id="tbtn_r_'+ci+'" class="t-rental" onclick="toggleMode('+ci+',\'rental\')">렌탈</button>'
+  +'<button id="tbtn_s_'+ci+'" onclick="toggleMode('+ci+',\'special\')">특판</button>'
+  +'</div></div>'
+  +'<div id="rental_sec_'+ci+'">'
+  +'<div class="cr"><label>📋 규정</label><select id="rule_sel_'+ci+'" onchange="updateCardFee(this,'+ci+',true)">'+opts+'</select></div>'
+  +'<div class="cb">'
+  +'<div class="ib"><div class="lb">💰 월렌탈료</div><div class="vl blue" id="cr_'+ci+'">'+(fr!==null?fmt(fr)+'원':'-')+'</div></div>'
+  +'<div class="ib"><div class="lb">🎁 프로모션 수수료</div><div class="vl orange" id="cc_'+ci+'">'+(!isNaN(fc)?fmt(fc)+'원':'-')+'</div></div>'
+  +'</div>'
+  +'</div>'
+  +'<div id="special_sec_'+ci+'" style="display:none"></div>'
+  +'</div>';
+  });
+  
+  rs.innerHTML=html;
+}
+
+function updateCardFee(sel,ci,isPromo){
+  var ri=parseInt(sel.value),card=window._allCards[ci];if(!card)return;
+  var rule=card.p.rules[ri];if(!rule)return;
+  var rn=getRentalNum(rule.rental&&rule.rental.length?rule.rental[0]:null,isPromo),cm=parseFloat(rule.planner);
+  document.getElementById('cr_'+ci).textContent=rn!==null?fmt(rn)+'원':'-';
+  document.getElementById('cc_'+ci).textContent=!isNaN(cm)?fmt(cm)+'원':'-';
+}
+
+<!-- 피드백 오버레이 — 버튼 즉시 반응 + 중복 전송 방지 -->
+function openFB(){
+  document.getElementById('fb-name').value = currentUser ? currentUser.name : '';
+  document.getElementById('fb-msg').value = '';
+  document.getElementById('ov').style.display = 'flex';  // ← classList 대신 style 직접
+  requestAnimationFrame(function(){
+    document.getElementById('ov').classList.add('show');
+  });
+}
+
+function closeFB(){
+  document.getElementById('ov').classList.remove('show');
+  setTimeout(function(){ document.getElementById('ov').style.display = 'none'; }, 200);
+  document.getElementById('fb-msg').value = '';
+}
+
+function closeOv(e){ if(e.target.id==='ov') closeFB(); }
+
+var _fbSending = false;  // ← 중복 전송 방지 플래그
+
+function sendFB(){
+  if(_fbSending) return;  // 이미 전송 중이면 무시
+
+  var name = document.getElementById('fb-name').value.trim() || (currentUser ? currentUser.name : '익명');
+  var msg  = document.getElementById('fb-msg').value.trim();
+
+  if(!msg){ alert('내용을 입력해주세요'); return; }
+
+  _fbSending = true;
+  var btn = document.querySelector('#ov .btn-primary');
+  if(btn){ btn.disabled = true; btn.textContent = '전송 중...'; }
+
+  google.script.run
+    .withSuccessHandler(function(res){
+      _fbSending = false;
+      if(btn){ btn.disabled = false; btn.textContent = '보내기'; }
+      if(res && res.ok){
+        alert('피드백 감사합니다 🙏');
+        closeFB();
+      } else {
+        alert('저장 실패: ' + (res && res.error ? res.error : '알 수 없는 오류'));
+      }
+    })
+    .withFailureHandler(function(e){
+      _fbSending = false;
+      if(btn){ btn.disabled = false; btn.textContent = '보내기'; }
+      alert('오류: ' + e.message);
+    })
+    .saveFeedback(name, msg);
+}
+
+/* ── 견적서 ── */
+function getFeeHtml(rule,isPromo){
+  var raw=rule.rental&&rule.rental.length?rule.rental[0]:null,rn=getRentalNum(raw,isPromo);
+  var rental=rn!==null&&!isNaN(rn)?rn.toLocaleString('ko-KR')+'원':'-';
+  var comm=rule.planner?parseInt(rule.planner).toLocaleString('ko-KR')+'원':'-';
+  var cc=isPromo?'#f97316':'#16a34a',cb=isPromo?'#fff7ed':'#f0fdf4',cl=isPromo?'🎁 프로모션 수수료':'✅ 수수료';
+  return'<div class="q-fee-cell" style="background:#eff6ff"><div class="q-fee-label">💰 월렌탈료</div><div class="q-fee-value" style="color:#2563eb">'+rental+'</div></div>'
+    +'<div class="q-fee-cell" style="background:'+cb+'"><div class="q-fee-label">'+cl+'</div><div class="q-fee-value" style="color:'+cc+'">'+comm+'</div></div>';
+}
+
+function updateQFee(i){var idx=parseInt(document.getElementById('qr'+i).value),p=window._qProds[i];document.getElementById('qfee'+i).innerHTML=getFeeHtml(p.rules[idx],p.isPromo||false);}
+
+function searchForQuote(){
+  var kw=document.getElementById('qSearch').value.trim();if(!kw)return;
+  var rd=document.getElementById('qSearchResult');
+  rd.innerHTML='<div style="color:#94a3b8;padding:12px">검색 중...</div>';
+  var qt=setTimeout(function(){rd.innerHTML='<div class="search-error">⏱ 검색 시간 초과.</div>';},40000);
+  var done=0,np=[],pp=[];
+  function onDone(){if(++done===2){clearTimeout(qt);renderQSearch(np,pp);}}
+  google.script.run.withSuccessHandler(function(r){np=r||[];onDone();}).withFailureHandler(function(e){np=[];rd.innerHTML='<div class="search-error">오류: '+e.message+'</div>';onDone();}).searchRental(kw,_cred());
+  google.script.run.withSuccessHandler(function(r){pp=r||[];onDone();}).withFailureHandler(function(){pp=[];onDone();}).searchPromo(kw,_cred());
+}
+
+function renderQSearch(np,pp){
+  var rd=document.getElementById('qSearchResult');
+  if(!np.length&&!pp.length){rd.innerHTML='<div style="color:#94a3b8;padding:10px">결과 없음</div>';return;}
+  window._qProds=[];var html='';
+  np.forEach(function(p){
+    var i=window._qProds.length;window._qProds.push(p);
+    var opts=p.rules.map(function(r,j){return'<option value="'+j+'">'+r.rule+'</option>';}).join('');
+    var img=p.imageUrl||findImageUrl(p.name);
+    var ih=img?'<img src="'+img+'" style="width:100%;height:100px;object-fit:contain" onerror="this.style.display=\'none\'">':'<div class="no-img">이미지<br>없음</div>';
+    html+='<div class="q-product-card"><div class="q-product-img-row"><div class="q-product-img">'+ih+'</div><div class="q-product-body">'
+      +'<div class="q-product-name">'+p.name+'<span style="font-size:.9rem;color:#94a3b8;font-weight:400">'+p.group+' · '+p.code+'</span></div>'
+      +'<div class="q-product-row"><select id="qr'+i+'" onchange="updateQFee('+i+')">'+opts+'</select><input type="number" id="qq'+i+'" value="1" min="1"><button class="q-add-btn" onclick="addToQuote('+i+')">+ 추가</button></div>'
+      +'<div id="qfee'+i+'" class="q-fee-bar">'+getFeeHtml(p.rules[0],false)+'</div></div></div></div>';
+  });
+  if(pp.length){
+    html+='<div style="font-size:1rem;color:#92400e;font-weight:700;margin:14px 0 8px;padding:8px 12px;background:#fff7ed;border-radius:6px">🎁 프로모션 제품 ('+pp.length+'개)</div>';
+    pp.forEach(function(p){
+      var i=window._qProds.length;window._qProds.push(p);
+      var opts=p.rules.map(function(r,j){return'<option value="'+j+'">'+r.rule+'</option>';}).join('');
+      var img=p.imageUrl||findImageUrl(p.name);
+      var ih=img?'<img src="'+img+'" style="width:100%;height:100px;object-fit:contain" onerror="this.style.display=\'none\'">':'<div class="no-img">이미지<br>없음</div>';
+      html+='<div class="q-product-card promo"><div class="q-product-img-row"><div class="q-product-img">'+ih+'</div><div class="q-product-body">'
+        +'<div class="q-product-name promo-name">🎁 '+p.name+'<span class="q-promo-tag">'+p.promoName+'</span></div>'
+        +'<div class="q-product-row"><select id="qr'+i+'" onchange="updateQFee('+i+')">'+opts+'</select><input type="number" id="qq'+i+'" value="1" min="1"><button class="q-add-btn promo" onclick="addToQuote('+i+')">+ 추가</button></div>'
+        +'<div id="qfee'+i+'" class="q-fee-bar">'+getFeeHtml(p.rules[0],true)+'</div></div></div></div>';
+    });
+  }
+  rd.innerHTML=html;
+}
+
+function addToQuote(i){
+  var p=window._qProds[i],ri=parseInt(document.getElementById('qr'+i).value),qty=parseInt(document.getElementById('qq'+i).value)||1,rule=p.rules[ri];
+  var img=p.imageUrl||findImageUrl(p.name);
+  qItems.push({name:p.name,code:p.code,group:p.group,rule:rule.rule,rentalArr:rule.rental,qty:qty,planner:rule.planner,isPromo:p.isPromo||false,promoName:p.promoName||'',imageUrl:img});
+  renderQItems();document.getElementById('qSearchResult').innerHTML='';document.getElementById('qSearch').value='';
+}
+
+function renderQItems(){
+  var list=document.getElementById('qItemList'),wrap=document.getElementById('qItems');
+  if(!qItems.length){wrap.style.display='none';return;}wrap.style.display='block';
+  list.innerHTML=qItems.map(function(item,i){
+    var raw=item.rentalArr&&item.rentalArr.length?item.rentalArr[0]:null,rn=getRentalNum(raw,item.isPromo);
+    var rental=rn!==null&&!isNaN(rn)?rn.toLocaleString('ko-KR'):'-';
+    var comm=item.planner?parseInt(item.planner).toLocaleString('ko-KR')+'원':'-';
+    var pt=item.isPromo?'<span class="q-promo-tag">'+item.promoName+'</span>':'';
+    return'<div class="q-item'+(item.isPromo?' promo-item':'')+'">'
+      +'<div class="q-item-info"><div class="q-item-name">'+(item.isPromo?'🎁 ':'')+item.name+pt+'</div>'
+      +'<div class="q-item-sub">'+item.rule+' · 월 '+rental+'원 · '+item.qty+'대 <span class="'+(item.isPromo?'q-item-comm promo-comm':'q-item-comm')+'">| 수수료 '+comm+'</span></div></div>'
+      +'<button class="q-item-del" onclick="removeQItem('+i+')">✕</button></div>';
+  }).join('');
+}
+
+function removeQItem(i){qItems.splice(i,1);renderQItems();}
+
+function previewQuote(){
+  if(!qItems.length){alert('제품을 추가해주세요');return;}
+  var customer=document.getElementById('qCustomer').value||'(고객명)',sn=document.getElementById('qStaffName').value||'';
+  var html='<div style="font-family:\'Malgun Gothic\',sans-serif;font-size:.9rem;border:1px solid #e2e8f0;padding:24px;border-radius:8px">'
+    +'<h2 style="text-align:center;font-size:1.6rem;margin-bottom:16px;letter-spacing:8px">견  적  서</h2>'
+    +'<div style="display:flex;justify-content:space-between;margin-bottom:12px"><div><span style="font-size:1.2rem;font-weight:700">'+customer+'</span> 귀하</div><div style="font-size:.8rem;color:#64748b">담당: '+sn+'</div></div>'
+    +'<p style="margin-bottom:16px;color:#475569">아래와 같이 견적합니다.</p>';
+  qItems.forEach(function(item){
+    var pObj=window._qProds?window._qProds.find(function(x){return x.name===item.name;}):null;
+    var img=pObj?pObj.imageUrl:null;if(!img)img=findImageUrl(item.name);
+    var raw=item.rentalArr&&item.rentalArr.length?item.rentalArr[0]:null;
+    var rn=getRentalNum(raw,item.isPromo),rental=rn!==null&&!isNaN(rn)?rn.toLocaleString('ko-KR'):'-';
+    html+='<div style="margin-bottom:16px;display:flex;gap:16px;align-items:flex-start">'
+      +(img?'<img src="'+img+'" style="width:100px;height:100px;object-fit:contain;border:1px solid #e2e8f0;border-radius:8px;flex-shrink:0">':'')
+      +'<div style="flex:1"><div style="background:#1e3a8a;color:#fff;padding:8px 14px;font-weight:700;border-radius:6px 6px 0 0">렌탈 - '+item.name+'</div>'
+      +'<table style="width:100%;border-collapse:collapse;border:1px solid #e2e8f0"><tr style="background:#f1f5f9;text-align:center"><th style="padding:8px;border:1px solid #e2e8f0">품명</th><th style="padding:8px;border:1px solid #e2e8f0">규정</th><th style="padding:8px;border:1px solid #e2e8f0">수량</th><th style="padding:8px;border:1px solid #e2e8f0">월렌탈료</th></tr>'
+      +'<tr style="text-align:center"><td style="padding:10px;border:1px solid #e2e8f0">'+item.name+'</td><td style="padding:10px;border:1px solid #e2e8f0">'+item.rule+'</td><td style="padding:10px;border:1px solid #e2e8f0">'+item.qty+'대</td><td style="padding:10px;border:1px solid #e2e8f0;color:#2563eb;font-weight:700">'+rental+'원</td></tr></table></div></div>';
+  });
+  html+='<div style="background:#f8fafc;padding:10px 14px;border-radius:6px;font-size:.82rem;color:#64748b;margin-top:8px">영업안내: 계약금 면제, 설치비 면제, 렌탈료 우대고객 할인 적용</div>'
+    +'<div style="font-size:.75rem;color:#94a3b8;margin-top:8px">※ 본 견적서는 검인을 받지 아니하고 사용할 수 있으나 거래명세표로는 사용할 수 없다.</div></div>';
+  document.getElementById('quotePreviewContent').innerHTML=html;
+  document.getElementById('quotePreviewOv').classList.add('show');
+}
+
+function closeQuotePreview(e){if(!e||e.target.id==='quotePreviewOv')document.getElementById('quotePreviewOv').classList.remove('show');}
+
+function generateQuote(){
+  var customer=document.getElementById('qCustomer').value.trim()||'고객님';
+  if(!qItems.length){alert('제품을 추가해주세요');return;}
+  document.getElementById('quotePreviewOv').classList.remove('show');
+  var btn=document.getElementById('qGenerateBtn');
+  btn.textContent='⏳ 견적서 생성 중...';btn.disabled=true;
+  showLoading('견적서를 만들고 있습니다... 잠시만 기다려주세요');
+  google.script.run
+    .withSuccessHandler(function(res){
+      hideLoading();btn.textContent='📄 견적서 생성 & 전송';btn.disabled=false;
+      if(res.ok){
+        lastPdfId=res.pdfId;window._lastPdfBase64=res.pdfBase64;window._lastPdfFilename=res.filename;
+        var lh='<div style="margin-bottom:15px;">'
+          +'<button onclick="downloadPdfNow()" style="display:block;width:100%;padding:14px;background:#f59e0b;color:#fff;border:none;border-radius:8px;font-weight:bold;font-size:1.05rem;cursor:pointer;font-family:inherit;margin-bottom:8px;">📥 PDF 저장 / 열기<br><span style="font-size:0.8rem;font-weight:normal">(카톡 전송용)</span></button>'
+          +'<button onclick="emailToMe()" style="display:block;width:100%;padding:12px;background:#10b981;color:#fff;border:none;border-radius:8px;font-weight:bold;font-size:0.95rem;cursor:pointer;font-family:inherit;">✉️ 내 이메일로 받기</button>'
+          +'</div>';
+        document.getElementById('sendLinks').innerHTML=lh;
+        document.getElementById('sendOv').classList.add('show');
+      }
+    })
+    .withFailureHandler(function(e){
+      hideLoading();btn.textContent='📄 견적서 생성 & 전송';btn.disabled=false;
+      alert('오류: '+e.message);
+    })
+    .createQuote({
+      customer:customer,
+      staffName:document.getElementById('qStaffName').value,
+      staffPhone:document.getElementById('qStaffPhone').value,
+      remark:document.getElementById('qRemark').value,
+      directWater:document.getElementById('qDirectWater').value==='true',
+      items:qItems
+    });
+}
+
+function doSendEmail(){
+  var email=document.getElementById('sendEmail').value.trim();
+  if(!email){alert('이메일을 입력해주세요');return;}
+  if(!lastPdfId){alert('먼저 견적서를 생성해주세요');return;}
+  google.script.run.withSuccessHandler(function(){alert('이메일 전송 완료! ✅');}).withFailureHandler(function(e){alert('오류: '+e.message);})
+    .sendQuoteEmail(lastPdfId,email,document.getElementById('qCustomer').value,document.getElementById('qStaffName').value,currentUser?currentUser.email||'':'');
+}
+
+function closeSendOv(e){if(!e||e.target.id==='sendOv')document.getElementById('sendOv').classList.remove('show');}
+
+function downloadPdfNow(){
+  var base64=window._lastPdfBase64,fn=window._lastPdfFilename||'견적서.pdf';
+  if(!base64){alert('PDF 데이터가 없습니다.');return;}
+  var ua=navigator.userAgent||'';
+  if(/KAKAOTALK|FBAN|FBAV|FB_IAB|Instagram|Line\/|NAVER|whale|Daum|Twitter|; wv\)/i.test(ua)){alert('⚠️ 인앱 브라우저에서는 PDF 다운로드가 차단됩니다.\n\n👉 Chrome/Safari로 열거나 「내 이메일로 받기」를 사용하세요.');return;}
+  try{
+    var bc=atob(base64),ba=new Uint8Array(bc.length);
+    for(var i=0;i<bc.length;i++)ba[i]=bc.charCodeAt(i);
+    var blob=new Blob([ba],{type:'application/pdf'}),burl=URL.createObjectURL(blob);
+    if(/iPhone|iPad|iPod/i.test(ua)){var w=window.open(burl,'_blank');if(!w||w.closed)location.href=burl;}
+    else{var a=document.createElement('a');a.href=burl;a.download=fn;a.style.display='none';document.body.appendChild(a);a.click();setTimeout(function(){if(a.parentNode)document.body.removeChild(a);},100);}
+    setTimeout(function(){URL.revokeObjectURL(burl);},60000);
+  }catch(e){alert('다운로드 실패: '+e.message);}
+}
+
+function emailToMe(){
+  if(!currentUser||!currentUser.email){alert('이메일 정보가 없습니다.');return;}
+  if(!lastPdfId){alert('견적서를 먼저 생성해주세요.');return;}
+  if(!confirm(currentUser.email+' 으로 PDF 보낼까요?'))return;
+  google.script.run
+    .withSuccessHandler(function(){alert('📧 전송 완료!');})
+    .withFailureHandler(function(e){alert('오류: '+e.message);})
+    .sendQuoteEmail(lastPdfId,currentUser.email,document.getElementById('qCustomer').value,document.getElementById('qStaffName').value,'');
+}
+
+/* ── 프로모션 ── */
+function promoEntry(){
+  var type=document.getElementById('promoTypeSel').value;
+  if(type==='card'){promoShowCard();return;}
+  if(_promoData){promoRebuildCat();promoFilterRender();return;}
+  promoFetch();
+}
+
+function promoTypeChange(){
+  var type=document.getElementById('promoTypeSel').value;
+  if(type==='card'){promoShowCard();return;}
+  // 할인 프로모션
+  if(_promoData){promoRebuildCat();promoFilterRender();}
+  else{promoFetch();}
+}
+
+var _cardPromoData=null,_cardPromoYm=null;
+
+function promoShowCard(){
+  if(_cardPromoData){cardPromoRebuildCat();cardPromoFilterRender();}
+  else{cardPromoFetch();}
+}
+
+function promoCatChange(){
+  var type=document.getElementById('promoTypeSel').value;
+  if(type==='card')cardPromoFilterRender();
+  else promoFilterRender();
+}
+
+function cardPromoFetch(){
+  document.getElementById('promoContent').innerHTML='<div class="promo-loading">📡 제휴카드 프로모션 불러오는 중...</div>';
+  google.script.run
+    .withSuccessHandler(function(res){
+      if(!res){document.getElementById('promoContent').innerHTML='<div class="promo-loading">⚠️ 응답 없음</div>';return;}
+      if(res.error){document.getElementById('promoContent').innerHTML='<div class="promo-loading">⚠️ '+res.error+'</div>';return;}
+      if(res.empty||!res.categories||!res.categories.length){
+        document.getElementById('promoContent').innerHTML='<div class="promo-empty">😅 제휴카드 프로모션 데이터가 없습니다.</div>';
+        document.getElementById('promoCatSel').innerHTML='<option value="all">전체 항목</option>';
+        document.getElementById('promoCountBadge').style.display='none';
+        return;
+      }
+      _cardPromoData=res;_cardPromoYm=res.ym;
+      var badge=document.getElementById('promoYmBadge');
+      badge.textContent=_cardPromoYm+' 기준';badge.style.display='inline-block';
+      cardPromoRebuildCat();cardPromoFilterRender();
+    })
+    .withFailureHandler(function(e){
+      document.getElementById('promoContent').innerHTML='<div class="promo-loading">❌ 오류: '+e.message+'</div>';
+    })
+    .getCardPromoData(null,_cred());
+}
+
+function cardPromoRebuildCat(){
+  if(!_cardPromoData)return;
+  var sel=document.getElementById('promoCatSel');
+  var prev=sel.value;
+  sel.innerHTML='<option value="all">전체 항목</option>';
+  _cardPromoData.categories.forEach(function(c){
+    var o=document.createElement('option');
+    o.value=c.catKey;o.textContent=c.catName||c.catKey;
+    sel.appendChild(o);
+  });
+  sel.value=prev||'all';
+}
+
+function fmtPromoWidth(w){
+  if(!w)return '';
+  var s=String(w).trim();
+  return /^\d+$/.test(s) ? s+'px' : s;
+}
+
+function _splitFix(a){
+  if(!a) return a;
+  if(Object.prototype.toString.call(a)!=='[object Array]') a=[a];
+  if(a.length===1){
+    var s=String(a[0]);
+    if(s.indexOf('|')!==-1) return s.split('|').map(function(x){return x.trim();});
+    if(s.indexOf(',')!==-1) return s.split(',').map(function(x){return x.trim();});
+  }
+  return a;
+}
+
+function cardPromoFilterRender(){
+  if(!_cardPromoData)return;
+  var catKey=document.getElementById('promoCatSel').value;
+  var cats=catKey==='all'?_cardPromoData.categories:_cardPromoData.categories.filter(function(c){return c.catKey===catKey;});
+  var total=0,html='';
+  cats.forEach(function(cat){
+    if(!cat.sections||!cat.sections.length)return;
+    cat.colHeaders=_splitFix(cat.colHeaders);
+    cat.colWidths=_splitFix(cat.colWidths);
+    html+='<div class="promo-card">';
+    html+='<div class="promo-card-hdr"><span style="font-size:1.4rem">💳</span><span class="promo-card-hdr-title">'+escHtml(cat.catName||cat.catKey)+'</span></div>';
+    html+='<div class="promo-tbl-wrap"><table class="promo-tbl">';
+    html+='<tbody>';
+    cat.sections.forEach(function(sec){
+      var cs=(cat.colHeaders&&cat.colHeaders.length)?cat.colHeaders.length:7;
+      if(sec.label) html+='<tr><td colspan="'+cs+'" class="promo-sec-hdr">'+escHtml(sec.label)+'</td></tr>';
+      if(cat.colHeaders&&cat.colHeaders.length){
+        html+='<tr>';
+        cat.colHeaders.forEach(function(h,i){
+          var w=(cat.colWidths&&cat.colWidths[i])?' style="width:'+fmtPromoWidth(cat.colWidths[i])+'"':'';
+          html+='<th'+w+'>'+escHtml(h)+'</th>';
+        });
+        html+='</tr>';
+      }
+      sec.rows.forEach(function(row){
+        if(cat.colHeaders&&cat.colHeaders.length)row=row.slice(0,cat.colHeaders.length);
+        html+='<tr>';
+        row.slice(0,(cat.colHeaders&&cat.colHeaders.length)?cat.colHeaders.length:row.length).forEach(function(cell,ci){
+          var cls='';
+          if(ci===1&&cat.colHeaders&&(cat.colHeaders[1]||'').includes('정상'))cls=' class="td-before"';
+          else if(ci===2&&cat.colHeaders&&((cat.colHeaders[2]||'').includes('할인')||(cat.colHeaders[2]||'').includes('렌탈료')))cls=' class="td-after"';
+          var val=String(cell);
+          var num=parseFloat(val);
+          if(!isNaN(num)&&num>0&&num<1&&val.indexOf('.')==1&&val.length>=3)val=Math.round(num*100)+'%';
+          html+='<td'+cls+'>'+escHtml(val)+'</td>';
+        });
+        html+='</tr>';total++;
+      });
+    });
+    html+='</tbody></table></div>';
+    if(cat.note)html+='<div class="promo-note">※ '+escHtml(cat.note)+'</div>';
+    html+='</div>';
+  });
+  if(!html)html='<div class="promo-empty">😅 선택한 항목에 해당하는 데이터가 없습니다.</div>';
+  document.getElementById('promoContent').innerHTML=html;
+  var badge=document.getElementById('promoCountBadge');
+  badge.textContent=total+'개 항목';
+  badge.style.display=total?'inline-block':'none';
+}
+
+function promoFetch(){
+  const now = new Date();
+  const ym = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
+  document.getElementById('promoContent').innerHTML='<div class="promo-loading">📡 프로모션 데이터 불러오는 중...</div>';
+  google.script.run
+    .withSuccessHandler(function(res){
+      if(res.error){document.getElementById('promoContent').innerHTML='<div class="promo-loading">⚠️ '+res.error+'</div>';return;}
+      if(res.empty||!res.categories||!res.categories.length){
+        document.getElementById('promoContent').innerHTML='<div class="promo-empty">😅 이번 달 프로모션 데이터가 없습니다.</div>';return;
+      }
+      _promoData=res;_promoYm=res.ym;
+      var badge=document.getElementById('promoYmBadge');
+      badge.textContent=_promoYm+' 기준';badge.style.display='inline-block';
+      promoRebuildCat();promoFilterRender();
+    })
+    .withFailureHandler(function(e){
+      document.getElementById('promoContent').innerHTML='<div class="promo-loading">❌ 오류: '+e.message+'</div>';
+    })
+    .getPromoPageData(ym,_cred());
+}
+
+function promoRebuildCat(){
+  if(!_promoData)return;
+  var sel=document.getElementById('promoCatSel');
+  var prev=sel.value;
+  sel.innerHTML='<option value="all">전체 항목</option>';
+  _promoData.categories.forEach(function(c){
+    var o=document.createElement('option');
+    o.value=c.catKey;o.textContent=c.catName||c.catKey;
+    sel.appendChild(o);
+  });
+  sel.value=prev||'all';
+}
+
+function promoFilterRender(){
+  if(!_promoData)return;
+  var catKey=document.getElementById('promoCatSel').value;
+  var cats=catKey==='all'?_promoData.categories:_promoData.categories.filter(function(c){return c.catKey===catKey;});
+  var total=0,html='';
+  cats.forEach(function(cat){
+    if(!cat.sections||!cat.sections.length)return;
+    html+='<div class="promo-card">';
+    html+='<div class="promo-card-hdr"><span style="font-size:1.4rem">🎁</span><span class="promo-card-hdr-title">'+escHtml(cat.catName||cat.catKey)+'</span></div>';
+    html+='<div class="promo-tbl-wrap"><table class="promo-tbl">';
+    html+='<tbody>';
+    cat.sections.forEach(function(sec){
+      var cs=(cat.colHeaders&&cat.colHeaders.length)?cat.colHeaders.length:7;
+      if(sec.label) html+='<tr><td colspan="'+cs+'" class="promo-sec-hdr">'+escHtml(sec.label)+'</td></tr>';
+      if(cat.colHeaders&&cat.colHeaders.length){
+        html+='<tr>';
+        cat.colHeaders.forEach(function(h,i){
+          var w=(cat.colWidths&&cat.colWidths[i])?' style="width:'+cat.colWidths[i]+'"':'';
+          html+='<th'+w+'>'+escHtml(h)+'</th>';
+        });
+        html+='</tr>';
+      }
+      sec.rows.forEach(function(row){
+        html+='<tr>';
+        row.slice(0,(cat.colHeaders&&cat.colHeaders.length)?cat.colHeaders.length:row.length).forEach(function(cell,ci){
+          var cls='';
+          if(ci===1&&cat.colHeaders&&(cat.colHeaders[1]||'').includes('정상'))cls=' class="td-before"';
+          else if(ci===2&&cat.colHeaders&&((cat.colHeaders[2]||'').includes('할인')||(cat.colHeaders[2]||'').includes('렌탈료')))cls=' class="td-after"';
+          var val=String(cell);
+var num=parseFloat(val);
+if(!isNaN(num)&&num>0&&num<1&&val.indexOf('.')==1&&val.length>=3)val=Math.round(num*100)+'%';
+html+='<td'+cls+'>'+escHtml(val)+'</td>';
+        });
+        html+='</tr>';total++;
+      });
+    });
+    html+='</tbody></table></div>';
+    if(cat.note)html+='<div class="promo-note">※ '+escHtml(cat.note)+'</div>';
+    html+='</div>';
+  });
+  if(!html)html='<div class="promo-empty">😅 선택한 항목에 해당하는 데이터가 없습니다.</div>';
+  document.getElementById('promoContent').innerHTML=html;
+  var badge=document.getElementById('promoCountBadge');
+  badge.textContent=total+'개 항목';
+  badge.style.display=total?'inline-block':'none';
+}
+
+function escHtml(s){
+  if(!s)return'';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+/* ── 특판 ── */
+var _specialProds = null;
+
+function _loadSpecialProds(cb) {
+  if (_specialProds) { cb(); return; }
+  google.script.run
+    .withSuccessHandler(function(res) {
+      _specialProds = (res && res.rows) ? res.rows : [];
+      cb();
+    })
+    .withFailureHandler(function() { _specialProds = []; cb(); })
+    .getSpecialProducts(_cred());
+}
+
+function _findSpecialProd(code, name) {
+  if (!_specialProds) return null;
+  
+  // 1순위: 절대 변하지 않는 고유 '제품 코드'로 완벽 매칭 (가장 확실함)
+  if (code) {
+    var matchedByCode = _specialProds.find(function(p) { return p.code === code; });
+    if (matchedByCode) return matchedByCode;
+  }
+  
+  // 2순위: 혹시 코드가 누락됐을 경우, 띄어쓰기를 전부 없앤 '이름'으로 매칭
+  var safeName = (name || '').replace(/\s+/g, '');
+  return _specialProds.find(function(p) {
+    var spName = (p.name || '').replace(/\s+/g, '');
+    return spName === safeName || spName.includes(safeName) || safeName.includes(spName);
+  }) || null;
+}
+
+function toggleMode(ci, mode) {
+  var card = window._allCards[ci];
+  if (!card) return;
+  var rentalBtn  = document.getElementById('tbtn_r_' + ci);
+  var specialBtn = document.getElementById('tbtn_s_' + ci);
+  var rentalSec  = document.getElementById('rental_sec_' + ci);
+  var specialSec = document.getElementById('special_sec_' + ci);
+
+  if (mode === 'rental') {
+    rentalBtn.className  = 't-rental';
+    specialBtn.className = '';
+    rentalSec.style.display  = 'block';
+    specialSec.style.display = 'none';
+  } else {
+    rentalBtn.className  = '';
+    specialBtn.className = 't-special';
+    rentalSec.style.display  = 'none';
+    specialSec.style.display = 'block';
+    _loadSpecialProds(function() { renderSpecialSec(ci); });
+  }
+}
+
+function renderSpecialSec(ci) {
+  var card = window._allCards[ci];
+  if (!card) return;
+  
+  // ★ 이름뿐만 아니라 '코드(code)'도 같이 넘겨서 정확하게 찾습니다.
+  var sp = _findSpecialProd(card.p.code, card.p.name); 
+  
+  var sec = document.getElementById('special_sec_' + ci);
+  if (!sp || !sp.listPrice) {
+    sec.innerHTML = '<div class="sp-section"><div style="color:#94a3b8;font-size:.95rem;text-align:center;padding:8px 0">특판 데이터 없음<br><span style="font-size:.85rem">시트에 정가 및 유지금액을 입력해주세요</span></div></div>';
+    return;
+  }
+  
+  var defaultMaint = (sp.maintenanceOptions && sp.maintenanceOptions.length > 0) ? sp.maintenanceOptions[0] : null;
+  window['_sp_' + ci] = { sp: sp, disc: 40, maint: defaultMaint };
+
+  var discHtml = [30, 40, 50].map(function(d) {
+    return '<button class="disc-btn' + (d === 40 ? ' on' : '') + '" onclick="setDisc(' + ci + ',' + d + ')">' + d + '%</button>';
+  }).join('');
+
+  var maintHtml = '';
+  if (sp.maintenanceOptions && sp.maintenanceOptions.length) {
+    maintHtml = '<div style="font-size:.95rem;color:#475569;margin-bottom:6px;font-weight:600">유지계약</div>'
+      + '<div class="maint-row">'
+      + sp.maintenanceOptions.map(function(m, i) {
+          var activeClass = (i === 0) ? ' on' : '';
+          return '<button class="maint-btn' + activeClass + '" id="mb_' + ci + '_' + i + '" onclick="setMaint(' + ci + ',' + i + ')">' + m.label + '</button>';
+        }).join('')
+      + '</div>';
+  }
+
+  sec.innerHTML = '<div class="sp-section">'
+    + '<div style="font-size:.95rem;color:#475569;margin-bottom:6px;font-weight:600">할인율</div>'
+    + '<div class="disc-row">' + discHtml + '</div>'
+    + maintHtml
+    + '<div id="sp_result_' + ci + '"></div>'
+    + '<div id="compare_box_' + ci + '"></div>'
+    + '</div>';
+  calcAndRender(ci);
+}
+
+function setDisc(ci, disc) {
+  if (!window['_sp_' + ci]) return;
+  window['_sp_' + ci].disc = disc;
+  document.querySelectorAll('#special_sec_' + ci + ' .disc-btn').forEach(function(b) {
+    b.classList.toggle('on', b.textContent.trim() === disc + '%');
+  });
+  calcAndRender(ci);
+}
+
+function setMaint(ci, idx) {
+  if (!window['_sp_' + ci]) return;
+  var sp = window['_sp_' + ci].sp;
+  window['_sp_' + ci].maint = sp.maintenanceOptions[idx];
+  // 버튼 활성화
+  var opts = sp.maintenanceOptions;
+  opts.forEach(function(_, i) {
+    var b = document.getElementById('mb_' + ci + '_' + i);
+    if (b) b.classList.toggle('on', i === idx);
+  });
+  var nb = document.getElementById('mb_' + ci + '_none');
+  if (nb) nb.classList.remove('on');
+  calcAndRender(ci);
+}
+
+function setMaintNone(ci) {
+  if (!window['_sp_' + ci]) return;
+  window['_sp_' + ci].maint = null;
+  var sp = window['_sp_' + ci].sp;
+  if (sp.maintenanceOptions) {
+    sp.maintenanceOptions.forEach(function(_, i) {
+      var b = document.getElementById('mb_' + ci + '_' + i);
+      if (b) b.classList.remove('on');
+    });
+  }
+  var nb = document.getElementById('mb_' + ci + '_none');
+  if (nb) nb.classList.add('on');
+  calcAndRender(ci);
+}
+
+function calcAndRender(ci) {
+  var state = window['_sp_' + ci];
+  if (!state) return;
+
+  var sp       = state.sp;
+  var disc     = state.disc; 
+  var maint    = state.maint; 
+  
+  // 1. 총 렌탈료 계산 (현재 선택된 렌탈 규정을 가져옴)
+  var card = window._allCards[ci];
+  var isPromo = card.isPromo;
+  var ruleSelect = document.getElementById('rule_sel_' + ci); 
+  var ri = ruleSelect ? parseInt(ruleSelect.value) : 0;
+  var ruleObj = card.p.rules[ri];
+  var ruleStr = ruleObj ? (ruleObj.rule || '') : '';
+  
+  var totalMonths = ruleStr.includes('72') ? 72 : 60; 
+  var rn = ruleObj ? getRentalNum(ruleObj.rental && ruleObj.rental.length ? ruleObj.rental[0] : null, isPromo) : 0;
+  var totalRentalPrice = rn ? (rn * totalMonths) : 0;
+
+  // 2. 특판 수수료율 판별
+  var feeRate = 0.20;
+  var productName = sp.name || '';
+  
+  if (productName.indexOf('아이스트리큐브') !== -1) {
+    feeRate = 0.15;
+  } else if (sp.productType === '매트리스' || sp.productType === '파운데이션' || productName.indexOf('매트리스') !== -1) {
+    if (disc <= 30) feeRate = 0.25;
+    else if (disc === 40) feeRate = 0.20;
+    else feeRate = 0.05;
+  } else if (sp.productType === '프레임' || productName.indexOf('프레임') !== -1) {
+    if (disc <= 30) feeRate = 0.10;
+    else feeRate = 0.05;
+  } else {
+    if (disc >= 50) feeRate = 0.05;
+    else feeRate = 0.20;
+  }
+
+  // 3. 결제액 및 수수료 계산
+  var discPrice = Math.round(sp.listPrice * (1 - disc / 100)); 
+  var maintAmt  = (maint && maint.amount > 0) ? maint.amount : 0; 
+  var customerTotal = discPrice + maintAmt; 
+
+  var exVatPrice = Math.round(discPrice / 1.1); 
+  var prodFee    = Math.floor(exVatPrice * feeRate); 
+
+  var maintFee = 0;
+  if (maintAmt > 0) {
+    var exVatMaint = Math.round(maintAmt / 1.1); 
+    maintFee = Math.floor(exVatMaint * 0.10); 
+  }
+  
+  var totalFee = prodFee + maintFee; 
+
+  // 4. 화면 출력 (UI 구성)
+  var resEl = document.getElementById('sp_result_' + ci);
+  if (!resEl) return;
+
+  resEl.innerHTML = '<div class="sp-result">'
+    + '<div class="sp-result-row"><span class="sr-label">기기 정가</span><span class="sr-val">' + fmt(sp.listPrice) + '원</span></div>'
+    + '<div class="sp-result-row"><span class="sr-label">기기 할인가 (' + disc + '%)</span><span class="sr-val">' + fmt(discPrice) + '원</span></div>'
+    + (maintAmt > 0 ? '<div class="sp-result-row"><span class="sr-label">점검 금액 (' + maint.label + ')</span><span class="sr-val">' + fmt(maintAmt) + '원</span></div>' : '')
+    
+    // ★ 레이아웃 버그 수정: 가로 정렬 클래스(sp-result-row)를 제거하고 세로 블록으로 바르게 쌓이도록 교체
+    + '<div style="background:#fff7ed; padding:12px; border-radius:8px; margin:8px 0; border:1px solid #fed7aa; display:block;">'
+    +   '<div style="display:flex; justify-content:space-between; margin-bottom:8px; align-items:center;">'
+    +     '<span style="font-weight:700; color:#b45309; font-size:0.95rem;">비교: 총 렌탈료 (' + totalMonths + '개월)</span>'
+    +     '<span style="color:#b45309; font-size:1.1rem; font-weight:700;">' + (totalRentalPrice ? fmt(totalRentalPrice) + '원' : '-') + '</span>'
+    +   '</div>'
+    +   '<div style="display:flex; justify-content:space-between; align-items:center; border-top:1.5px solid #fdba74; padding-top:8px;">'
+    +     '<span style="font-weight:900; color:#92400e; font-size:1.05rem;">고객 총 결제액 (특판)</span>'
+    +     '<span style="color:#92400e; font-size:1.35rem; font-weight:900;">' + fmt(customerTotal) + '원</span>'
+    +   '</div>'
+    + '</div>'
+    
+    // 수수료 분리 표시
+    + '<div class="sp-result-row" style="margin-top:12px"><span class="sr-label">제품 수수료 (부가세 제외액의 ' + Math.round(feeRate * 100) + '%)</span><span class="sr-val" style="color:#d97706">' + fmt(prodFee) + '원</span></div>'
+    + (maintAmt > 0 ? '<div class="sp-result-row"><span class="sr-label">AS 수수료 (부가세 제외액의 10%)</span><span class="sr-val" style="color:#059669">' + fmt(maintFee) + '원</span></div>' : '')
+    
+    // 수수료 합산
+    + '<div class="sp-result-row" style="border-top:2px solid #e2e8f0;margin-top:6px;padding-top:10px">'
+    + '<span class="sr-label" style="font-weight:800">총 특판 수수료</span>'
+    + '<span class="sr-val" style="color:#2563eb;font-size:1.25rem;font-weight:800">' + fmt(totalFee) + '원</span></div>'
+    + '</div>';
+
+  window['_sp_' + ci].specialTotal = totalFee;
+  if (typeof renderCompare === 'function') renderCompare(ci, totalFee);
+}
+
+function renderCompare(ci, specialTotal) {
+  var el = document.getElementById('compare_box_' + ci);
+  if (!el) return;
+
+  // 현재 선택된 렌탈 수수료
+  var rentalFeeEl = document.getElementById('cc_' + ci);
+  if (!rentalFeeEl) { el.innerHTML = ''; return; }
+  var rentalText = rentalFeeEl.textContent.replace(/[^0-9]/g, '');
+  var rentalFee  = parseInt(rentalText) || 0;
+  if (!rentalFee) { el.innerHTML = ''; return; }
+
+  var diff    = rentalFee - specialTotal;
+  var diffAbs = Math.abs(diff);
+  var diffHtml, diffClass;
+  if (diff > 500) {
+    diffHtml  = '렌탈이 ' + fmt(diffAbs) + '원 유리';
+    diffClass = 'diff-rental';
+  } else if (diff < -500) {
+    diffHtml  = '특판이 ' + fmt(diffAbs) + '원 유리';
+    diffClass = 'diff-special';
+  } else {
+    diffHtml  = '렌탈 ≈ 특판 (거의 동일)';
+    diffClass = 'diff-same';
+  }
+
+  el.innerHTML = '<div class="compare-box">'
+    + '<div class="cb-title">렌탈 vs 특판 수수료 비교</div>'
+    + '<div class="compare-grid">'
+    + '<div class="compare-cell"><div class="cc-label">렌탈 수수료</div><div class="cc-val" style="color:#1e3a8a">' + fmt(rentalFee) + '</div></div>'
+    + '<div class="compare-cell"><div class="cc-label">특판 수수료</div><div class="cc-val" style="color:#92400e">' + fmt(specialTotal) + '</div></div>'
+    + '</div>'
+    + '<div class="compare-diff ' + diffClass + '">' + diffHtml + '</div>'
+    + '</div>';
+}
+
+function toggleCompare(ci) {
+  var state = window['_sp_' + ci];
+  if (!state || state.specialTotal === undefined) return;
+  renderCompare(ci, state.specialTotal);
+}
+/* ── AI 챗봇 ── */
+var _chatHistory = [];
+var _chatBusy = false;
+var _chatGreeted = false;
+ 
+function openChatbot(){
+  if(!_chatGreeted){ _chatGreeting(); _chatGreeted = true; }
+  document.getElementById('chatPanel').classList.add('open');
+  document.getElementById('chatOverlay').classList.add('show');
+  setTimeout(function(){
+    var ci = document.getElementById('chatInput');
+    if(ci) ci.focus();
+  }, 320);
+}
+ 
+function closeChatbot(){
+  document.getElementById('chatPanel').classList.remove('open');
+  document.getElementById('chatOverlay').classList.remove('show');
+}
+ 
+function _chatGreeting(){
+  var name = (currentUser && currentUser.name) ? currentUser.name + '님' : '플래너님';
+  var greet = name + ', 안녕하세요! 👋\n청호나이스 영업 자료를 학습한 AI 비서예요.\n\n📌 <strong>이런 질문을 해보세요</strong>';
+  _appendBotMsg(greet);
+ 
+  var suggest =
+    '<div class="chat-suggest">'+
+      '<button class="chat-suggest-btn" onclick="_suggestClick(this)">롯데카드 이번달 제휴카드 혜택</button>'+
+      '<button class="chat-suggest-btn" onclick="_suggestClick(this)">뉴 러블리트리 이번달 프로모션</button>'+
+      '<button class="chat-suggest-btn" onclick="_suggestClick(this)">서밋 공기청정기 사양 알려줘</button>'+
+      '<button class="chat-suggest-btn" onclick="_suggestClick(this)">이번달 비데30회차 이상고객 뽑아줘</button>'+
+    '</div>';
+  var msgs = document.getElementById('chatMessages');
+  var d = document.createElement('div');
+  d.className = 'chat-msg chat-msg-bot';
+  d.style.background = 'transparent';
+  d.style.border = 'none';
+  d.style.padding = '0 4px';
+  d.style.boxShadow = 'none';
+  d.innerHTML = suggest;
+  msgs.appendChild(d);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+ 
+function _suggestClick(btn){
+  document.getElementById('chatInput').value = btn.textContent;
+  sendChat();
+}
+ 
+function sendChat(){
+  if(_chatBusy) return;
+  var input = document.getElementById('chatInput');
+  var q = input.value.trim();
+  if(!q) return;
+ 
+  _appendUserMsg(q);
+  input.value = '';
+  input.style.height = 'auto';
+ 
+  // 로딩 점 3개
+  var msgs = document.getElementById('chatMessages');
+  var loadId = 'chatLoad_' + Date.now();
+  var loadEl = document.createElement('div');
+  loadEl.className = 'chat-loading';
+  loadEl.id = loadId;
+  loadEl.innerHTML = '<span></span><span></span><span></span>';
+  msgs.appendChild(loadEl);
+  msgs.scrollTop = msgs.scrollHeight;
+ 
+  _chatBusy = true;
+  document.getElementById('chatSend').disabled = true;
+ 
+  google.script.run
+    .withSuccessHandler(function(res){
+      var el = document.getElementById(loadId);
+      if(el) el.remove();
+      _chatBusy = false;
+      document.getElementById('chatSend').disabled = false;
+ 
+      if(!res){
+        _appendBotMsg('⚠️ 응답이 없습니다. 잠시 후 다시 시도해주세요.');
+        return;
+      }
+      if(res.error){
+        _appendBotMsg('⚠️ ' + res.error);
+        return;
+      }
+      _appendBotMsg(res.answer);
+      _chatHistory.push({ role: 'user',  text: q });
+      _chatHistory.push({ role: 'model', text: res.answer });
+      if(_chatHistory.length > 12) _chatHistory = _chatHistory.slice(-12);
+    })
+    .withFailureHandler(function(e){
+      var el = document.getElementById(loadId);
+      if(el) el.remove();
+      _chatBusy = false;
+      document.getElementById('chatSend').disabled = false;
+      _appendBotMsg('⚠️ 오류: ' + e.message);
+    })
+    .askChatbot(q, _chatHistory, Object.assign({}, currentUser, {dk:getDeviceKey()}));
+}
+ 
+function _appendUserMsg(text){
+  var msgs = document.getElementById('chatMessages');
+  var d = document.createElement('div');
+  d.className = 'chat-msg chat-msg-user';
+  d.textContent = text;
+  msgs.appendChild(d);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+ 
+function _appendBotMsg(text){
+  var msgs = document.getElementById('chatMessages');
+  var d = document.createElement('div');
+  d.className = 'chat-msg chat-msg-bot';
+  d.innerHTML = _chatMdToHtml(text);
+  msgs.appendChild(d);
+      if (String(text || '').indexOf('[[PROSPECT]]') !== -1) {
+        d.innerHTML = d.innerHTML.split('[[PROSPECT]]').join('');
+        var _pb = document.createElement('div');
+        _pb.className = 'chat-suggest';
+        _pb.innerHTML = '<button class="chat-suggest-btn" onclick="openShopOrProspect()">\u{1F465} \uAC00\uB9DD\uACE0\uAC1D \uC5F4\uAE30</button>';
+        msgs.appendChild(_pb);
+      }
+  msgs.scrollTop = msgs.scrollHeight;
+}
+ 
+// 간단 마크다운 (굵게/이탤릭/코드/표/리스트/줄바꿈)
+function _chatMdToHtml(text){
+  var src = String(text);
+  // 우선 HTML 이스케이프 (단, <strong> 같이 이미 들어온 태그는 그대로 두기)
+  // → 그리팅에서 <strong> 사용하므로 살짝 관대하게 처리
+  var s = src
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;');
+  // ▶ 출처 강조
+  s = s.replace(/(\*?출처\*?\s*[::])([^\n]*)/g, '<div class="chat-msg-source">📎 출처:$2</div>');
+  // ▶ 마크다운 표
+  s = _renderMdTable(s);
+  // ▶ ** bold **
+  s = s.replace(/^### (.+)$/gm, '<h4 style="color:#7c3aed;margin:8px 0 4px">$1</h4>');
+s = s.replace(/^## (.+)$/gm, '<h3 style="color:#1e3a8a;margin:8px 0 4px">$1</h3>');
+s = s.replace(/\*\*([^*\n]+)\*\*/g, '<strong>$1</strong>');
+  // ▶ * italic *
+  s = s.replace(/(^|\s)\*([^*\n]+)\*/g, '$1<em>$2</em>');
+  // ▶ `code`
+  s = s.replace(/`([^`\n]+)`/g, '<code>$1</code>');
+  // ▶ 글머리 - / *
+  s = s.replace(/^(?:[-*•]\s+)(.+)$/gm, '<li>$1</li>');
+  s = s.replace(/(<li>.*?<\/li>(\s*<li>.*?<\/li>)+)/gs, '<ul>$1</ul>');
+  // ▶ &lt;strong&gt; 같이 이스케이프된 인사말 strong 복원
+  s = s.replace(/&lt;strong&gt;([\s\S]*?)&lt;\/strong&gt;/g, '<strong>$1</strong>');
+  s = s.replace(/&lt;br&gt;/g, '<br>');
+  // ▶ 줄바꿈 → <br>
+  s = s.replace(/\n/g, '<br>');
+  return s;
+}
+ 
+// 마크다운 표를 HTML 표로
+function _renderMdTable(text){
+  var lines = text.split('\n');
+  var out = [];
+  var i = 0;
+  while(i < lines.length){
+    var l1 = lines[i];
+    var l2 = lines[i+1] || '';
+    if(l1.indexOf('|') !== -1 && /^\s*\|?\s*-{3,}/.test(l2)){
+      // 표 시작
+      var headers = l1.split('|').map(function(s){return s.trim();}).filter(Boolean);
+      var rows = [];
+      i += 2;
+      while(i < lines.length && lines[i].indexOf('|') !== -1){
+        var cells = lines[i].split('|').map(function(s){return s.trim();}).filter(Boolean);
+        if(cells.length) rows.push(cells);
+        i++;
+      }
+      var html = '<table><thead><tr>';
+      headers.forEach(function(h){ html += '<th>' + h + '</th>'; });
+      html += '</tr></thead><tbody>';
+      rows.forEach(function(r){
+        html += '<tr>';
+        r.forEach(function(c){ html += '<td>' + c + '</td>'; });
+        html += '</tr>';
+      });
+      html += '</tbody></table>';
+      out.push(html);
+      continue;
+    }
+    out.push(l1);
+    i++;
+  }
+  return out.join('\n');
+}
+ 
+// Enter 전송 · Shift+Enter 줄바꿈 · 자동 높이
+document.addEventListener('DOMContentLoaded', function(){
+  var ci = document.getElementById('chatInput');
+  if(!ci) return;
+  ci.addEventListener('keydown', function(e){
+    if(e.key === 'Enter' && !e.shiftKey){
+      e.preventDefault();
+      sendChat();
+    }
+  });
+  ci.addEventListener('input', function(){
+    ci.style.height = 'auto';
+    ci.style.height = Math.min(ci.scrollHeight, 120) + 'px';
+  });
+});
+</script>
+<script>
+(function(){
+  function logUse(t){
+    if(!currentUser) return;
+    try{ google.script.run.withFailureHandler(function(){}).logUsage(_cred(), t); }catch(e){}
+  }
+
+  var _enterApp = enterApp;
+  enterApp = function(u){ _enterApp(u); logUse('open'); };
+
+  var _doSearch = doSearch;
+  doSearch = function(){
+    var k = document.getElementById('kw');
+    if(k && k.value.trim()) logUse('search');
+    _doSearch();
+  };
+
+  var _openShopApp = openShopApp;
+  openShopApp = function(){ logUse('shop'); _openShopApp(); };
+})();
+</script>
+<script>if('serviceWorker' in navigator){addEventListener('load',function(){navigator.serviceWorker.register('sw.js');});}</script>
+</body>
+</html>
