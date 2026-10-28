@@ -2,6 +2,13 @@
 <html>
 <head>
   <meta charset="UTF-8">
+  <script>
+  // 카톡 등 앱 안 브라우저에서 열리면 크롬으로 다시 열기 (앱 안에서는 설치가 안 됨)
+  (function(){var ua=navigator.userAgent;
+    if(/Android/i.test(ua)&&/KAKAOTALK|NAVER\(inapp|Line\/|Instagram|FBAN|FBAV|BAND\//i.test(ua)){
+      location.href='intent://'+location.host+location.pathname+location.search+'#Intent;scheme=https;package=com.android.chrome;end';
+    }})();
+  </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>렌탈수수료 시스템</title>
   <link rel="manifest" href="manifest.json">
