@@ -5,7 +5,9 @@
   <script>
   // 카톡 등 앱 안 브라우저에서 열리면 크롬으로 다시 열기 (앱 안에서는 설치가 안 됨)
   (function(){var ua=navigator.userAgent;
-    if(/Android/i.test(ua)&&/KAKAOTALK|NAVER\(inapp|Line\/|Instagram|FBAN|FBAV|BAND\//i.test(ua)){
+    var url=location.href;
+    if(/KAKAOTALK/i.test(ua)){ location.href='kakaotalk://web/openExternal?url='+encodeURIComponent(url); }
+    else if(/Android/i.test(ua)&&/NAVER\(inapp|Line\/|Instagram|FBAN|FBAV|BAND\//i.test(ua)){
       location.href='intent://'+location.host+location.pathname+location.search+'#Intent;scheme=https;package=com.android.chrome;end';
     }})();
   </script>
