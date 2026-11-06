@@ -406,6 +406,19 @@ h1{text-align:center;font-size:1.4rem;color:#1e3a8a;margin-bottom:18px}
   .promo-ctrl select{font-size:.9rem}
 }
 .hub-btn-card{width:100%;padding:20px 16px;background:#fff;color:#334155;border:2.5px solid #475569;border-radius:16px;font-family:inherit;cursor:pointer;display:block;-webkit-tap-highlight-color:transparent;box-shadow:0 3px 10px rgba(71,85,105,.15);transition:transform .15s;margin-bottom:12px;text-align:center;}
+.fly-pickers{display:flex;gap:8px;margin-bottom:10px}
+.fly-pick{flex:1;min-width:0;padding:6px;border-radius:12px;border:2px solid #e2e8f0;background:#fff;cursor:pointer;font-family:inherit;text-align:center}
+.fly-pick img{width:100%;aspect-ratio:3/2;object-fit:cover;object-position:top;border-radius:8px;display:block;margin-bottom:4px;background:#f1f5f9}
+.fly-pick span{font-size:.8rem;font-weight:700;color:#334155;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fly-pick.on{border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.15)}
+.fly-row{display:flex;gap:8px;margin-bottom:8px}
+.fly-row input{flex:1;min-width:0;font-family:inherit;font-size:1rem;padding:10px 12px;border:1px solid #cbd5e1;border-radius:10px}
+.fly-roles{display:flex;gap:8px;margin-bottom:10px}
+.fly-chip{flex:1;font-family:inherit;font-weight:700;font-size:.95rem;padding:9px 6px;border-radius:10px;border:1px solid #cbd5e1;background:#fff;color:#334155;cursor:pointer}
+.fly-chip.on{background:#2563eb;border-color:#2563eb;color:#fff}
+.fly-sel{flex:0 0 112px;font-family:inherit;font-size:1rem;font-weight:700;padding:10px 8px;border:1px solid #cbd5e1;border-radius:10px;background:#fff;color:#334155}
+.fly-canvas{width:100%;height:auto;border:1px solid #e2e8f0;border-radius:10px;display:block}
+.fly-msg{min-height:20px;margin-top:8px;font-size:.85rem;color:#64748b;text-align:center}
 .hub-btn-card:active{transform:scale(.98)}
 .hub-btn-card .hub-btn-desc{color:#64748b;opacity:1}
 #exitToast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:rgba(30,41,59,.92);color:#fff;padding:12px 20px;border-radius:24px;font-size:.95rem;font-weight:600;z-index:3000;display:none;white-space:nowrap}
@@ -471,6 +484,12 @@ h1{text-align:center;font-size:1.4rem;color:#1e3a8a;margin-bottom:18px}
         <div class="hub-btn-icon">📇</div>
         <div class="hub-btn-label">내 명함</div>
         <div class="hub-btn-desc">고객에게 보낼 내 연락처 카드</div>
+      </button>
+
+      <button class="hub-btn-card" onclick="openFlyerApp()">
+        <div class="hub-btn-icon">🖼️</div>
+        <div class="hub-btn-label">내 전단지</div>
+        <div class="hub-btn-desc">내 연락처가 들어간 전단지 만들기</div>
       </button>
 
       <button class="hub-btn-search" onclick="showPage('search')">
@@ -671,6 +690,28 @@ h1{text-align:center;font-size:1.4rem;color:#1e3a8a;margin-bottom:18px}
 
 <div id="exitToast">한 번 더 누르면 종료돼요</div>
 
+<div class="ov" id="flyerOv" onclick="closeFlyerModal(event)">
+  <div class="modal" style="max-width:440px;padding:14px;max-height:94vh;overflow-y:auto">
+    <h2 style="margin:0 0 10px">내 전단지</h2>
+    <div class="fly-pickers" id="flyPickers"></div>
+    <div class="fly-row">
+      <input id="flyName" type="text" maxlength="12" placeholder="이름" oninput="flyOnInput()">
+      <select id="flyRoleSel" class="fly-sel" onchange="flySetRole(this.value)">
+        <option value="플래너">플래너</option>
+        <option value="팀장">팀장</option>
+      </select>
+    </div>
+    <div class="fly-row">
+      <input id="flyPhone" type="tel" inputmode="numeric" maxlength="13" placeholder="010-0000-0000" oninput="flyOnPhone()">
+    </div>
+    <canvas id="flyCanvas" class="fly-canvas"></canvas>
+    <img id="flyResult" class="fly-canvas" style="display:none" alt="완성된 전단지">
+    <div class="fly-msg" id="flyMsg"></div>
+    <div class="mbtns" style="margin-top:10px"><button class="mbtn-send" onclick="flySave()">저장하기</button></div>
+    <div class="mbtns"><button class="mbtn-cancel" onclick="closeFlyerModal()">닫기</button></div>
+  </div>
+</div>
+
 <div class="ov" id="cardOv" onclick="closeCardModal(event)">
   <div class="modal" style="max-width:420px;padding:14px;max-height:94vh;overflow-y:auto">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
@@ -766,6 +807,184 @@ function openShopApp() {
 }
 
 var _cardUrl = '';
+
+// ===== 내 전단지 =====
+var FLY_BASE = 'https://banhyunky.github.io/chungho/flyers/';
+var FLY_ORG = '청호나이스 대전중구지사';
+var FLY_W = 794, FLY_FOOT = 128;
+var FLY_LIST = [
+  { id:'vip', label:'11월 VIP 50% 할인', title:'VIP할인', file:'2026-11_vip-50off.jpg', srcW:794, srcH:1020, cropH:982, scale:2,
+    f:{ bg:'#f3f3f3', pill:'#111111', pillText:'#ffffff', name:'#111111', phone:'#1fb5aa', ph:'#b5b8bd', phPhone:'#b5dedb', org:'#6b6f75' } },
+  { id:'coupon', label:'시크릿쿠폰 (만기고객)', title:'시크릿쿠폰', file:'2026-11_secret-coupon.jpg', srcW:1063, srcH:1383, cropH:1383, scale:1.5,
+    f:{ bg:'#4a2519', pill:'#f2efe8', pillText:'#4a2519', name:'#f7efe4', phone:'#f6cf7d', ph:'#9a7f72', phPhone:'#a58a52', org:'#d9c3b0' } }
+];
+var flyCur = 0, flyRole = '플래너', flyImgs = {};
+
+function flyEl(id){ return document.getElementById(id); }
+function flyFmt(v){
+  var d = String(v || '').replace(/\D/g, '').slice(0, 11);
+  var a = d.indexOf('02') === 0 ? 2 : 3;
+  if (d.length <= a) return d;
+  var rest = d.length - a;
+  var midLen = rest > 7 ? 4 : (rest > 4 ? 3 : rest);
+  var mid = d.slice(a, a + midLen), last = d.slice(a + midLen);
+  return d.slice(0, a) + '-' + mid + (last ? '-' + last : '');
+}
+function flyRR(c, x, y, w, h, r){
+  c.beginPath(); c.moveTo(x + r, y);
+  c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r);
+  c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath();
+}
+function flyFit(c, text, weight, maxS, minS, maxW){
+  var s = maxS; c.font = weight + ' ' + s + 'px sans-serif';
+  while (c.measureText(text).width > maxW && s > minS){ s -= 1; c.font = weight + ' ' + s + 'px sans-serif'; }
+  return s;
+}
+function flyPrefs(){
+  try { return JSON.parse(localStorage.getItem('flyerPrefs') || 'null'); } catch(e){ return null; }
+}
+function flyPersist(){
+  try {
+    localStorage.setItem('flyerPrefs', JSON.stringify({ r:flyRole, f:flyCur, n:flyEl('flyName').value, p:flyEl('flyPhone').value, u:(currentUser ? currentUser.name : '') }));
+  } catch(e){}
+}
+function flyRoleUI(){
+  var s = flyEl('flyRoleSel');
+  if (s) s.value = flyRole;
+}
+function flyPickUI(){
+  var ps = document.querySelectorAll('#flyPickers .fly-pick');
+  for (var i = 0; i < ps.length; i++) ps[i].classList.toggle('on', i === flyCur);
+}
+function flyBuildPickers(){
+  var box = flyEl('flyPickers'); box.innerHTML = '';
+  FLY_LIST.forEach(function(fl, i){
+    var b = document.createElement('button');
+    b.type = 'button'; b.className = 'fly-pick';
+    var im = document.createElement('img'); im.src = FLY_BASE + fl.file; im.alt = '';
+    var sp = document.createElement('span'); sp.textContent = fl.label;
+    b.appendChild(im); b.appendChild(sp);
+    b.onclick = function(){ flyCur = i; flyPickUI(); flyPersist(); flyShowCanvas(); flyLoadImg(i, flyDraw); };
+    box.appendChild(b);
+  });
+  flyPickUI();
+}
+function flyShowCanvas(){
+  flyEl('flyResult').style.display = 'none';
+  flyEl('flyCanvas').style.display = 'block';
+  flyEl('flyMsg').textContent = '';
+}
+function flyLoadImg(i, cb){
+  var cached = flyImgs[i];
+  if (cached && cached.complete && cached.naturalWidth){ cb(); return; }
+  var im = new Image();
+  im.crossOrigin = 'anonymous';
+  im.onload = function(){ flyImgs[i] = im; cb(); };
+  im.onerror = function(){ flyEl('flyMsg').textContent = '전단지 이미지를 불러오지 못했습니다. 잠시 후 다시 열어 주세요.'; };
+  im.src = FLY_BASE + FLY_LIST[i].file;
+}
+function flyDraw(){
+  var fl = FLY_LIST[flyCur], img = flyImgs[flyCur];
+  if (!img) return;
+  var cv = flyEl('flyCanvas'), c = cv.getContext('2d');
+  var W = FLY_W, S = fl.scale, F = fl.f;
+  var drawH = fl.cropH * W / fl.srcW;
+  var top = Math.round(drawH), H = top + FLY_FOOT;
+  var wantW = Math.round(W * S), wantH = Math.round(H * S);
+  if (cv.width !== wantW || cv.height !== wantH){ cv.width = wantW; cv.height = wantH; }
+  c.setTransform(S, 0, 0, S, 0, 0);
+  c.fillStyle = F.bg; c.fillRect(0, 0, W, H);
+  c.drawImage(img, 0, 0, fl.srcW, fl.cropH, 0, 0, W, drawH);
+
+  var name = flyEl('flyName').value.trim(), phone = flyEl('flyPhone').value.trim();
+  var midY = top + 52;
+  c.fillStyle = F.pill; flyRR(c, 30, midY - 21, 124, 42, 21); c.fill();
+  c.fillStyle = F.pillText; c.textAlign = 'center'; c.textBaseline = 'middle';
+  c.font = '700 20px sans-serif';
+  c.fillText('담당 ' + flyRole, 92, midY + 1);
+
+  c.textAlign = 'left';
+  var nameText = name || '이름';
+  flyFit(c, nameText, '900', 40, 24, 190);
+  c.fillStyle = name ? F.name : F.ph;
+  c.fillText(nameText, 172, midY + 1);
+  var nameW = c.measureText(nameText).width;
+
+  c.textAlign = 'right';
+  var phoneText = phone || '010-0000-0000';
+  flyFit(c, phoneText, '900', 46, 28, 764 - (172 + nameW + 24));
+  c.fillStyle = phone ? F.phone : F.phPhone;
+  c.fillText(phoneText, 764, midY + 2);
+
+  c.textAlign = 'center'; c.fillStyle = F.org; c.font = '400 17px sans-serif';
+  c.fillText(FLY_ORG, W / 2, top + 100);
+}
+function flyOnInput(){ flyPersist(); flyShowCanvas(); flyDraw(); }
+function flyOnPhone(){ var p = flyEl('flyPhone'); p.value = flyFmt(p.value); flyOnInput(); }
+function flySetRole(r){ flyRole = r; flyRoleUI(); flyPersist(); flyShowCanvas(); flyDraw(); }
+function flyResetInfo(){
+  if (!currentUser) return;
+  flyEl('flyName').value = currentUser.name || '';
+  flyEl('flyPhone').value = flyFmt(currentUser.phone || '');
+  flyPersist(); flyShowCanvas(); flyDraw();
+  flyEl('flyMsg').textContent = '로그인 정보로 되돌렸습니다.';
+}
+function openFlyerApp(){
+  if (!currentUser){ alert('로그인이 필요합니다'); return; }
+  var s = flyPrefs();
+  var nm = currentUser.name || '', ph = flyFmt(currentUser.phone || '');
+  if (s){
+    if (s.r === '플래너' || s.r === '팀장') flyRole = s.r;
+    if (typeof s.f === 'number' && FLY_LIST[s.f]) flyCur = s.f;
+    if (s.u === nm && typeof s.n === 'string' && typeof s.p === 'string'){ nm = s.n; ph = s.p; }
+  }
+  flyEl('flyName').value = nm;
+  flyEl('flyPhone').value = ph;
+  flyBuildPickers(); flyRoleUI(); flyShowCanvas();
+  flyEl('flyerOv').classList.add('show');
+  flyLoadImg(flyCur, flyDraw);
+}
+function closeFlyerModal(e){
+  if (e && e.target && e.target.id !== 'flyerOv') return;
+  flyEl('flyerOv').classList.remove('show');
+}
+function flyShowResult(msg){
+  var cv = flyEl('flyCanvas'), im = flyEl('flyResult');
+  try {
+    im.src = cv.toDataURL('image/png');
+    im.style.display = 'block'; cv.style.display = 'none';
+    flyEl('flyMsg').textContent = msg;
+  } catch(e){
+    flyEl('flyMsg').textContent = '이미지를 만들지 못했습니다. 잠시 후 다시 시도해 주세요.';
+  }
+}
+function flySave(){
+  var name = flyEl('flyName').value.trim(), phone = flyEl('flyPhone').value.trim();
+  if (!name || !phone){ flyEl('flyMsg').textContent = '이름과 전화번호를 입력해 주세요.'; return; }
+  var cv = flyEl('flyCanvas');
+  var fname = '청호_' + FLY_LIST[flyCur].title + '_' + name + '.png';
+  try {
+    cv.toBlob(function(blob){
+      if (!blob){ flyShowResult('위 이미지를 길게 눌러 저장하세요.'); return; }
+      var file = null;
+      try { file = new File([blob], fname, { type:'image/png' }); } catch(e){}
+      if (file && navigator.canShare && navigator.canShare({ files:[file] })){
+        navigator.share({ files:[file] }).catch(function(){});
+        flyShowResult('공유 창에서 카카오톡 등을 고르세요. 안 뜨면 위 이미지를 길게 눌러 저장하세요.');
+        return;
+      }
+      try {
+        var a = document.createElement('a');
+        a.href = URL.createObjectURL(blob); a.download = fname;
+        document.body.appendChild(a); a.click();
+        setTimeout(function(){ document.body.removeChild(a); }, 500);
+      } catch(e){}
+      flyShowResult('저장이 안 되면 위 이미지를 길게 눌러 저장하세요.');
+    }, 'image/png');
+  } catch(e){
+    flyEl('flyMsg').textContent = '이미지를 만들지 못했습니다. 잠시 후 다시 시도해 주세요.';
+  }
+}
 
 function openCardApp() {
   if (!currentUser) { alert('로그인이 필요합니다'); return; }
