@@ -445,12 +445,13 @@ h1{text-align:center;font-size:1.4rem;color:#1e3a8a;margin-bottom:18px}
     </div>
     <div id="formJoin" style="display:none">
       <div class="form-group"><label>소속 지사</label>
-        <select id="joinDept">
+        <select id="joinDept" onchange="_joinDeptChange()">
           <option value="">지사 선택</option>
           <option value="중구지사">중구지사</option>
           <option value="유성지사">유성지사</option>
-          <option value="정읍지사">정읍지사</option>
+          <option value="__etc">기타 (직접 입력)</option>
         </select>
+        <input type="text" id="joinDeptEtc" placeholder="지사 이름 입력 (예: 서구지사)" style="display:none;margin-top:8px">
       </div>
       <div class="form-group"><label>사번</label><input type="text" id="joinEmpNo" placeholder="예) 50012345" autocomplete="off" autocapitalize="characters"></div>
       <div class="form-group"><label>이름</label><input type="text" id="joinName" placeholder="홍길동"></div>
@@ -810,7 +811,12 @@ var _cardUrl = '';
 
 // ===== 내 전단지 =====
 var FLY_BASE = 'https://banhyunky.github.io/chungho/flyers/';
-var FLY_ORG = '청호나이스 대전중구지사';
+// 전단지 하단 소속: 로그인한 사람의 지사 (대전 지사는 '대전' 붙임)
+function flyOrg(){
+  var b = currentUser ? (currentUser.branch || currentUser.dept || '') : '';
+  var m = { '중구지사':'대전중구지사', '유성지사':'대전유성지사' };
+  return '청호나이스 ' + (m[b] || b || '대전중구지사');
+}
 var FLY_W = 794, FLY_FOOT = 128;
 var FLY_LIST = [
   { id:'vip', label:'11월 VIP 50% 할인', title:'VIP할인', file:'2026-11_vip-50off.jpg', srcW:794, srcH:1020, cropH:982, scale:2,
@@ -917,7 +923,7 @@ function flyDraw(){
   c.fillText(phoneText, 764, midY + 2);
 
   c.textAlign = 'center'; c.fillStyle = F.org; c.font = '400 17px sans-serif';
-  c.fillText(FLY_ORG, W / 2, top + 100);
+  c.fillText(flyOrg(), W / 2, top + 100);
 }
 function flyOnInput(){ flyPersist(); flyShowCanvas(); flyDraw(); }
 function flyOnPhone(){ var p = flyEl('flyPhone'); p.value = flyFmt(p.value); flyOnInput(); }
@@ -1046,6 +1052,30 @@ function closeCardQr(e) {
   if (!e || e.target.id === 'cardQrOv') document.getElementById('cardQrOv').classList.remove('show');
 }
 
+// ── 지사 목록 (2026-11-10) ── 서버 getBranchInfo 한 곳에서 받음
+// 가입 드롭다운 = 승인된 사람들의 지사 + '기타 (직접 입력)' / 가망고객·수수료 추이 버튼 = 자료 있는 지사만
+var _branchInfo=null;
+function _applyBranchInfo(res){
+  if(!res||!res.branches)return;
+  _branchInfo=res;
+  var sel=document.getElementById('joinDept'); if(sel){
+    var cur=sel.value, h='<option value="">지사 선택</option>';
+    res.branches.forEach(function(b){ h+='<option value="'+escHtml(b)+'">'+escHtml(b)+'</option>'; });
+    h+='<option value="__etc">기타 (직접 입력)</option>';
+    sel.innerHTML=h; if(cur)sel.value=cur; _joinDeptChange();
+  }
+  if(currentUser)_applyDataButtons(currentUser);
+}
+function _joinDeptChange(){
+  var sel=document.getElementById('joinDept'), etc=document.getElementById('joinDeptEtc');
+  if(sel&&etc)etc.style.display=sel.value==='__etc'?'block':'none';
+}
+function _applyDataButtons(u){
+  if(!_branchInfo||!_branchInfo.dataBranches)return;
+  var ok=_branchInfo.dataBranches.indexOf((u&&(u.branch||u.dept))||'')>-1;
+  ['.hub-btn-prospect','.hub-btn-trend'].forEach(function(q){var b=document.querySelector(q);if(b)b.style.display=ok?'':'none';});
+}
+
 function openShopOrProspect() { openProspectApp(); }
 
 function openProspectApp() {
@@ -1085,7 +1115,7 @@ var API_URL='https://script.google.com/macros/s/AKfycbzlo001BPiVHJIUFNqI3CsPZZIV
   function R(s,f){this._s=s;this._f=f;}
   R.prototype.withSuccessHandler=function(fn){return new R(fn,this._f);};
   R.prototype.withFailureHandler=function(fn){return new R(this._s,fn);};
-  ['login','checkSession','requestJoin','getAllImageUrls','getMyShopId','searchRental','searchPromo',
+  ['login','checkSession','getBranchInfo','requestJoin','getAllImageUrls','getMyShopId','searchRental','searchPromo',
    'saveFeedback','getCardPromoData','getPromoPageData','getSpecialProducts','logUsage','askChatbot'
   ].forEach(function(fn){
     R.prototype[fn]=function(){
@@ -1125,6 +1155,7 @@ function hideLoading(){document.getElementById('loadingOverlay').classList.remov
 
 document.addEventListener('DOMContentLoaded',function(){
   google.script.run.withSuccessHandler(function(res){if(res)imageUrlCache=res;}).getAllImageUrls();
+  google.script.run.withSuccessHandler(_applyBranchInfo).withFailureHandler(function(){}).getBranchInfo();
   var saved=null;
   try{saved=JSON.parse(localStorage.getItem('rentalUser')||'null');}catch(e){}
   if(saved){currentUser=saved;enterApp(saved);}
@@ -1165,7 +1196,7 @@ function enterApp(u){
   }
   document.getElementById('mainFabBtn').style.display = 'flex';
   document.getElementById('userLabel').textContent=u.name+' · '+(u.branch||u.dept||'');
-  var _noTrend=['정읍지사'];var _tb=document.querySelector('.hub-btn-trend');if(_tb)_tb.style.display=_noTrend.indexOf(u.branch||u.dept||'')>-1?'none':'';
+  _applyDataButtons(u);
   showPage('hub');
   _startSessionWatch();
 }
@@ -1197,6 +1228,11 @@ function doLogin(pin){
 
 function doJoin(){
   var dept=document.getElementById('joinDept').value.trim();
+  if(dept==='__etc'){
+    dept=document.getElementById('joinDeptEtc').value.replace(/\s/g,'');
+    if(!dept){showMsg('joinMsg','소속 지사 이름을 입력해주세요','error');return;}
+    if(!/지사$/.test(dept))dept+='지사';
+  }
   var empNo=document.getElementById('joinEmpNo').value.trim();
   var name=document.getElementById('joinName').value.trim();
   var phone=document.getElementById('joinPhone').value.trim();
