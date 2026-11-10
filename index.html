@@ -811,11 +811,11 @@ var _cardUrl = '';
 
 // ===== 내 전단지 =====
 var FLY_BASE = 'https://banhyunky.github.io/chungho/flyers/';
-// 전단지 하단 소속: 로그인한 사람의 지사 (대전 지사는 '대전' 붙임)
+// 전단지 하단 소속: 로그인한 사람의 지사 앞에 '대전'을 붙임 (이미 '대전'으로 시작하면 그대로) — 명함 데이터 branchLabel_()와 같은 규칙
 function flyOrg(){
   var b = currentUser ? (currentUser.branch || currentUser.dept || '') : '';
-  var m = { '중구지사':'대전중구지사', '유성지사':'대전유성지사' };
-  return '청호나이스 ' + (m[b] || b || '대전중구지사');
+  if (!b) b = '중구지사';
+  return '청호나이스 ' + (b.indexOf('대전') === 0 ? b : '대전' + b);
 }
 var FLY_W = 794, FLY_FOOT = 128;
 var FLY_LIST = [
