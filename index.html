@@ -20,7 +20,7 @@
   <style>
 *{box-sizing:border-box;margin:0;padding:0;touch-action:manipulation}
 button{touch-action:manipulation}
-body{font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif;background:#eef2fb;}
+body{font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif;background:#F2F4F6;}
 .login-wrap{display:flex;align-items:center;justify-content:center;min-height:100svh;padding:16px}
 .login-box{background:#fff;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,.12);padding:28px 20px;width:100%;max-width:480px}
 .login-logo{text-align:center;margin-bottom:20px}
@@ -40,30 +40,50 @@ body{font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif;background:#ee
 .msg.success{background:#f0fdf4;color:#16a34a}
 .msg.info{background:#eff6ff;color:#2563eb}
 #app{display:none}
-.topbar{background:#1e3a8a;color:#fff;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:nowrap;gap:8px}
-.topbar .logo{font-size:1.1rem;font-weight:800;white-space:nowrap;flex-shrink:0}
-.topbar .user-info{font-size:.9rem;opacity:.85;display:flex;align-items:center;gap:8px;min-width:0;flex:1;justify-content:flex-end}
-#userLabel{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
-.topbar .logout-btn{background:rgba(255,255,255,.15);border:none;color:#fff;padding:8px 12px;border-radius:8px;font-size:.85rem;cursor:pointer;font-family:inherit;font-weight:600;white-space:nowrap;flex-shrink:0}
-#hubPage{padding:16px 12px}
-.hub-btn-search{width:100%;padding:20px 16px;background:linear-gradient(135deg,#1e3a8a,#2563eb);color:#fff;border:none;border-radius:16px;margin-bottom:12px;font-family:inherit;cursor:pointer;display:block;-webkit-tap-highlight-color:transparent;box-shadow:0 4px 14px rgba(37,99,235,.35);transition:transform .15s;text-align:center;}
-.hub-btn-search:active{transform:scale(.98)}
-.hub-btn-quote{width:100%;padding:20px 16px;background:#fff;color:#1e3a8a;border:2.5px solid #2563eb;border-radius:16px;font-family:inherit;cursor:pointer;display:block;-webkit-tap-highlight-color:transparent;box-shadow:0 3px 10px rgba(37,99,235,.12);transition:transform .15s;margin-bottom:12px;text-align:center;}
-.hub-btn-quote:active{transform:scale(.98)}
-.hub-btn-shop{width:100%;padding:20px 16px;background:linear-gradient(135deg,#ea580c,#f97316);color:#fff;border:none;border-radius:16px;font-family:inherit;cursor:pointer;display:block;-webkit-tap-highlight-color:transparent;box-shadow:0 4px 14px rgba(249,115,22,.35);transition:transform .15s;margin-bottom:12px;text-align:center;}
-    .hub-btn-shop:active{transform:scale(.98)}
-    .hub-btn-prospect{width:100%;padding:20px 16px;background:#fff;color:#0e7490;border:2.5px solid #06b6d4;border-radius:16px;font-family:inherit;cursor:pointer;display:block;-webkit-tap-highlight-color:transparent;box-shadow:0 3px 10px rgba(6,182,212,.15);transition:transform .15s;margin-bottom:12px;text-align:center;}
-    .hub-btn-prospect:active{transform:scale(.98)}
-    .hub-btn-trend{width:100%;padding:20px 16px;background:#fff;color:#059669;border:2.5px solid #10b981;border-radius:16px;font-family:inherit;cursor:pointer;display:block;-webkit-tap-highlight-color:transparent;box-shadow:0 3px 10px rgba(16,185,129,.15);transition:transform .15s;margin-bottom:12px;text-align:center;text-decoration:none;}
-.hub-btn-trend:active{transform:scale(.98)}
-.hub-btn-trend .hub-btn-desc{color:#64748b;opacity:1}
-.hub-btn-promo{width:100%;padding:20px 16px;background:#fff;color:#7c3aed;border:2.5px solid #8b5cf6;border-radius:16px;font-family:inherit;cursor:pointer;display:block;-webkit-tap-highlight-color:transparent;box-shadow:0 3px 10px rgba(139,92,246,.15);transition:transform .15s;margin-bottom:12px;text-align:center;}
-.hub-btn-promo:active{transform:scale(.98)}
-.hub-btn-promo .hub-btn-desc{color:#64748b;opacity:1}
-.hub-btn-icon{font-size:2.2rem;margin-bottom:6px}
-.hub-btn-label{font-size:1.4rem;font-weight:800;margin-bottom:4px}
-.hub-btn-desc{font-size:.95rem;opacity:.8}
-.hub-btn-quote .hub-btn-desc{color:#64748b;opacity:1}
+/* ── 메인 화면 (플래너허브, 2026-11-17 토스풍 리디자인) ── */
+.topbar{background:#F2F4F6;color:#191F28;padding:16px 16px 8px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.topbar .tb-brand{min-width:0}
+.topbar .logo{font-size:1.35rem;font-weight:800;letter-spacing:-.4px;white-space:nowrap}
+#userLabel{display:block;margin-top:2px;font-size:.82rem;color:#6B7684;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tb-tools{display:flex;gap:6px;flex-shrink:0}
+.tb-btn{height:36px;padding:0 11px;border:0;border-radius:12px;background:#fff;box-shadow:0 2px 10px rgba(25,31,40,.05);display:flex;align-items:center;gap:5px;color:#6B7684;font-family:inherit;font-size:.82rem;font-weight:700;white-space:nowrap;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.tb-btn:active{transform:scale(.97)}
+.ph-i{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.tb-btn .ph-i{width:16px;height:16px}
+#fabBtn{display:none!important}
+#mainFabBtn{bottom:calc(24px + env(safe-area-inset-bottom,0px))!important}
+#hubPage{padding:4px 16px 28px}
+.ph{display:flex;flex-direction:column;gap:12px;max-width:520px;margin:0 auto}
+.ph button{font-family:inherit;color:inherit;border:0;background:none;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.ph button:active{transform:scale(.98)}
+.ph-card{background:#fff !important;border-radius:20px;box-shadow:0 2px 10px rgba(25,31,40,.05)}
+.ph-sec{margin:6px 4px -2px;font-size:.88rem;font-weight:700;color:#6B7684}
+.ph-dot{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;flex-shrink:0}
+.ph-dot.blue{background:#E8F3FF;color:#3182F6}
+.ph-dot.red{background:#FFEEEE;color:#F04452}
+.ph-dot.violet{background:#F1EDFE;color:#7A5AF8}
+.ph-dot.green{background:#E5F8EF;color:#03B26C}
+.ph-dot.amber{background:#FFF3E0;color:#FE9800}
+.ph-grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.ph-mini{display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px 6px 14px}
+.ph-mini b{font-size:.9rem;font-weight:700;color:#191F28}
+.ph-grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ph-big{display:flex;flex-direction:column;align-items:flex-start;gap:22px;padding:18px 16px;text-align:left;min-height:150px}
+.ph-big b{display:block;font-size:1.06rem;font-weight:800;color:#191F28;letter-spacing:-.3px}
+.ph-big em{display:block;margin-top:4px;font-style:normal;font-size:.82rem;color:#6B7684;line-height:1.4}
+.ph .ph-big.primary{background:#3182F6 !important;box-shadow:0 6px 16px rgba(49,130,246,.28)}
+.ph-big.primary b{color:#fff}
+.ph-big.primary em{color:rgba(255,255,255,.82)}
+.ph-big.primary .ph-dot{background:rgba(255,255,255,.18);color:#fff}
+.ph-list{padding:6px 0;display:flex;flex-direction:column}
+.ph-row{display:flex;align-items:center;gap:14px;width:100%;padding:12px 16px;text-align:left;border-top:1px solid #F2F4F6 !important}
+.ph-row:first-child{border-top:0 !important}
+.ph-row .ph-txt{flex:1;min-width:0}
+.ph-row b{font-size:1rem;font-weight:700;color:#191F28}
+.ph-row em{display:block;font-style:normal;font-size:.82rem;color:#6B7684;margin-top:1px}
+.ph-badge{display:inline-block;margin-left:6px;padding:2px 7px;border-radius:999px;background:#F04452;color:#fff;font-size:.7rem;font-weight:700;vertical-align:2px}
+.ph-chev{color:#B0B8C1;display:flex}
+.ph-chev .ph-i{width:18px;height:18px}
 .back-btn{display:inline-flex;align-items:center;gap:6px;color:#fff;font-size:1.1rem;font-weight:700;cursor:pointer;margin-bottom:16px;background:#2563eb;border:none;font-family:inherit;padding:14px 22px;border-radius:10px;box-shadow:0 3px 10px rgba(37,99,235,.3)}
 .back-btn:active{transform:scale(.97)}
 h1{text-align:center;font-size:1.4rem;color:#1e3a8a;margin-bottom:18px}
@@ -405,7 +425,6 @@ h1{text-align:center;font-size:1.4rem;color:#1e3a8a;margin-bottom:18px}
   .q-add-btn{padding:12px 8px;font-size:.85rem}
   .promo-ctrl select{font-size:.9rem}
 }
-.hub-btn-card{width:100%;padding:20px 16px;background:#fff;color:#334155;border:2.5px solid #475569;border-radius:16px;font-family:inherit;cursor:pointer;display:block;-webkit-tap-highlight-color:transparent;box-shadow:0 3px 10px rgba(71,85,105,.15);transition:transform .15s;margin-bottom:12px;text-align:center;}
 .fly-pickers{display:flex;gap:8px;margin-bottom:10px}
 .fly-pick{flex:1;min-width:0;padding:6px;border-radius:12px;border:2px solid #e2e8f0;background:#fff;cursor:pointer;font-family:inherit;text-align:center}
 .fly-pick img{width:100%;aspect-ratio:3/2;object-fit:cover;object-position:top;border-radius:8px;display:block;margin-bottom:4px;background:#f1f5f9}
@@ -419,8 +438,6 @@ h1{text-align:center;font-size:1.4rem;color:#1e3a8a;margin-bottom:18px}
 .fly-sel{flex:0 0 112px;font-family:inherit;font-size:1rem;font-weight:700;padding:10px 8px;border:1px solid #cbd5e1;border-radius:10px;background:#fff;color:#334155}
 .fly-canvas{width:100%;height:auto;border:1px solid #e2e8f0;border-radius:10px;display:block}
 .fly-msg{min-height:20px;margin-top:8px;font-size:.85rem;color:#64748b;text-align:center}
-.hub-btn-card:active{transform:scale(.98)}
-.hub-btn-card .hub-btn-desc{color:#64748b;opacity:1}
 #exitToast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:rgba(30,41,59,.92);color:#fff;padding:12px 20px;border-radius:24px;font-size:.95rem;font-weight:600;z-index:3000;display:none;white-space:nowrap}
 </style>
 </head>
@@ -466,61 +483,51 @@ h1{text-align:center;font-size:1.4rem;color:#1e3a8a;margin-bottom:18px}
 <!-- 앱 -->
 <div id="app">
   <div class="topbar">
-    <div class="logo">🏢 렌탈수수료 시스템</div>
-    <div class="user-info">
+    <div class="tb-brand">
+      <div class="logo">플래너허브</div>
       <span id="userLabel"></span>
-      <button class="logout-btn" onclick="doLogout()">로그아웃</button>
+    </div>
+    <div class="tb-tools">
+      <button class="tb-btn" onclick="openFB()"><svg class="ph-i"><use href="#ph-msg"/></svg>의견 보내기</button>
+      <button class="tb-btn logout-btn" onclick="doLogout()"><svg class="ph-i"><use href="#ph-logout"/></svg>로그아웃</button>
     </div>
   </div>
 
-  <!-- 허브 -->
-  <div id="hubPage" style="padding:16px 12px">
-    <div style="text-align:center;font-size:1.4rem;color:#1e3a8a;font-weight:700;margin-bottom:20px">무엇을 하시겠어요?</div>
-    <button class="hub-btn-shop" onclick="openShopApp()">
-        <div class="hub-btn-icon">🛒</div>
-        <div class="hub-btn-label">내 쇼핑몰</div>
-        <div class="hub-btn-desc">내 전용 판매 페이지</div>
-      </button>
-      <button class="hub-btn-card" onclick="openCardApp()">
-        <div class="hub-btn-icon">📇</div>
-        <div class="hub-btn-label">내 명함</div>
-        <div class="hub-btn-desc">고객에게 보낼 내 연락처 카드</div>
-      </button>
+  <!-- 허브 (2026-11-17 리디자인: 홍보 도구 → 영업 도구 → 관리 메뉴) -->
+  <div id="hubPage">
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+      <symbol id="ph-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></symbol>
+      <symbol id="ph-file" viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></symbol>
+      <symbol id="ph-user-check" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></symbol>
+      <symbol id="ph-gift" viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5C10 3 12 8 12 8s2-5 4.5-5a2.5 2.5 0 0 1 0 5"/></symbol>
+      <symbol id="ph-trend" viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></symbol>
+      <symbol id="ph-store" viewBox="0 0 24 24"><path d="M3 9l1.5-5h15L21 9"/><path d="M3 9h18v1.5a3 3 0 0 1-6 0 3 3 0 0 1-6 0 3 3 0 0 1-6 0Z"/><path d="M5 13v8h14v-8"/><path d="M10 21v-5h4v5"/></symbol>
+      <symbol id="ph-card" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M15 8h2"/><path d="M15 12h2"/><path d="M7 16h10"/></symbol>
+      <symbol id="ph-image" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.09-3.09a2 2 0 0 0-2.82 0L6 21"/></symbol>
+      <symbol id="ph-msg" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></symbol>
+      <symbol id="ph-logout" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></symbol>
+      <symbol id="ph-chev" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
+    </svg>
+    <div class="ph">
+      <div class="ph-sec">내 홍보 도구</div>
+      <div class="ph-grid3">
+        <button class="ph-card ph-mini" onclick="openShopApp()"><div class="ph-dot amber"><svg class="ph-i"><use href="#ph-store"/></svg></div><b>내 쇼핑몰</b></button>
+        <button class="ph-card ph-mini" onclick="openCardApp()"><div class="ph-dot green"><svg class="ph-i"><use href="#ph-card"/></svg></div><b>내 명함</b></button>
+        <button class="ph-card ph-mini" onclick="openFlyerApp()"><div class="ph-dot blue"><svg class="ph-i"><use href="#ph-image"/></svg></div><b>내 전단지</b></button>
+      </div>
 
-      <button class="hub-btn-card" onclick="openFlyerApp()">
-        <div class="hub-btn-icon">🖼️</div>
-        <div class="hub-btn-label">내 전단지</div>
-        <div class="hub-btn-desc">내 연락처가 들어간 전단지 만들기</div>
-      </button>
+      <div class="ph-sec">영업 도구</div>
+      <div class="ph-grid2">
+        <button class="ph-card ph-big primary" onclick="showPage('search')"><div class="ph-dot"><svg class="ph-i"><use href="#ph-search"/></svg></div><div><b>수수료 검색</b><em>렌탈료와 수수료<br>바로 찾기</em></div></button>
+        <button class="ph-card ph-big" onclick="openQuoteApp()"><div class="ph-dot blue"><svg class="ph-i"><use href="#ph-file"/></svg></div><div><b>견적서 만들기</b><em>고객 견적서<br>작성 &amp; 전송</em></div></button>
+      </div>
 
-      <button class="hub-btn-search" onclick="showPage('search')">
-      <div class="hub-btn-icon">🔍</div>
-      <div class="hub-btn-label">수수료 검색</div>
-      <div class="hub-btn-desc">렌탈료 &amp; 수수료 조회</div>
-    </button>
-    <!-- ★ 견적서: 내부 페이지로 이동 -->
-    <button class="hub-btn-quote" onclick="openQuoteApp()">
-      <div class="hub-btn-icon">📄</div>
-      <div class="hub-btn-label">견적서 만들기</div>
-      <div class="hub-btn-desc">고객 견적서 작성 &amp; 전송</div>
-    </button>
-    <button class="hub-btn-promo" onclick="showPage('promo')">
-      <div class="hub-btn-icon">🎁</div>
-      <div class="hub-btn-label">이달의 프로모션</div>
-      <div class="hub-btn-desc">할인 렌탈료 &amp; 시상금 안내</div>
-    </button>
-    
-    <button class="hub-btn-prospect" onclick="openProspectApp()">
-        <div class="hub-btn-icon">👥</div>
-        <div class="hub-btn-label">가망고객</div>
-        <div class="hub-btn-desc">만기 임박 고객 조회</div>
-      </button>
-
-      <a href="javascript:void(0)" onclick="openTrendApp()" class="hub-btn-trend">
-      <div class="hub-btn-icon">💰</div>
-      <div class="hub-btn-label">수수료 추이</div>
-      <div class="hub-btn-desc">실적 입력 &amp; 수수료 현황</div>
-    </a>
+      <div class="ph-card ph-list">
+        <button class="ph-row ph-prospect" onclick="openProspectApp()"><div class="ph-dot red"><svg class="ph-i"><use href="#ph-user-check"/></svg></div><div class="ph-txt"><b>가망고객</b><span class="ph-badge">임박</span><em>만기 다가오는 내 고객</em></div><div class="ph-chev"><svg class="ph-i"><use href="#ph-chev"/></svg></div></button>
+        <button class="ph-row" onclick="showPage('promo')"><div class="ph-dot violet"><svg class="ph-i"><use href="#ph-gift"/></svg></div><div class="ph-txt"><b>이달의 프로모션</b><em>할인 렌탈료 &amp; 제휴카드 혜택</em></div><div class="ph-chev"><svg class="ph-i"><use href="#ph-chev"/></svg></div></button>
+        <button class="ph-row ph-trend" onclick="openTrendApp()"><div class="ph-dot green"><svg class="ph-i"><use href="#ph-trend"/></svg></div><div class="ph-txt"><b>수수료 추이</b><em>실적 입력 &amp; 수수료 현황</em></div><div class="ph-chev"><svg class="ph-i"><use href="#ph-chev"/></svg></div></button>
+      </div>
+    </div>
   </div>
 
   <!-- 검색 -->
@@ -1073,7 +1080,7 @@ function _joinDeptChange(){
 function _applyDataButtons(u){
   if(!_branchInfo||!_branchInfo.dataBranches)return;
   var ok=_branchInfo.dataBranches.indexOf((u&&(u.branch||u.dept))||'')>-1;
-  ['.hub-btn-prospect','.hub-btn-trend'].forEach(function(q){var b=document.querySelector(q);if(b)b.style.display=ok?'':'none';});
+  ['.ph-prospect','.ph-trend'].forEach(function(q){var b=document.querySelector(q);if(b)b.style.display=ok?'':'none';});
 }
 
 function openShopOrProspect() { openProspectApp(); }
