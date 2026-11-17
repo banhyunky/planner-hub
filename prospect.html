@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>가망고객 · 플래너허브</title>
+<meta name="theme-color" content="#ffffff">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif;background:#F2F4F6;color:#191F28;padding-bottom:40px}
+.topbar{background:#fff;position:sticky;top:0;z-index:150;padding:12px 14px;border-bottom:1px solid #EEF0F3;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.topbar .logo{font-size:1.05rem;font-weight:700}
+.topbar .back{background:#F2F4F6;color:#333D4B;border:none;padding:8px 12px;border-radius:8px;font-size:.9rem;font-weight:700;font-family:inherit;cursor:pointer}
+.tb-right{min-width:58px;display:flex;justify-content:flex-end}
+.tb-right select{height:34px;border:1px solid #E5E8EB;border-radius:8px;padding:0 6px;font-size:13px;font-family:inherit;background:#fff}
+.wrap{max-width:600px;margin:0 auto;padding:4px 14px}
+.state-box{text-align:center;padding:32px 16px;color:#94a3b8}
+.state-icon{font-size:28px;margin-bottom:6px}
+.error-msg{background:#fef2f2;color:#ef4444;padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:10px}
+#toast{position:fixed;bottom:40px;left:50%;transform:translateX(-50%);background:#191F28;color:#fff;font-size:13px;padding:9px 16px;border-radius:999px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:9999;white-space:nowrap}
+#toast.show{opacity:1}
+input,select,button,textarea{font-family:inherit}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <button class="back" onclick="location.href='./'">‹ 홈</button>
+  <div class="logo">가망고객</div>
+  <div class="tb-right" id="pcBranchSlot"></div>
+</div>
+<div class="wrap" id="pcRoot"></div>
+<div id="toast"></div>
+
+<script>
+// ── 플래너허브 앱 안 가망고객 화면 (2026-11-17) ──────────────────────
+// 화면 코드는 매출추이마스터 Index.html 가망고객 부분(buildProspectShell ~ pcCopyContract)을 그대로 옮긴 것.
+// 가망고객 화면을 고치면 매출추이마스터 쪽과 이 파일 둘 다 고칠 것 (옛 화면은 전환 끝나면 정리)
+// 로그인 정보는 허브(같은 주소 index.html)가 이 폰에 저장해 둔 것을 그대로 씀. 없으면 허브로 돌려보냄
+var INIT_NAME = '', INIT_PHONE = '', INIT_TOKEN = '', INIT_DK = '';
+(function () {
+  var u = null;
+  try { u = JSON.parse(localStorage.getItem('rentalUser') || 'null'); INIT_DK = localStorage.getItem('rentalDeviceKey') || ''; } catch (e) {}
+  if (!u || !u.sessionToken) { location.replace('./'); return; }
+  INIT_NAME = u.name || ''; INIT_PHONE = u.phone || ''; INIT_TOKEN = u.sessionToken;
+})();
+
+function $(id) { return document.getElementById(id); }
+function showToast(msg) {
+  var t = $('toast'); if (!t) return;
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(function () { t.classList.remove('show'); }, 2200);
+}
+var G = { user: null, currentBranchKey: null };
+try { G.currentBranchKey = localStorage.getItem('pcBranch') || null; } catch (e) {}
+
+// 슈퍼관리자만: 상단 오른쪽 지사 선택
+function pcRenderBranchPicker(who) {
+  var slot = $('pcBranchSlot');
+  if (!slot || !who.isSuperAdmin || !(who.branches || []).length) { if (slot) slot.innerHTML = ''; return; }
+  slot.innerHTML = '<select onchange="pcChangeBranch(this.value)">' + who.branches.map(function (b) {
+    return '<option value="' + b.branchKey + '"' + (b.branchKey === who.bk ? ' selected' : '') + '>' + b.branchName + '</option>';
+  }).join('') + '</select>';
+}
+function pcChangeBranch(bk) {
+  G.currentBranchKey = bk;
+  try { localStorage.setItem('pcBranch', bk); } catch (e) {}
+  $('pcRoot').innerHTML = buildProspectShell();
+  _pcCatFilter = ''; _pcUrgFilter = '';
+  loadProspectData();
+}
+
+// 기존 google.script.run 호출 모양 그대로 두고, 실제로는 매출추이마스터 GAS의 doPost로 fetch
+// (허용 함수 목록은 매출추이마스터 Code.gs의 PROSPECT_API — 함수를 추가하면 두 곳 다 고칠 것)
+var PROSPECT_API_URL = 'https://script.google.com/macros/s/AKfycbxHR4Z7CQOj2lZNb4UXL2AwSWnAAZuAyTARFaYJBSChKWgr2i0saCVV78h6FA_cCvEgmA/exec';
+(function () {
+  function Run(s, f) { this._s = s; this._f = f; }
+  Run.prototype.withSuccessHandler = function (fn) { return new Run(fn, this._f); };
+  Run.prototype.withFailureHandler = function (fn) { return new Run(this._s, fn); };
+  ['getProspectCustomers', 'saveProspectMemo'].forEach(function (fn) {
+    Run.prototype[fn] = function () {
+      var s = this._s, f = this._f, args = [].slice.call(arguments);
+      fetch(PROSPECT_API_URL, { method: 'POST', body: JSON.stringify({ fn: fn, args: args }) })
+        .then(function (r) { return r.json(); })
+        .then(function (d) { if (d.ok) { if (s) s(d.result); } else { if (f) f(new Error(d.error || '오류')); } })
+        .catch(function () { if (f) f(new Error('인터넷 연결을 확인하고 다시 시도해 주세요.')); });
+    };
+  });
+  window.google = { script: { run: new Run(null, null) } };
+})();
+</script>
+<script>
+function buildProspectShell() {
+  return `
+    <div style="padding:12px 0">
+
+      <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:14px">
+        <div onclick="pcStatClick('')" class="pc-stat pc-stat-all active" id="pc-stat-all">
+          <div class="pc-stat-label">전체</div>
+          <div id="pc-cnt-total" class="pc-stat-value">—</div>
+        </div>
+        <div onclick="pcStatClick('red')" class="pc-stat pc-stat-red" id="pc-stat-red">
+          <div class="pc-stat-label">임박</div>
+          <div id="pc-cnt-red" class="pc-stat-value">—</div>
+        </div>
+        <div onclick="pcStatClick('amber')" class="pc-stat pc-stat-amber" id="pc-stat-amber">
+          <div class="pc-stat-label">가망</div>
+          <div id="pc-cnt-amber" class="pc-stat-value">—</div>
+        </div>
+      </div>
+
+      <!-- 1행: 플래너 선택 · 고객명 검색 · 검색버튼 -->
+      <div style="display:flex;gap:6px;margin-bottom:8px">
+        <div id="pc-planner-slot" style="flex:0 0 140px;min-width:0"></div>
+
+        <input type="text" id="pc-search"
+          placeholder="고객명 검색"
+          oninput="pcFilter()"
+          onkeydown="if(event.key==='Enter') pcFilter()"
+          style="flex:1;min-width:0;padding:0 12px;height:40px;font-size:13px;border:1.5px solid #cbd5e1;border-radius:8px;outline:none">
+
+        <button type="button" onclick="pcFilter()"
+          style="flex:0 0 44px;height:40px;background:#3b82f6;color:#fff;border:none;border-radius:8px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center">🔍</button>
+      </div>
+
+      <!-- 2행: 긴급도 + 카테고리 칩 -->
+      <div style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;align-items:center">
+        <button class="pc-chip active" onclick="pcChip(this,'')">전체</button>
+        <button class="pc-chip" onclick="pcChip(this,'정수기')">정수기</button>
+        <button class="pc-chip" onclick="pcChip(this,'청정기')">청정기</button>
+        <button class="pc-chip" onclick="pcChip(this,'비데')">비데</button>
+        <button class="pc-chip" onclick="pcChip(this,'기타')">기타</button>
+      </div>
+
+    
+      <div id="pc-list">
+        <div class="state-box"><div class="state-icon">⏳</div><p>불러오는 중...</p></div>
+      </div>
+
+      <div id="pc-toast" style="display:none;position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1e293b;color:#fff;font-size:12px;padding:8px 16px;border-radius:999px;white-space:nowrap;z-index:9999"></div>
+
+    </div>
+
+    <style>
+      .pc-chip{font-size:11px;padding:4px 10px;border-radius:999px;border:1px solid #e2e8f0;background:#fff;color:#64748b;cursor:pointer}
+      .pc-chip.active{background:#dbeafe;color:#1d4ed8;border-color:#93c5fd}
+      .pc-card{background:#fff;border:1px solid #e8eaed;border-radius:0 12px 12px 0;padding:12px 14px;margin-bottom:8px;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+      .pc-card.red{border-left:3px solid #ef4444}
+      .pc-card.amber{border-left:3px solid #f59e0b}
+      .pc-badge{display:inline-block;font-size:10px;padding:2px 7px;border-radius:999px;font-weight:600}
+      .pc-badge.red{background:#fef2f2;color:#dc2626}
+      .pc-badge.amber{background:#fffbeb;color:#d97706}
+      .pc-badge.blue{background:#dbeafe;color:#1d4ed8}
+      .pc-badge.gray{background:#f1f5f9;color:#64748b}
+      .pc-group-header{display:flex;align-items:center;gap:8px;margin-bottom:8px;margin-top:4px}
+      .pc-stat{padding:10px 8px;text-align:center;border-radius:8px;cursor:pointer;border:1.5px solid transparent;transition:all .15s}
+      .pc-stat-label{font-size:11px;margin-bottom:4px;color:#94a3b8}
+      .pc-stat-value{font-size:22px;font-weight:700;color:#1e293b}
+      .pc-stat-all{background:#f8fafc;border-color:#e8eaed}
+      .pc-stat-all.active{border-color:#64748b;background:#e2e8f0}
+      .pc-stat-red{background:#fef2f2}
+      .pc-stat-red .pc-stat-label,.pc-stat-red .pc-stat-value{color:#dc2626}
+      .pc-stat-red.active{border-color:#dc2626}
+      .pc-stat-amber{background:#fffbeb}
+      .pc-stat-amber .pc-stat-label,.pc-stat-amber .pc-stat-value{color:#d97706}
+      .pc-stat-amber.active{border-color:#d97706}
+    </style>
+    <div id="pc-memo-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:10000;align-items:center;justify-content:center;padding:20px">
+      <div style="background:#fff;border-radius:12px;width:100%;max-width:480px;padding:20px;box-shadow:0 4px 24px rgba(0,0,0,.2);max-height:90vh;display:flex;flex-direction:column">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <div id="pc-memo-title" style="font-size:14px;font-weight:700;color:#1e293b">메모</div>
+          <button onclick="pcCloseMemo()" style="background:none;border:none;font-size:22px;cursor:pointer;color:#94a3b8;padding:0;line-height:1">×</button>
+        </div>
+        <div id="pc-memo-meta" style="font-size:11px;color:#94a3b8;margin-bottom:10px"></div>
+        <textarea id="pc-memo-text" rows="6" placeholder="메모를 입력하세요..."
+          style="width:100%;padding:10px;font-size:13px;border:1.5px solid #cbd5e1;border-radius:8px;outline:none;box-sizing:border-box;resize:vertical;font-family:inherit"></textarea>
+        <div style="display:flex;gap:8px;margin-top:14px;justify-content:flex-end">
+          <button onclick="pcCloseMemo()" style="padding:8px 16px;background:#f1f5f9;border:none;border-radius:6px;font-size:13px;cursor:pointer">취소</button>
+          <button id="pc-memo-save-btn" onclick="pcSaveMemo()" style="padding:8px 16px;background:#3b82f6;color:#fff;border:none;border-radius:6px;font-size:13px;cursor:pointer">저장</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+var _pcData = [];
+var _pcMemos = {};   // key: contract_no + '|' + planner_name → memo 객체
+var _pcCatFilter = '';
+var _pcUrgFilter = '';
+var _pcMemoEditing = null;  // 편집 중인 계약 정보
+
+function loadProspectData() {
+  var el = $('pc-list');
+  if (el) el.innerHTML = '<div class="state-box"><div class="state-icon">⏳</div><p>불러오는 중...</p></div>';
+
+  // 백엔드로 보낼 정확한 파라미터 생성
+  // 허브 세션 정보만 보내고, 권한·지사는 서버가 직원탭으로 판단 (2026-10-02)
+  var authCred = { name: INIT_NAME, phone: INIT_PHONE, token: INIT_TOKEN, dk: INIT_DK };
+  var branchKey = G.currentBranchKey || 'junggu';
+
+  google.script.run
+    .withSuccessHandler(function(res) {
+      // 0. 내 정보(권한·지사)는 서버 응답(who)으로 — 플래너허브 앱 (2026-11-17)
+      if (res && res.who) { G.user = res.who; G.currentBranchKey = res.who.bk; pcRenderBranchPicker(res.who); }
+
+      // 1. 에러가 있을 경우 차단
+      if (res && res.error) {
+        var el = $('pc-list');
+        if (el) el.innerHTML = '<div class="error-msg">오류: ' + res.error + '</div>';
+        return;
+      }
+
+      // 2. 백엔드 객체에서 데이터 배열만 쏙 빼냄
+      var list = res ? (res.list || []) : [];
+
+      // 3. 권한에 따른 필터링
+      if (G.user && G.user.role === 'planner') {
+        _pcData = list.filter(function(r) { return r.planner_name === G.user.name; });
+      } else {
+        _pcData = list;
+      }
+
+      pcRenderSummary();
+      pcPopulatePlannerFilter();
+
+    // 4. 메모는 같은 응답(res.memos)에서 바로 받는다 (키: 계약번호|플래너명)
+    _pcMemos = (res && res.memos) || {};
+    pcFilter();
+    })
+    .withFailureHandler(function(e) {
+      var el = $('pc-list');
+      if (el) el.innerHTML = '<div class="error-msg">오류: ' + e.message + '</div>';
+    })
+    .getProspectCustomers(authCred, branchKey);
+}
+function pcPopulatePlannerFilter() {
+  var slot = $('pc-planner-slot');
+  if (!slot) return;
+
+  var isAdmin = G.user && (G.user.role === 'admin' || G.user.isSuperAdmin || G.user.role === 'manager');
+
+  if (!isAdmin) {
+    // 플래너 본인: 이름 라벨 + 숨겨진 input(필터 값 보관)
+    var myName = (G.user && G.user.name) || '';
+    slot.innerHTML =
+      '<div style="height:40px;padding:0 12px;display:flex;align-items:center;background:#f1f5f9;'
+      + 'border:1.5px solid #cbd5e1;border-radius:8px;font-size:13px;font-weight:700;color:#1e293b;'
+      + 'overflow:hidden;text-overflow:ellipsis;white-space:nowrap">👤 ' + myName + '</div>'
+      + '<input type="hidden" id="pc-filter-planner" value="' + myName + '">';
+    return;
+  }
+
+  // 관리자: 플래너별 건수 집계
+  var counts = {};
+  _pcData.forEach(function(r) {
+    var k = r.planner_name || '미배정';
+    counts[k] = (counts[k] || 0) + 1;
+  });
+  var names = Object.keys(counts).sort(function(a, b) { return counts[b] - counts[a]; });
+
+  var opts = '<option value="">전체 플래너 (' + _pcData.length + ')</option>';
+  names.forEach(function(n) {
+    opts += '<option value="' + n + '">' + n + ' (' + counts[n] + ')</option>';
+  });
+
+  slot.innerHTML =
+    '<select id="pc-filter-planner" onchange="pcFilter()" '
+    + 'style="width:100%;font-size:13px;padding:0 8px;height:40px;border:1.5px solid #cbd5e1;'
+    + 'border-radius:8px;outline:none;background:#fff">' + opts + '</select>';
+}
+
+function pcRenderSummary() {
+  var total = _pcData.length;
+  var red   = _pcData.filter(function(r){ return r.urgency === 'red'; }).length;
+  var amber = _pcData.filter(function(r){ return r.urgency === 'amber'; }).length;
+  var el;
+  el = $('pc-cnt-total'); if(el) el.textContent = total;
+  el = $('pc-cnt-red');   if(el) el.textContent = red;
+  el = $('pc-cnt-amber'); if(el) el.textContent = amber;
+}
+
+function pcStatClick(urg) {
+  ['all','red','amber'].forEach(function(k){
+    var el = $('pc-stat-' + k);
+    if (el) el.classList.remove('active');
+  });
+  var key = urg === '' ? 'all' : urg;
+  var active = $('pc-stat-' + key);
+  if (active) active.classList.add('active');
+  _pcUrgFilter = urg;
+  pcFilter();
+}
+
+function _pcCatOf(r) {
+  var c = String((r && (r.product_category || r.product_name)) || '');
+  if (c.indexOf('\uC815\uC218\uAE30') > -1) return '\uC815\uC218\uAE30';
+  if (c.indexOf('\uCCAD\uC815\uAE30') > -1) return '\uCCAD\uC815\uAE30';
+  if (c.indexOf('\uBE44\uB370') > -1) return '\uBE44\uB370';
+  return '\uAE30\uD0C0';
+}
+
+function pcChip(btn, cat) {
+  _pcCatFilter = cat;
+  document.querySelectorAll('.pc-chip').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+  pcFilter();
+}
+
+function pcFilter() {
+  var kw  = ($('pc-search') ? $('pc-search').value : '').trim().toLowerCase();
+  var urg = _pcUrgFilter;
+  var pln = $('pc-filter-planner') ? $('pc-filter-planner').value : '';
+
+  var filtered = _pcData.filter(function(r) {
+    if (_pcCatFilter && _pcCatOf(r) !== _pcCatFilter) return false;
+    if (urg && r.urgency !== urg) return false;
+    if (pln && (r.planner_name || '미배정') !== pln) return false;
+    if (kw) {
+      var hay = [r.customer_name, r.planner_name, r.product_name, r.dong].join(' ').toLowerCase();
+      if (hay.indexOf(kw) < 0) return false;
+    }
+    return true;
+  });
+
+  pcRenderList(filtered);
+}
+
+function pcRenderList(list) {
+  var el = $('pc-list');
+  if (!el) return;
+
+  if (!list.length) {
+    el.innerHTML = '<div class="state-box"><div class="state-icon">📭</div><p>검색 결과가 없습니다</p></div>';
+    return;
+  }
+
+  var isAdmin = G.user && (G.user.role === 'admin' || G.user.isSuperAdmin);
+  var html = '';
+
+  if (isAdmin) {
+    var groups = {};
+    list.forEach(function(r) {
+      var key = r.planner_name || '미배정';
+      if (!groups[key]) groups[key] = [];
+      groups[key].push(r);
+    });
+
+    Object.keys(groups).forEach(function(planner) {
+      var items = groups[planner];
+      var redCnt   = items.filter(function(r){ return r.urgency === 'red'; }).length;
+      var amberCnt = items.filter(function(r){ return r.urgency === 'amber'; }).length;
+
+      html += '<div style="margin-bottom:18px">';
+      html += '<div class="pc-group-header">';
+      html += '<span style="font-size:13px;font-weight:700;color:#1e293b">' + planner + '</span>';
+      if (redCnt)   html += '<span class="pc-badge red">임박 ' + redCnt + '</span>';
+      if (amberCnt) html += '<span class="pc-badge amber">가망 ' + amberCnt + '</span>';
+      html += '<span style="font-size:11px;color:#94a3b8;margin-left:auto">' + items.length + '건</span>';
+      html += '</div>';
+      items.forEach(function(r) { html += pcCardHTML(r, false); });
+      html += '</div>';
+    });
+
+  } else {
+    list.forEach(function(r) { html += pcCardHTML(r, true); });
+  }
+
+  el.innerHTML = html;
+}
+
+function pcCardHTML(r, showPlanner) {
+  var urgLabel   = r.urgency === 'red' ? '임박' : '가망';
+  var typeLabel  = r.customer_type === '렌탈' ? '렌탈' : '유지';
+  var remaining = Math.max(0, r.current_remaining);
+var baseDuration = r.contract_duration > 0 ? r.contract_duration : 60;
+var remaining = baseDuration - r.current_usage;
+var remainText = r.customer_type === '렌탈'
+  ? (remaining < 0 ? '의무초과 · ' + r.current_usage + '회차' : '잔여 ' + remaining + '개월 · ' + r.current_usage + '회차')
+  : r.current_usage + '회차';
+var remainText = r.customer_type === '렌탈'
+  ? '잔여 ' + remaining + '개월 · ' + r.current_usage + '회차'
+  : r.current_usage + '회차';
+  var contractNo  = r.contract_no || '';
+  var plannerName = r.planner_name || '';
+  var customerNm  = r.customer_name || '';
+
+  var memoKey = contractNo + '|' + plannerName;
+  var memoObj = _pcMemos[memoKey];
+  var memoText = memoObj ? memoObj.memo : '';
+
+  // 본인 가망고객 여부 (편집 가능 여부)
+  var isMyCustomer = G.user && G.user.name === plannerName;
+  var isAdmin      = G.user && (G.user.role === 'admin' || G.user.isSuperAdmin || G.user.role === 'manager');
+
+  // 메모 영역: 본인 가망고객은 항상 표시(편집), 관리자는 메모 있을 때만 표시(읽기), 그 외는 숨김
+  var memoBlock = '';
+  if (isMyCustomer || isAdmin) {
+    memoBlock = '<div onclick="event.stopPropagation();pcOpenMemo(\'' + contractNo + '\',\'' + _pcEsc(plannerName) + '\',\'' + _pcEsc(customerNm) + '\')" '
+      + 'style="margin-top:8px;padding:8px 10px;background:#fffbe6;border:1px dashed #fde68a;border-radius:6px;font-size:12px;color:' + (memoText ? '#92400e' : '#a78a3f') + ';cursor:pointer;line-height:1.4;white-space:pre-wrap;word-break:break-word">'
+      + '📝 ' + (memoText ? _pcEsc(memoText) : '메모 추가...')
+      + '</div>';
+  } else if (isAdmin && memoText) {
+    memoBlock = '<div style="margin-top:8px;padding:8px 10px;background:#f1f5f9;border-radius:6px;font-size:12px;color:#475569;line-height:1.4;white-space:pre-wrap;word-break:break-word">'
+      + '📝 ' + _pcEsc(memoText)
+      + '<span style="display:block;margin-top:4px;font-size:10px;color:#94a3b8">' + _pcEsc(plannerName) + ' · ' + (memoObj.updated_at || '') + '</span>'
+      + '</div>';
+  }
+
+  return '<div class="pc-card ' + r.urgency + '" onclick="pcCopyContract(\'' + contractNo + '\')">'
+    + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">'
+    +   '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">'
+    +     '<span style="font-size:13px;font-weight:700;color:#1e293b">' + _pcEsc(customerNm) + '</span>'
+    +     '<span class="pc-badge ' + r.urgency + '">' + urgLabel + '</span>'
+    +     '<span class="pc-badge ' + (r.customer_type === '렌탈' ? 'blue' : 'gray') + '">' + typeLabel + '</span>'
+    +   '</div>'
+    +   '<span style="font-size:11px;font-weight:700;color:' + (r.urgency === 'red' ? '#dc2626' : '#d97706') + '">' + remainText + '</span>'
+    + '</div>'
+    + '<div style="font-size:12px;color:#64748b;margin-bottom:6px">' + _pcEsc(r.product_name || '') + '</div>'
+    + memoBlock
+    + '<div style="display:flex;align-items:center;justify-content:space-between;margin-top:6px">'
+    +   '<div style="display:flex;align-items:center;gap:6px;font-size:11px;color:#94a3b8">'
+    +     (showPlanner ? '<span>' + _pcEsc(plannerName) + '</span><span>·</span>' : '')
+    +     '<span>' + _pcEsc(r.product_category || '') + '</span>'
+    +     '<span>·</span><span>' + _pcEsc(r.dong || '') + '</span>'
+    +     '<span>·</span><span>' + _pcEsc(r.latest_month || '') + '</span>'
+    +   '</div>'
+    +   '<span style="font-size:10px;color:#94a3b8">탭하여 복사</span>'
+    + '</div>'
+    + '</div>';
+}
+function pcOpenMemo(contractNo, plannerName, customerName) {
+  _pcMemoEditing = { contract_no: contractNo, planner_name: plannerName, customer_name: customerName };
+  var key = contractNo + '|' + plannerName;
+  var memoObj = _pcMemos[key];
+
+  $('pc-memo-title').textContent = customerName + ' 메모';
+  $('pc-memo-meta').textContent = '계약번호: ' + contractNo + (memoObj && memoObj.updated_at ? ' · 마지막 저장: ' + memoObj.updated_at : '');
+  $('pc-memo-text').value = memoObj ? memoObj.memo : '';
+
+  var modal = $('pc-memo-modal');
+  modal.style.display = 'flex';
+  setTimeout(function() { $('pc-memo-text').focus(); }, 100);
+}
+
+function pcCloseMemo() {
+  $('pc-memo-modal').style.display = 'none';
+  _pcMemoEditing = null;
+}
+
+function pcSaveMemo() {
+  if (!_pcMemoEditing) return;
+  var memo = $('pc-memo-text').value;
+  var btn = $('pc-memo-save-btn');
+  btn.disabled = true;
+  btn.textContent = '저장 중...';
+
+  var info = _pcMemoEditing;
+
+  google.script.run
+    .withSuccessHandler(function(res) {
+      if (res && res.error) {
+        alert('❌ ' + res.error);
+        btn.disabled = false;
+        btn.textContent = '저장';
+        return;
+      }
+      // 로컬 캐시 업데이트
+      var key = info.contract_no + '|' + info.planner_name;
+      _pcMemos[key] = {
+        contract_no: info.contract_no,
+        planner_email: G.user.email,
+        planner_name: info.planner_name,
+        memo: memo,
+        updated_at: (res && res.updated_at) || new Date().toLocaleString('ko-KR')
+      };
+      btn.disabled = false;
+      btn.textContent = '저장';
+      pcCloseMemo();
+      pcFilter();  // 리렌더링
+      showToast('✅ 메모 저장됨');
+    })
+    .withFailureHandler(function(e) {
+      alert('❌ 저장 실패: ' + e.message);
+      btn.disabled = false;
+      btn.textContent = '저장';
+    })
+    .saveProspectMemo(info.contract_no, info.planner_name, memo, { name: INIT_NAME, phone: INIT_PHONE, token: INIT_TOKEN, dk: INIT_DK }, G.currentBranchKey || 'junggu');
+}
+
+function _pcEsc(s) {
+  return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+function pcCopyContract(contractNo) {
+  if (!contractNo) return;
+  var doToast = function() {
+    var toast = $('pc-toast');
+    if (!toast) return;
+    toast.textContent = '복사됨: ' + contractNo;
+    toast.style.display = 'block';
+    setTimeout(function(){ toast.style.display = 'none'; }, 2500);
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(contractNo).then(doToast);
+  } else {
+    var ta = document.createElement('textarea');
+    ta.value = contractNo;
+    ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    doToast();
+  }
+}
+
+
+// ── 시작 ──
+$('pcRoot').innerHTML = buildProspectShell();
+loadProspectData();
+</script>
+</body>
+</html>
