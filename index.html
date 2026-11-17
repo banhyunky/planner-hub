@@ -791,13 +791,9 @@ document.addEventListener('click', function () {
 }, { capture: true, once: true });
 
 function openQuoteApp() {
-  var name  = currentUser ? (currentUser.name  || '') : '';
-  var phone = currentUser ? (currentUser.phone || '') : '';
-  var url = 'https://script.google.com/macros/s/AKfycbxgwTPBdXZhxzf0LWUeG5wOdBFbM13xgb8dj1KYlwOxK4ATpYCDPDOrFfOMXNrd0ebV/exec'
-    + '?name='  + encodeURIComponent(name)
-    + '&phone=' + encodeURIComponent(phone)
-    + _authQuery();
-  window.open(url, '_blank');
+  // 플래너허브 앱 안 견적서 화면 (2026-11-17). 옛 화면: 견적서생성 GAS 주소(?name=&phone=&token=&dk=)
+  if (!currentUser) { alert('\uB85C\uADF8\uC778\uC774 \uD544\uC694\uD569\uB2C8\uB2E4'); return; }
+  location.href = 'https://banhyunky.github.io/planner-hub/quote.html';
 }
 
 function openShopApp() {
@@ -1089,13 +1085,9 @@ function _applyDataButtons(u){
 function openShopOrProspect() { openProspectApp(); }
 
 function openProspectApp() {
+  // 플래너허브 앱 안 가망고객 화면 (2026-11-17). 옛 화면: 매출추이마스터 GAS 주소 ?tab=prospectTab&view=prospect
   if (!currentUser) { alert('\uB85C\uADF8\uC778\uC774 \uD544\uC694\uD569\uB2C8\uB2E4'); return; }
-  var url = 'https://script.google.com/macros/s/AKfycbxHR4Z7CQOj2lZNb4UXL2AwSWnAAZuAyTARFaYJBSChKWgr2i0saCVV78h6FA_cCvEgmA/exec'
-    + '?name=' + encodeURIComponent(currentUser.name || '')
-    + '&phone=' + encodeURIComponent(currentUser.phone || '')
-    + '&tab=prospectTab&view=prospect'
-    + _authQuery();
-  window.open(url, '_blank');
+  location.href = 'https://banhyunky.github.io/planner-hub/prospect.html';
 }
 
 function openTrendApp() {
