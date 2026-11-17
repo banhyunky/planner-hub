@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>견적서 만들기 · 플래너허브</title>
+<meta name="theme-color" content="#ffffff">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+body{font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif;background:#EEF2FB;padding-bottom:100px}
+.topbar{background:#1e3a8a;color:#fff;padding:14px 16px;display:flex;align-items:center;justify-content:space-between}
+.topbar .logo{font-size:1.1rem;font-weight:800}
+.topbar .back{background:rgba(255,255,255,.15);border:none;color:#fff;padding:8px 14px;border-radius:8px;font-size:.9rem;cursor:pointer;font-family:inherit;font-weight:600}
+.wrap{padding:16px 14px;max-width:600px;margin:0 auto}
+.section{background:#fff;border-radius:16px;padding:20px;margin-bottom:14px;box-shadow:0 2px 12px rgba(0,60,180,.07)}
+.sec-title{font-size:1rem;font-weight:700;color:#1e3a8a;margin-bottom:16px;display:flex;align-items:center;gap:6px}
+.sec-title::before{content:'';display:block;width:3px;height:16px;background:#2563eb;border-radius:2px}
+.form-group{margin-bottom:13px}
+.form-group label{display:block;font-size:.9rem;color:#475569;margin-bottom:5px;font-weight:600}
+.form-group input,.form-group select,.form-group textarea{width:100%;padding:13px 12px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:1rem;outline:none;font-family:inherit;color:#1e293b;background:#fff}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:#2563eb}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.type-toggle{display:flex;background:#f1f5f9;border-radius:10px;padding:3px;margin-bottom:16px}
+.type-btn{flex:1;padding:12px;border:none;background:none;border-radius:8px;font-size:1rem;font-weight:600;color:#64748b;cursor:pointer;font-family:inherit;transition:.2s}
+.type-btn.active{background:#2563eb;color:#fff;box-shadow:0 2px 8px rgba(37,99,235,.3)}
+.search-row{display:flex;gap:8px;margin-bottom:12px}
+.search-row input{flex:1;padding:13px 12px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:1rem;outline:none;font-family:inherit}
+.search-row input:focus{border-color:#2563eb}
+.search-btn{padding:13px 20px;background:#2563eb;color:#fff;border:none;border-radius:10px;font-size:1rem;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit}
+.product-result{margin-bottom:10px}
+.prod-card{background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:12px;margin-bottom:8px;overflow:hidden}
+.prod-card.promo{background:#fffbf5;border-color:#fed7aa}
+.prod-header{padding:12px 14px;display:flex;gap:10px;align-items:center}
+.prod-img{width:60px;height:60px;object-fit:contain;border-radius:6px;background:#fff;border:1px solid #e2e8f0;flex-shrink:0}
+.prod-img-empty{width:60px;height:60px;background:#f1f5f9;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#94a3b8;text-align:center;flex-shrink:0}
+.prod-info{flex:1}
+.prod-name{font-size:.95rem;font-weight:700;color:#1e3a8a;margin-bottom:4px}
+.prod-meta{font-size:.82rem;color:#64748b}
+.prod-spec { font-size: .78rem; color: #64748b; margin-top: 3px; line-height: 1.4; }
+.prod-body{padding:0 14px 12px}
+.prod-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px}
+.prod-row select{flex:1;min-width:0;padding:11px 10px;border:1.5px solid #cbd5e1;border-radius:8px;font-size:.95rem;outline:none;background:#fff;font-family:inherit}
+.prod-row input[type=number]{width:56px;padding:11px 6px;border:1.5px solid #cbd5e1;border-radius:8px;text-align:center;font-size:.95rem;outline:none;flex-shrink:0;font-family:inherit}
+.add-btn{padding:11px 16px;background:#2563eb;color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer;white-space:nowrap;font-size:.95rem;font-family:inherit;flex-shrink:0}
+.add-btn.promo{background:#f97316}
+.fee-bar{display:flex;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden}
+.fee-cell{flex:1;padding:8px 10px;text-align:center;background:#f8fafc}
+.fee-cell+.fee-cell{border-left:1px solid #e2e8f0}
+.fee-label{font-size:.78rem;color:#94a3b8;margin-bottom:2px}
+.fee-value{font-size:1rem;font-weight:700;color:#2563eb}
+.item-list{display:flex;flex-direction:column;gap:8px;margin-bottom:4px}
+.item-card{background:#fff;border:1.5px solid #e2e8f0;border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:10px}
+.item-card.promo-item{border-color:#fed7aa;background:#fffbf5}
+.item-info{flex:1}
+.item-name{font-size:.95rem;font-weight:600;color:#1e3a8a;margin-bottom:3px;display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.item-sub{font-size:.85rem;color:#64748b}
+.item-comm{color:#16a34a;font-weight:600}
+.item-comm.promo{color:#f97316}
+.item-del{background:none;border:none;color:#dc2626;font-size:1.4rem;cursor:pointer;padding:4px;flex-shrink:0}
+.promo-tag{font-size:.78rem;background:#f97316;color:#fff;padding:2px 7px;border-radius:6px;font-weight:700}
+.prod-card.special{background:#f5fff7;border-color:#86efac}
+.add-btn.special{background:#16a34a}
+.special-tag{font-size:.78rem;background:#16a34a;color:#fff;padding:2px 7px;border-radius:6px;font-weight:700}
+.item-card.special-item{border-color:#86efac;background:#f5fff7}
+.mode-hint{font-size:.82rem;color:#94a3b8;margin:-8px 0 14px 2px}
+.direct-water{display:flex;align-items:center;gap:10px;background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:13px 14px;cursor:pointer}
+.direct-water input[type=checkbox]{width:22px;height:22px;accent-color:#16a34a;cursor:pointer;flex-shrink:0}
+.direct-water label{font-size:1rem;color:#166534;font-weight:600;cursor:pointer}
+.action-bar{position:fixed;bottom:0;left:0;right:0;background:#fff;padding:12px 14px;box-shadow:0 -4px 20px rgba(0,0,0,.08);display:flex;gap:10px;z-index:100}
+.btn-preview{flex:1;padding:15px;background:#f1f5f9;color:#1e3a8a;border:2px solid #cbd5e1;border-radius:12px;font-size:1rem;font-weight:700;cursor:pointer;font-family:inherit}
+.btn-create{flex:2;padding:15px;background:#2563eb;color:#fff;border:none;border-radius:12px;font-size:1rem;font-weight:700;cursor:pointer;font-family:inherit}
+.btn-create:disabled{opacity:.6;cursor:not-allowed}
+/* 모달 */
+.ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:center;justify-content:center}
+.ov.show{display:flex}
+.modal{background:#fff;border-radius:20px;padding:24px;width:92%;max-width:440px;max-height:90vh;overflow-y:auto}
+.modal h2{font-size:1.1rem;color:#1e3a8a;margin-bottom:16px}
+.link-box{background:#f1f5f9;border-radius:10px;padding:14px;font-size:.9rem;color:#1e3a8a;word-break:break-all;margin-bottom:14px;line-height:1.5}
+.modal-btn{width:100%;padding:14px;border:none;border-radius:10px;font-size:1rem;font-weight:700;cursor:pointer;margin-bottom:8px;font-family:inherit}
+.modal-btn.primary{background:#2563eb;color:#fff}
+.modal-btn.secondary{background:#f1f5f9;color:#64748b}
+.modal-btn.email{background:#059669;color:#fff}
+.modal-btn.pdf{background:#f59e0b;color:#fff}
+/* 로딩 */
+.loading-ov{display:none;position:fixed;inset:0;background:rgba(255,255,255,.9);z-index:300;align-items:center;justify-content:center;flex-direction:column;gap:14px}
+.loading-ov.show{display:flex}
+.spinner{width:44px;height:44px;border:4px solid #e2e8f0;border-top-color:#2563eb;border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-txt{font-size:1rem;color:#1e3a8a;font-weight:600}
+.empty-items{text-align:center;color:#94a3b8;font-size:.95rem;padding:20px 0}
+
+/* ── 플래너허브 스타일 (2026-11-17) ── */
+body{background:#F2F4F6;color:#191F28}
+.topbar{background:#fff;color:#191F28;position:sticky;top:0;z-index:150;padding:12px 14px;border-bottom:1px solid #EEF0F3}
+.topbar .logo{font-size:1.05rem;font-weight:700}
+.topbar .back{background:#F2F4F6;color:#333D4B;font-weight:700;padding:8px 12px}
+.tb-sp{width:58px}
+.section{border-radius:20px;box-shadow:none}
+.sec-title{color:#191F28;font-weight:700}
+.sec-title::before{display:none}
+.type-btn.active,.search-btn,.btn-create,.add-btn,.modal-btn.primary{background:#3182F6}
+.type-btn.active{box-shadow:none}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus,.search-row input:focus{border-color:#3182F6}
+.btn-preview{background:#F2F4F6;color:#333D4B;border:none}
+.action-bar{padding-bottom:calc(12px + env(safe-area-inset-bottom))}
+.prod-name,.item-name,.modal h2{color:#191F28}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <button class="back" onclick="goBack()">‹ 홈</button>
+  <div class="logo">견적서 만들기</div>
+  <span class="tb-sp"></span>
+</div>
+
+<div class="wrap">
+
+  <!-- 견적서 유형 -->
+  <div class="section">
+    <div class="sec-title">견적서 유형</div>
+    <div class="type-toggle">
+      <button class="type-btn active" id="typePersonal" onclick="setType('personal')">👤 개인고객</button>
+      <button class="type-btn" id="typeCorporate" onclick="setType('corporate')">🏢 법인/관공서</button>
+    </div>
+
+    <!-- 판매 방식 (렌탈 / 특판) -->
+    <div class="type-toggle">
+      <button class="type-btn active" id="modeRental" onclick="setMode('rental')">💧 렌탈</button>
+      <button class="type-btn" id="modeSpecial" onclick="setMode('special')">🏷 특판 (일시불)</button>
+    </div>
+    <div class="mode-hint" id="modeHint" style="display:none">특판: 정가에서 30/40/50% 할인 + 유지계약(점검주기별)</div>
+
+    <!-- 고객 정보 -->
+    <div class="sec-title" style="margin-top:4px">고객 정보</div>
+    <div class="form-group">
+      <label>고객명 / 기관명</label>
+      <input type="text" id="qCustomer" placeholder="홍길동 또는 국민연금공단 동대전지사">
+    </div>
+    <div class="grid2">
+      <div class="form-group">
+        <label>담당자 이름</label>
+        <input type="text" id="qPlannerName" placeholder="반현기" value="">
+      </div>
+      <div class="form-group">
+        <label>담당자 연락처</label>
+        <input type="tel" id="qPlannerPhone" placeholder="010-3041-3282" value="">
+      </div>
+    </div>
+    <div class="form-group" id="emailRow" style="display:none">
+      <label>이메일 (법인/관공서)</label>
+      <input type="email" id="qEmail" placeholder="example@gov.kr">
+    </div>
+    <div class="form-group">
+      <label>비고 <span style="font-size:.85rem;color:#94a3b8;font-weight:400">(선택)</span></label>
+      <input type="text" id="qRemark" placeholder="특이사항, 선납할인 안내 등">
+    </div>
+  </div>
+
+  <!-- 제품 추가 -->
+  <div class="section">
+    <div class="sec-title">제품 추가</div>
+    <div class="search-row">
+      <input type="text" id="qSearch" placeholder="제품명 검색... 예) 550, 슈퍼, 서밋" onkeydown="if(event.key==='Enter')searchProduct()">
+      <button class="search-btn" onclick="searchProduct()">검색</button>
+    </div>
+    <div id="productResult" class="product-result"></div>
+
+    <!-- 직수 옵션 -->
+    <input type="hidden" id="qDirectWater">
+  </div>
+
+  <!-- 견적 목록 -->
+  <div class="section" id="itemSection" style="display:none">
+    <div class="sec-title">견적 제품 목록</div>
+    <div class="item-list" id="itemList"></div>
+  </div>
+
+</div>
+
+<div class="action-bar">
+  <button class="btn-preview" onclick="previewQuote()">👁 미리보기</button>
+  <button class="btn-create" id="createBtn" onclick="createQuote()">🔗 견적서 생성</button>
+</div>
+
+<!-- 생성 완료 모달 -->
+<div class="ov" id="resultOv">
+  <div class="modal">
+    <h2>✅ 견적서 생성 완료!</h2>
+    <div class="link-box" id="resultLink"></div>
+    <button class="modal-btn primary" onclick="copyLink()">🔗 링크 복사 (카톡 전송용)</button>
+    <button class="modal-btn email" id="emailBtn" onclick="showEmailInput()" style="display:none">✉️ 이메일 전송</button>
+    <div id="emailInputWrap" style="display:none;margin-bottom:8px">
+      <input type="email" id="sendEmail" placeholder="수신 이메일" style="width:100%;padding:12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:1rem;margin-bottom:8px;outline:none;font-family:inherit">
+      <button class="modal-btn email" onclick="sendEmail()">전송</button>
+    </div>
+    <button class="modal-btn secondary" onclick="closeResult()">닫기</button>
+  </div>
+</div>
+
+<!-- 미리보기 팝업 (2026-11-10) -->
+<div id="pvOv" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,0.6);z-index:250;flex-direction:column;align-items:center;justify-content:center;padding:10px">
+  <div style="width:100%;max-width:900px;height:100%;background:#fff;border-radius:14px;overflow:hidden;display:flex;flex-direction:column">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:#1e3a8a;color:#fff;font-weight:700">
+      <span>👁 미리보기 (고객이 보는 화면)</span>
+      <button onclick="closePreview()" style="background:#fff;color:#1e3a8a;border:none;border-radius:8px;padding:6px 14px;font-weight:700;font-family:inherit;cursor:pointer">닫기</button>
+    </div>
+    <iframe id="pvFrame" style="flex:1;width:100%;border:none;background:#eef1f5"></iframe>
+  </div>
+</div>
+
+<!-- 로딩 -->
+<div class="loading-ov" id="loadingOv">
+  <div class="spinner"></div>
+  <div class="loading-txt" id="loadingTxt">처리 중...</div>
+</div>
+
+<script>
+// ── 플래너허브 앱 안 견적서 화면 (2026-11-17) ─────────────────────
+// 로그인 정보는 허브(같은 주소 index.html)가 이 폰에 저장해 둔 것을 그대로 씀. 없으면 허브로 돌려보냄
+var AUTH = (function () {
+  var u = null, dk = '';
+  try { u = JSON.parse(localStorage.getItem('rentalUser') || 'null'); dk = localStorage.getItem('rentalDeviceKey') || ''; } catch (e) {}
+  if (!u || !u.sessionToken) { location.replace('./'); return {}; }
+  return { name: u.name || '', phone: u.phone || '', token: u.sessionToken, dk: dk };
+})();
+document.getElementById('qPlannerName').value  = AUTH.name  || '';
+document.getElementById('qPlannerPhone').value = AUTH.phone || '';
+
+// 기존 google.script.run 호출 모양 그대로 두고, 실제로는 견적서생성 GAS의 doPost로 fetch
+// (허용 함수 목록은 견적서생성 Code.gs의 QUOTE_API — 함수를 추가하면 두 곳 다 고칠 것)
+var QUOTE_API_URL = 'https://script.google.com/macros/s/AKfycbxgwTPBdXZhxzf0LWUeG5wOdBFbM13xgb8dj1KYlwOxK4ATpYCDPDOrFfOMXNrd0ebV/exec';
+(function () {
+  function Run(s, f) { this._s = s; this._f = f; }
+  Run.prototype.withSuccessHandler = function (fn) { return new Run(fn, this._f); };
+  Run.prototype.withFailureHandler = function (fn) { return new Run(this._s, fn); };
+  ['searchRental', 'searchPromo', 'searchSpecial', 'previewQuoteHtml', 'saveQuote', 'sendQuoteEmail'].forEach(function (fn) {
+    Run.prototype[fn] = function () {
+      var s = this._s, f = this._f, args = [].slice.call(arguments);
+      fetch(QUOTE_API_URL, { method: 'POST', body: JSON.stringify({ fn: fn, args: args }) })
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+          if (d.ok) { if (s) s(d.result); return; }
+          if (/로그인이 만료/.test(d.error || '')) { alert('로그인이 만료되었어요. 플래너허브에서 다시 로그인해 주세요.'); location.replace('./'); return; }
+          if (f) f(new Error(d.error || '오류'));
+        })
+        .catch(function () { if (f) f(new Error('인터넷 연결을 확인하고 다시 시도해 주세요.')); });
+    };
+  });
+  window.google = { script: { run: new Run(null, null) } };
+})();
+</script>
+<script>
+var quoteType = 'personal';
+var saleMode  = 'rental';   // 'rental' | 'special'
+var qItems    = [];
+var _qProds   = [];
+var lastQuoteId = null, lastLink = null;
+
+
+
+// 홈(플래너허브)으로
+function goBack() { location.href = './'; }
+
+function setType(type) {
+  quoteType = type;
+  document.getElementById('typePersonal').classList.toggle('active', type === 'personal');
+  document.getElementById('typeCorporate').classList.toggle('active', type === 'corporate');
+  document.getElementById('emailRow').style.display = type === 'corporate' ? 'block' : 'none';
+}
+
+function setMode(m) {
+  if (qItems.length && ((m === 'special') !== !!qItems[0].isSpecial)) {
+    alert('렌탈 제품과 특판 제품은 한 견적서에 함께 담을 수 없습니다.\n견적 목록을 비운 후 변경해주세요.');
+    return;
+  }
+  saleMode = m;
+  document.getElementById('modeRental').classList.toggle('active', m === 'rental');
+  document.getElementById('modeSpecial').classList.toggle('active', m === 'special');
+  document.getElementById('modeHint').style.display = m === 'special' ? 'block' : 'none';
+  document.getElementById('productResult').innerHTML = '';
+  document.getElementById('qSearch').value = '';
+  document.getElementById('qSearch').placeholder = m === 'special'
+    ? '특판 제품 검색... 예) 아이스트리, 550'
+    : '제품명 검색... 예) 550, 슈퍼, 서밋';
+}
+
+function showLoading(txt) {
+  document.getElementById('loadingTxt').textContent = txt || '처리 중...';
+  document.getElementById('loadingOv').classList.add('show');
+}
+function hideLoading() { document.getElementById('loadingOv').classList.remove('show'); }
+
+// ── 제품 검색
+function searchProduct() {
+  var kw = document.getElementById('qSearch').value.trim();
+  if (!kw) return;
+  var rd = document.getElementById('productResult');
+  rd.innerHTML = '<div style="color:#94a3b8;padding:12px;text-align:center">검색 중...</div>';
+
+  // ★ 특판 모드: 특판_제품 탭에서 검색
+  if (saleMode === 'special') {
+    google.script.run
+      .withSuccessHandler(function(r) { renderSpecialSearch(r); })
+      .withFailureHandler(function(e) { rd.innerHTML = '<div style="color:#dc2626;padding:10px">오류: ' + e.message + '</div>'; })
+      .searchSpecial(kw, AUTH);
+    return;
+  }
+
+  var done = 0, normalProds = [], promoProds = [];
+  function onDone() {
+    if (++done < 2) return;
+    renderProductSearch(normalProds, promoProds);
+  }
+  google.script.run
+    .withSuccessHandler(function(r) { normalProds = r || []; onDone(); })
+    .withFailureHandler(function(e) { normalProds = []; rd.innerHTML = '<div style="color:#dc2626;padding:10px">오류: ' + e.message + '</div>'; onDone(); })
+    .searchRental(kw, AUTH);
+  google.script.run
+    .withSuccessHandler(function(r) { promoProds = r || []; onDone(); })
+    .withFailureHandler(function() { promoProds = []; onDone(); })
+    .searchPromo(kw, AUTH);
+}
+
+function renderProductSearch(normals, promos) {
+  var rd = document.getElementById('productResult');
+  if (!normals.length && !promos.length) {
+    rd.innerHTML = '<div style="color:#94a3b8;padding:10px;text-align:center">결과 없음</div>';
+    return;
+  }
+  _qProds = [];
+  var html = '';
+
+  normals.forEach(function(p) {
+    var i = _qProds.length; _qProds.push(p);
+    var opts = p.rules.map(function(r, j) { return '<option value="' + j + '">' + r.rule + '</option>'; }).join('');
+    var imgHtml = p.imageUrl
+      ? '<img class="prod-img" src="' + p.imageUrl + '" onerror="this.style.display=\'none\'">'
+      : '<div class="prod-img-empty">이미지없음</div>';
+    html += '<div class="prod-card">' +
+      '<div class="prod-header">' + imgHtml +
+      '<div class="prod-info"><div class="prod-name">' + p.name + '</div><div class="prod-meta">' + p.group + ' · ' + p.code + '</div>' + '</div>' + '</div>' +
+      '<div class="prod-body">' +
+      '<div class="prod-row"><select id="qr' + i + '" onchange="updateFee(' + i + ')"><optgroup label="규정 선택">' + opts + '</optgroup></select>' +
+      '<input type="number" id="qq' + i + '" value="1" min="1">' +
+      '<button class="add-btn" onclick="addItem(' + i + ')">+ 추가</button></div>' +
+      '<div id="qfee' + i + '" class="fee-bar">' + getFeeHtml(p.rules[0], false) + '</div></div></div>';
+  });
+
+  if (promos.length) {
+    html += '<div style="font-size:.9rem;color:#92400e;font-weight:700;margin:10px 0 6px;padding:7px 12px;background:#fff7ed;border-radius:8px">🎁 프로모션 제품 (' + promos.length + '개)</div>';
+    promos.forEach(function(p) {
+      p.isPromo = true;
+      var i = _qProds.length; _qProds.push(p);
+      var opts = p.rules.map(function(r, j) { return '<option value="' + j + '">' + r.rule + '</option>'; }).join('');
+      var imgHtml = p.imageUrl
+        ? '<img class="prod-img" src="' + p.imageUrl + '" onerror="this.style.display=\'none\'">'
+        : '<div class="prod-img-empty">이미지없음</div>';
+      html += '<div class="prod-card promo">' +
+        '<div class="prod-header">' + imgHtml +
+        '<div class="prod-info"><div class="prod-name">🎁 ' + p.name + ' <span class="promo-tag">' + (p.promoName || '') + '</span></div><div class="prod-meta">' + p.group + ' · ' + p.code + '</div>' + '</div>' + '</div>' +
+        '<div class="prod-body">' +
+        '<div class="prod-row"><select id="qr' + i + '" onchange="updateFee(' + i + ')"><optgroup label="규정 선택">' + opts + '</optgroup></select>' +
+        '<input type="number" id="qq' + i + '" value="1" min="1">' +
+        '<button class="add-btn promo" onclick="addItem(' + i + ')">+ 추가</button></div>' +
+        '<div id="qfee' + i + '" class="fee-bar">' + getFeeHtml(p.rules[0], true) + '</div></div></div>';
+    });
+  }
+  rd.innerHTML = html;
+}
+
+function fmt(v) { var n = Math.round(parseFloat(v)); return isNaN(n) ? '-' : n.toLocaleString('ko-KR'); }
+function getRental(raw, isPromo) {
+  if (!raw) return null;
+  var v = parseFloat(String(raw).split('-')[0]);
+  if (isNaN(v)) return null;
+  return isPromo ? Math.round(v) : Math.round(v * 1000);
+}
+function getFeeHtml(rule, isPromo) {
+  var raw = rule.rental && rule.rental.length ? rule.rental[0] : null;
+  var rental = getRental(raw, isPromo);
+  var comm = rule.planner ? parseInt(rule.planner) : null;
+  return '<div class="fee-cell"><div class="fee-label">💰 월렌탈료</div><div class="fee-value">' +
+    (rental !== null ? fmt(rental) + '원' : '-') + '</div></div>' +
+    '<div class="fee-cell"><div class="fee-label">' + (isPromo ? '🎁 프로모션수수료' : '✅ 수수료') + '</div><div class="fee-value" style="color:' + (isPromo ? '#f97316' : '#16a34a') + '">' +
+    (comm !== null ? fmt(comm) + '원' : '-') + '</div></div>';
+}
+function updateFee(i) {
+  var p = _qProds[i]; if (!p) return;
+  var rule = p.rules[parseInt(document.getElementById('qr' + i).value)];
+  document.getElementById('qfee' + i).innerHTML = getFeeHtml(rule, p.isPromo || false);
+}
+
+// ── 특판 검색 결과 렌더링
+function renderSpecialSearch(prods) {
+  var rd = document.getElementById('productResult');
+  if (prods && prods.error) {
+    rd.innerHTML = '<div style="color:#dc2626;padding:10px">오류: ' + prods.error + '</div>';
+    return;
+  }
+  if (!prods || !prods.length) {
+    rd.innerHTML = '<div style="color:#94a3b8;padding:10px;text-align:center">결과 없음 (특판가가 등록된 제품만 검색됩니다)</div>';
+    return;
+  }
+  _qProds = [];
+  var html = '<div style="font-size:.9rem;color:#166534;font-weight:700;margin:0 0 6px;padding:7px 12px;background:#f0fdf4;border-radius:8px">🏷 특판 제품 (' + prods.length + '개) — 정가 할인 + 유지계약</div>';
+  prods.forEach(function(p) {
+    p.isSpecial = true;
+    var i = _qProds.length; _qProds.push(p);
+    var rateOpts = [30, 40, 50].map(function(r) {
+      return '<option value="' + r + '"' + (r === 40 ? ' selected' : '') + '>' + r + '%</option>';
+    }).join('');
+    var maintOpts = p.maints.length
+      ? p.maints.map(function(m, j) { return '<option value="' + j + '">' + m.label + ' · ' + Number(m.price).toLocaleString('ko-KR') + '원</option>'; }).join('')
+      : '<option value="-1">유지계약 없음</option>';
+    var imgHtml = p.imageUrl
+      ? '<img class="prod-img" src="' + p.imageUrl + '" onerror="this.style.display=\'none\'">'
+      : '<div class="prod-img-empty">이미지없음</div>';
+    html += '<div class="prod-card special">' +
+      '<div class="prod-header">' + imgHtml +
+      '<div class="prod-info"><div class="prod-name">🏷 ' + p.name + '</div><div class="prod-meta">' + p.code + ' · 정가 ' + Number(p.listPrice).toLocaleString('ko-KR') + '원</div></div>' + '</div>' +
+      '<div class="prod-body">' +
+      '<div class="prod-row"><select id="qsr' + i + '" onchange="updateSpecialFee(' + i + ')" style="flex:0 0 110px">' + rateOpts + '</select>' +
+      '<select id="qsm' + i + '" onchange="updateSpecialFee(' + i + ')">' + maintOpts + '</select></div>' +
+      '<div class="prod-row"><input type="number" id="qq' + i + '" value="1" min="1">' +
+      '<button class="add-btn special" onclick="addSpecialItem(' + i + ')" style="flex:1">+ 추가</button></div>' +
+      '<div id="qfee' + i + '" class="fee-bar">' + getSpecialFeeHtml(p, 40, p.maints.length ? 0 : -1) + '</div></div></div>';
+  });
+  rd.innerHTML = html;
+}
+
+function getSpecialFeeHtml(p, rate, mi) {
+  var sp = Math.round(p.listPrice * (100 - rate) / 100);
+  var mp = (mi >= 0 && p.maints[mi]) ? p.maints[mi].price : 0;
+  return '<div class="fee-cell"><div class="fee-label">🏷 특판가 (' + rate + '% 할인)</div><div class="fee-value">' + sp.toLocaleString('ko-KR') + '원</div></div>' +
+    '<div class="fee-cell"><div class="fee-label">🔧 유지계약</div><div class="fee-value" style="color:#16a34a">' + (mp ? mp.toLocaleString('ko-KR') + '원' : '-') + '</div></div>' +
+    '<div class="fee-cell"><div class="fee-label">💰 합계</div><div class="fee-value" style="color:#dc2626">' + (sp + mp).toLocaleString('ko-KR') + '원</div></div>';
+}
+
+function updateSpecialFee(i) {
+  var p = _qProds[i]; if (!p) return;
+  var rate = parseInt(document.getElementById('qsr' + i).value);
+  var mi   = parseInt(document.getElementById('qsm' + i).value);
+  document.getElementById('qfee' + i).innerHTML = getSpecialFeeHtml(p, rate, mi);
+}
+
+function addSpecialItem(i) {
+  var p = _qProds[i]; if (!p) return;
+  if (qItems.length && !qItems[0].isSpecial) {
+    alert('렌탈 제품과 특판 제품은 한 견적서에 함께 담을 수 없습니다.');
+    return;
+  }
+  var rate = parseInt(document.getElementById('qsr' + i).value);
+  var mi   = parseInt(document.getElementById('qsm' + i).value);
+  var qty  = parseInt(document.getElementById('qq' + i).value) || 1;
+  var m    = (mi >= 0 && p.maints[mi]) ? p.maints[mi] : null;
+  qItems.push({
+    name: p.name,
+    code: p.code,
+    group: '특판',
+    rule: '특판 ' + rate + '% 할인' + (m ? ' · ' + m.label : ''),
+    listPrice: p.listPrice,
+    rate: rate,
+    specialPrice: Math.round(p.listPrice * (100 - rate) / 100),
+    maintKey: m ? m.key : '',
+    maintLabel: m ? m.label : '',
+    maintPrice: m ? m.price : 0,
+    qty: qty,
+    isSpecial: true,
+    isPromo: false,
+    promoRows: [],
+    rentalArr: [],
+    imageUrl: p.imageUrl || '',
+    spec: p.spec || '',
+    remark: '',
+  });
+  renderItems();
+  document.getElementById('productResult').innerHTML = '';
+  document.getElementById('qSearch').value = '';
+}
+
+// ── 아이템 추가
+function addItem(i) {
+  var p = _qProds[i];
+  if (!p) return;
+  var ruleIdx = parseInt(document.getElementById('qr' + i).value);
+  var qty = parseInt(document.getElementById('qq' + i).value) || 1;
+  var rule = p.rules[ruleIdx];
+  var raw = rule.rental && rule.rental.length ? rule.rental[0] : null;
+  var rentalNum = getRental(raw, p.isPromo || false);
+
+  // 프로모션 약정별 반값 계산
+  var promoRows = [];
+if (p.isPromo && rentalNum && rule.note && rule.note.indexOf('반값') !== -1) {
+    var months = parseInt((rule.rule.match(/\d+/) || ['60'])[0]);
+    var noteMonthMatch = rule.note.match(/(\d+)개월/);
+    var halfMonths = noteMonthMatch ? parseInt(noteMonthMatch[1]) : 6;
+    promoRows = [
+      { period: '1~' + halfMonths + '개월 (반값)', price: Math.round(rentalNum / 2) },
+      { period: (halfMonths + 1) + '~' + months + '개월 (정상)', price: rentalNum },
+    ];
+}
+
+  qItems.push({
+    name: p.name,
+    code: p.code,
+    group: p.group,
+    rule: rule.rule,
+    rentalArr: rule.rental,
+    qty: qty,
+    planner: rule.planner,
+    isPromo: p.isPromo || false,
+    promoName: p.promoName || '',
+    imageUrl: p.imageUrl || '',
+    promoRows: promoRows,
+    remark: '',
+    spec: p.spec || '',
+  });
+
+  renderItems();
+  document.getElementById('productResult').innerHTML = '';
+  document.getElementById('qSearch').value = '';
+}
+
+function renderItems() {
+  var list = document.getElementById('itemList');
+  var sec  = document.getElementById('itemSection');
+  if (!qItems.length) { sec.style.display = 'none'; return; }
+  sec.style.display = 'block';
+  list.innerHTML = qItems.map(function(item, i) {
+    // ★ 특판 아이템 표시
+    if (item.isSpecial) {
+      var unit = item.specialPrice + (item.maintPrice || 0);
+      return '<div class="item-card special-item">' +
+        '<div class="item-info">' +
+        '<div class="item-name">🏷 ' + item.name + '<span class="special-tag">특판 ' + item.rate + '% 할인</span></div>' +
+        '<div class="item-sub">특판가 ' + item.specialPrice.toLocaleString('ko-KR') + '원' +
+        (item.maintPrice ? ' + 유지 ' + item.maintPrice.toLocaleString('ko-KR') + '원 (' + item.maintLabel + ')' : '') +
+        ' · ' + item.qty + '대 <span class="item-comm">| 합계 ' + (unit * item.qty).toLocaleString('ko-KR') + '원</span></div></div>' +
+        '<button class="item-del" onclick="removeItem(' + i + ')">✕</button></div>';
+    }
+    var raw = item.rentalArr && item.rentalArr.length ? item.rentalArr[0] : null;
+    var rental = getRental(raw, item.isPromo);
+    var comm = item.planner ? parseInt(item.planner).toLocaleString('ko-KR') + '원' : '-';
+    return '<div class="item-card' + (item.isPromo ? ' promo-item' : '') + '">' +
+      '<div class="item-info">' +
+      '<div class="item-name">' + (item.isPromo ? '🎁 ' : '') + item.name +
+      (item.isPromo ? '<span class="promo-tag">' + item.promoName + '</span>' : '') + '</div>' +
+      '<div class="item-sub">' + item.rule + ' · 월 ' + (rental !== null ? rental.toLocaleString('ko-KR') : '-') + '원 · ' + item.qty + '대 ' +
+      '<span class="item-comm' + (item.isPromo ? ' promo' : '') + '">| 수수료 ' + comm + '</span></div></div>' +
+      '<button class="item-del" onclick="removeItem(' + i + ')">✕</button></div>';
+  }).join('');
+}
+function removeItem(i) { qItems.splice(i, 1); renderItems(); }
+
+// ── 미리보기
+// 생성 전에 고객이 볼 화면을 팝업으로 보여줌 (저장 안 함, 2026-11-10)
+function previewQuote() {
+  var data = collectQuoteData(); if (!data) return;
+  showLoading('미리보기 만드는 중...');
+  google.script.run
+    .withSuccessHandler(function(html) {
+      hideLoading();
+      document.getElementById('pvFrame').srcdoc = html;
+      document.getElementById('pvOv').style.display = 'flex';
+    })
+    .withFailureHandler(function(e) { hideLoading(); alert('오류: ' + e.message); })
+    .previewQuoteHtml(data, AUTH);
+}
+function closePreview() {
+  document.getElementById('pvOv').style.display = 'none';
+  document.getElementById('pvFrame').srcdoc = '';
+}
+
+// 입력값 모으기 — 미리보기·견적서 생성이 같이 씀
+function collectQuoteData() {
+  if (!qItems.length) { alert('제품을 추가해주세요'); return null; }
+  var customer = document.getElementById('qCustomer').value.trim() || '고객님';
+  var plannerName  = document.getElementById('qPlannerName').value.trim();
+  var plannerPhone = document.getElementById('qPlannerPhone').value.trim();
+  if (!plannerName) plannerName = document.getElementById('qPlannerName').placeholder;
+  if (!plannerPhone) plannerPhone = document.getElementById('qPlannerPhone').placeholder;
+  return {
+    type:         quoteType,
+    customer:     customer,
+    plannerName:  plannerName,
+    plannerPhone: formatPhone(plannerPhone),
+    plannerEmail: document.getElementById('qEmail').value.trim(),
+    branch:       '중구지사',
+    remark:       document.getElementById('qRemark').value.trim(),
+    directWater:  false,
+    items:        qItems,
+  };
+}
+
+function formatPhone(phone) {
+  if (!phone) return '';
+  var s = String(phone).replace(/[^0-9]/g, '');
+  if (s.length === 10 && s.charAt(0) !== '0') s = '0' + s;
+  if (s.length === 11) return s.slice(0,3) + '-' + s.slice(3,7) + '-' + s.slice(7);
+  if (s.length === 10) return s.slice(0,3) + '-' + s.slice(3,6) + '-' + s.slice(6);
+  return phone;
+}
+
+// ── 견적서 생성
+
+function createQuote() {
+  var data = collectQuoteData(); if (!data) return;
+
+  showLoading('견적서 생성 중...');
+
+  google.script.run
+    .withSuccessHandler(function(res) {
+      hideLoading();
+      if (res.ok) {
+        lastQuoteId = res.quoteId;
+        lastLink    = res.link;
+        document.getElementById('resultLink').textContent = res.link;
+        document.getElementById('emailBtn').style.display = quoteType === 'corporate' ? 'block' : 'none';
+        document.getElementById('resultOv').classList.add('show');
+      } else {
+        alert('오류: ' + res.error);
+      }
+    })
+    .withFailureHandler(function(e) {
+      hideLoading();
+      alert('오류: ' + e.message);
+    })
+
+    .saveQuote(data, AUTH);
+}
+
+// ── 링크 복사
+function copyLink() {
+  if (!lastLink) return;
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(lastLink).then(function() {
+      alert('✅ 링크가 복사되었습니다!\n카카오톡에 붙여넣기 하세요.');
+    });
+  } else {
+    var ta = document.createElement('textarea');
+    ta.value = lastLink;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    alert('✅ 링크가 복사되었습니다!');
+  }
+}
+
+function showEmailInput() {
+  document.getElementById('emailInputWrap').style.display = 'block';
+  // 법인이면 이미 입력된 이메일 자동 채움
+  var email = document.getElementById('qEmail').value.trim();
+  if (email) document.getElementById('sendEmail').value = email;
+}
+
+function sendEmail() {
+  var email = document.getElementById('sendEmail').value.trim();
+  if (!email) { alert('이메일을 입력해주세요'); return; }
+  if (!lastQuoteId) return;
+  showLoading('이메일 전송 중...');
+  google.script.run
+    .withSuccessHandler(function(res) {
+      hideLoading();
+      if (res.ok) alert('✅ 이메일 전송 완료!');
+      else alert('오류: ' + res.error);
+    })
+    .withFailureHandler(function(e) { hideLoading(); alert('오류: ' + e.message); })
+    .sendQuoteEmail(lastQuoteId, email, null, null, AUTH);
+}
+
+function closeResult() {
+  document.getElementById('resultOv').classList.remove('show');
+  document.getElementById('emailInputWrap').style.display = 'none';
+}
+</script>
+</body>
+</html>
