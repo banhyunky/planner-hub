@@ -140,11 +140,16 @@ body{background:#F2F4F6;color:#191F28}
       <input type="text" id="qCustomer" placeholder="홍길동 또는 국민연금공단 동대전지사">
     </div>
     <div class="grid2">
-      <div class="form-group">
-        <label>담당자 이름</label>
-        <input type="text" id="qPlannerName" placeholder="반현기" value="">
+      <div class="form-group" style="grid-column:1/-1">
+        <label>담당자 이름 · 직함</label>
+        <div style="display:flex;gap:6px">
+          <input type="text" id="qPlannerName" placeholder="반현기" value="" style="flex:1;min-width:0">
+          <select id="qPlannerRole" style="width:auto;flex-shrink:0;padding:13px 6px" onchange="try{localStorage.setItem('quoteRole',this.value)}catch(e){}">
+            <option>플래너</option><option>팀장</option><option>지사장</option>
+          </select>
+        </div>
       </div>
-      <div class="form-group">
+      <div class="form-group" style="grid-column:1/-1">
         <label>담당자 연락처</label>
         <input type="tel" id="qPlannerPhone" placeholder="010-3041-3282" value="">
       </div>
@@ -228,6 +233,8 @@ var AUTH = (function () {
 })();
 document.getElementById('qPlannerName').value  = AUTH.name  || '';
 document.getElementById('qPlannerPhone').value = AUTH.phone || '';
+// 직함(플래너/팀장/지사장): 이 폰에서 마지막으로 고른 값 기억. 서버 Code.gs QUOTE_ROLES와 같은 목록
+try { var _r = localStorage.getItem('quoteRole'); if (_r) document.getElementById('qPlannerRole').value = _r; } catch (e) {}
 
 // 기존 google.script.run 호출 모양 그대로 두고, 실제로는 견적서생성 GAS의 doPost로 fetch
 // (허용 함수 목록은 견적서생성 Code.gs의 QUOTE_API — 함수를 추가하면 두 곳 다 고칠 것)
@@ -587,6 +594,7 @@ function collectQuoteData() {
     customer:     customer,
     plannerName:  plannerName,
     plannerPhone: formatPhone(plannerPhone),
+    plannerRole:  document.getElementById('qPlannerRole').value,
     plannerEmail: document.getElementById('qEmail').value.trim(),
     branch:       '중구지사',
     remark:       document.getElementById('qRemark').value.trim(),
