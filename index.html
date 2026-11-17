@@ -822,8 +822,11 @@ var FLY_BASE = 'https://banhyunky.github.io/chungho/flyers/';
 function flyOrg(){
   var b = currentUser ? (currentUser.branch || currentUser.dept || '') : '';
   if (!b) b = '중구지사';
-  return '청호나이스 ' + (b.indexOf('대전') === 0 ? b : '대전' + b);
+  var skip = b.indexOf('대전') === 0 || FLY_NO_DAEJEON.some(function(c){ return b.indexOf(c) === 0; });
+  return '청호나이스 ' + (skip ? b : '대전' + b);
 }
+// 대전이 아닌 지사 — 앞에 '대전'을 안 붙임 (명함 데이터 NO_DAEJEON과 같이 고칠 것)
+var FLY_NO_DAEJEON = ['세종'];
 var FLY_W = 794, FLY_FOOT = 128;
 var FLY_LIST = [
   { id:'vip', label:'11월 VIP 50% 할인', title:'VIP할인', file:'2026-11_vip-50off.jpg', srcW:794, srcH:1020, cropH:982, scale:2,
