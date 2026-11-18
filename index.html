@@ -500,7 +500,7 @@ h1{text-align:center;font-size:1.4rem;color:#1e3a8a;margin-bottom:18px}
       <symbol id="ph-file" viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></symbol>
       <symbol id="ph-user-check" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></symbol>
       <symbol id="ph-gift" viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5C10 3 12 8 12 8s2-5 4.5-5a2.5 2.5 0 0 1 0 5"/></symbol>
-      <symbol id="ph-trend" viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></symbol>
+      <symbol id="ph-trend" viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></symbol><symbol id="ph-chart" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></symbol>
       <symbol id="ph-store" viewBox="0 0 24 24"><path d="M3 9l1.5-5h15L21 9"/><path d="M3 9h18v1.5a3 3 0 0 1-6 0 3 3 0 0 1-6 0 3 3 0 0 1-6 0Z"/><path d="M5 13v8h14v-8"/><path d="M10 21v-5h4v5"/></symbol>
       <symbol id="ph-card" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M15 8h2"/><path d="M15 12h2"/><path d="M7 16h10"/></symbol>
       <symbol id="ph-image" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.09-3.09a2 2 0 0 0-2.82 0L6 21"/></symbol>
@@ -525,7 +525,8 @@ h1{text-align:center;font-size:1.4rem;color:#1e3a8a;margin-bottom:18px}
       <div class="ph-card ph-list">
         <button class="ph-row ph-prospect" onclick="openProspectApp()"><div class="ph-dot red"><svg class="ph-i"><use href="#ph-user-check"/></svg></div><div class="ph-txt"><b>가망고객</b><span class="ph-badge">임박</span><em>만기 다가오는 내 고객</em></div><div class="ph-chev"><svg class="ph-i"><use href="#ph-chev"/></svg></div></button>
         <button class="ph-row" onclick="showPage('promo')"><div class="ph-dot violet"><svg class="ph-i"><use href="#ph-gift"/></svg></div><div class="ph-txt"><b>이달의 프로모션</b><em>할인 렌탈료 &amp; 제휴카드 혜택</em></div><div class="ph-chev"><svg class="ph-i"><use href="#ph-chev"/></svg></div></button>
-        <button class="ph-row ph-trend" onclick="openTrendApp()"><div class="ph-dot green"><svg class="ph-i"><use href="#ph-trend"/></svg></div><div class="ph-txt"><b>수수료 추이</b><em>실적 입력 &amp; 수수료 현황</em></div><div class="ph-chev"><svg class="ph-i"><use href="#ph-chev"/></svg></div></button>
+        <button class="ph-row ph-status" onclick="openStatusApp()"><div class="ph-dot blue"><svg class="ph-i"><use href="#ph-chart"/></svg></div><div class="ph-txt"><b>내실적현황</b><em>이번달 실적 &amp; 예상수수료</em></div><div class="ph-chev"><svg class="ph-i"><use href="#ph-chev"/></svg></div></button>
+        <button class="ph-row ph-trend" onclick="openTrendApp()"><div class="ph-dot green"><svg class="ph-i"><use href="#ph-trend"/></svg></div><div class="ph-txt"><b>지사매출실적</b><em>실적 입력 &amp; 수수료 현황</em></div><div class="ph-chev"><svg class="ph-i"><use href="#ph-chev"/></svg></div></button>
       </div>
     </div>
   </div>
@@ -1079,7 +1080,11 @@ function _joinDeptChange(){
 function _applyDataButtons(u){
   if(!_branchInfo||!_branchInfo.dataBranches)return;
   var ok=_branchInfo.dataBranches.indexOf((u&&(u.branch||u.dept))||'')>-1;
-  ['.ph-prospect','.ph-trend'].forEach(function(q){var b=document.querySelector(q);if(b)b.style.display=ok?'':'none';});
+  ['.ph-prospect'].forEach(function(q){var b=document.querySelector(q);if(b)b.style.display=ok?'':'none';});
+}
+function _hasBranchData(){
+  if(!_branchInfo||!_branchInfo.dataBranches)return true;
+  return _branchInfo.dataBranches.indexOf((currentUser&&(currentUser.branch||currentUser.dept))||'')>-1;
 }
 
 function openShopOrProspect() { openProspectApp(); }
@@ -1090,7 +1095,16 @@ function openProspectApp() {
   location.href = 'https://banhyunky.github.io/planner-hub/prospect.html';
 }
 
+function openStatusApp() {
+  // 내실적현황 (2026-11-18): 플래너허브 앱 안, 본인 실적만. 타지사(매출 데이터 없음)는 안내만
+  if (!currentUser) { alert('로그인이 필요합니다'); return; }
+  if (!_hasBranchData()) { alert('데이터가 없습니다'); return; }
+  location.href = 'https://banhyunky.github.io/planner-hub/status.html';
+}
+
 function openTrendApp() {
+  // 지사매출실적 (구 수수료 추이, 2026-11-18 이름 변경만 — 화면·로직은 그대로)
+  if (!_hasBranchData()) { alert('데이터가 없습니다'); return; }
   var name  = currentUser ? encodeURIComponent(currentUser.name)  : '';
   var phone = currentUser ? encodeURIComponent(currentUser.phone) : '';
   var email = currentUser ? encodeURIComponent(currentUser.email || '') : '';
