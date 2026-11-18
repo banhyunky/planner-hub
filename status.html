@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>내실적현황 · 플래너허브</title>
+<meta name="theme-color" content="#ffffff">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif;background:#F2F4F6;color:#191F28;padding-bottom:40px}
+.topbar{background:#fff;position:sticky;top:0;z-index:150;padding:12px 14px;border-bottom:1px solid #EEF0F3;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.topbar .logo{font-size:1.05rem;font-weight:700}
+.topbar .back{background:#F2F4F6;color:#333D4B;border:none;padding:8px 12px;border-radius:8px;font-size:.9rem;font-weight:700;font-family:inherit;cursor:pointer}
+.tb-right{min-width:58px}
+.wrap{max-width:600px;margin:0 auto;padding:16px 14px}
+.state-box{text-align:center;padding:48px 16px;color:#94a3b8}
+.state-icon{font-size:28px;margin-bottom:6px}
+.error-msg{background:#fef2f2;color:#ef4444;padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:10px}
+.hi-card{background:#fff;border-radius:20px;box-shadow:0 2px 8px rgba(0,0,0,.04);padding:20px;margin-bottom:14px}
+.hi-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px}
+.hi-name{font-size:1.1rem;font-weight:800}
+.hi-sub{font-size:.8rem;color:#8B95A1}
+.hi-ym{font-size:.78rem;color:#8B95A1;margin-bottom:16px}
+.hi-main{display:flex;align-items:baseline;gap:6px;margin-bottom:10px}
+.hi-main b{font-size:2.1rem;font-weight:800;color:#1e3a8a}
+.hi-main span{font-size:1rem;color:#8B95A1}
+.hi-bar-wrap{background:#F2F4F6;border-radius:999px;height:8px;overflow:hidden;margin-bottom:8px}
+.hi-bar{background:#3182F6;height:100%;border-radius:999px;transition:width .3s}
+.hi-nudge{font-size:.82rem;color:#3182F6;font-weight:600}
+.hi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.hi-tile{background:#fff;border-radius:16px;box-shadow:0 2px 8px rgba(0,0,0,.04);padding:16px 10px;text-align:center}
+.hi-tile-label{font-size:.76rem;color:#8B95A1;margin-bottom:6px}
+.hi-tile-value{font-size:1.25rem;font-weight:800;color:#191F28}
+.hi-note{font-size:.72rem;color:#B0B8C1;text-align:center;margin-top:16px;line-height:1.5}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <button class="back" onclick="location.href='./'">‹ 홈</button>
+  <div class="logo">내실적현황</div>
+  <div class="tb-right"></div>
+</div>
+<div class="wrap" id="hiRoot">
+  <div class="state-box"><div class="state-icon">⏳</div><p>불러오는 중...</p></div>
+</div>
+
+<script>
+// ── 플래너허브 앱 안 내실적현황 화면 (2026-11-18) ──────────────────────
+// 로그인 정보는 허브(같은 주소 index.html)가 이 폰에 저장해 둔 것을 그대로 씀. 없으면 허브로 돌려보냄
+var INIT_NAME = '', INIT_PHONE = '', INIT_TOKEN = '', INIT_DK = '';
+(function () {
+  var u = null;
+  try { u = JSON.parse(localStorage.getItem('rentalUser') || 'null'); INIT_DK = localStorage.getItem('rentalDeviceKey') || ''; } catch (e) {}
+  if (!u || !u.sessionToken) { location.replace('./'); return; }
+  INIT_NAME = u.name || ''; INIT_PHONE = u.phone || ''; INIT_TOKEN = u.sessionToken;
+})();
+
+function $(id) { return document.getElementById(id); }
+</script>
+<script>
+// ── 설치형 앱(GitHub Pages)용 서버 호출 — 매출추이마스터 doPost (가망고객과 같은 주소, getMyStatus 허용목록 추가됨) ──
+var STATUS_API_URL = 'https://script.google.com/macros/s/AKfycbxHR4Z7CQOj2lZNb4UXL2AwSWnAAZuAyTARFaYJBSChKWgr2i0saCVV78h6FA_cCvEgmA/exec';
+(function () {
+  function Run(s, f) { this._s = s; this._f = f; }
+  Run.prototype.withSuccessHandler = function (fn) { return new Run(fn, this._f); };
+  Run.prototype.withFailureHandler = function (fn) { return new Run(this._s, fn); };
+  ['getMyStatus'].forEach(function (fn) {
+    Run.prototype[fn] = function () {
+      var s = this._s, f = this._f, args = [].slice.call(arguments);
+      fetch(STATUS_API_URL, { method: 'POST', body: JSON.stringify({ fn: fn, args: args }) })
+        .then(function (r) { return r.json(); })
+        .then(function (d) { if (d.ok) { if (s) s(d.result); } else { if (f) f(new Error(d.error || '오류')); } })
+        .catch(function () { if (f) f(new Error('인터넷 연결을 확인하고 다시 시도해 주세요.')); });
+    };
+  });
+  window.google = { script: { run: new Run(null, null) } };
+})();
+
+function loadMyStatus() {
+  var root = $('hiRoot');
+  var authCred = { name: INIT_NAME, phone: INIT_PHONE, token: INIT_TOKEN, dk: INIT_DK };
+  google.script.run
+    .withSuccessHandler(function (res) {
+      if (!res || res.error) {
+        root.innerHTML = '<div class="state-box"><div class="state-icon">📭</div><p>' + ((res && res.error) || '데이터가 없습니다') + '</p></div>';
+        return;
+      }
+      renderStatus(res);
+    })
+    .withFailureHandler(function (e) {
+      root.innerHTML = '<div class="error-msg">오류: ' + e.message + '</div>';
+    })
+    .getMyStatus(authCred);
+}
+
+function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]; }); }
+
+function renderStatus(d) {
+  var total = Number(d.total || 0);
+  var target = Number(d.monthly_target || 0);
+  var pct = target > 0 ? Math.min(100, Math.round(total / target * 100)) : 0;
+  var remain = target > 0 ? Math.max(0, target - total) : null;
+  var procRate = (d.process_rate === null || d.process_rate === undefined) ? '—' : (d.process_rate + '%');
+  var specialFee = Number(d.special_commission || 0);
+
+  var nudge = '';
+  if (remain !== null) {
+    nudge = remain > 0
+      ? '목표까지 <b>' + remain + '건</b> 남았어요'
+      : '이번달 목표를 달성했어요 🎉';
+  }
+
+  var html = '';
+  html += '<div class="hi-card">';
+  html += '  <div class="hi-head"><div class="hi-name">' + esc(d.name) + '</div><div class="hi-sub">' + esc(d.team || d.branchName || '') + '</div></div>';
+  html += '  <div class="hi-ym">' + esc(d.ym) + ' 실적</div>';
+  html += '  <div class="hi-main"><b>' + total + '</b><span>건' + (target > 0 ? ' / 목표 ' + target + '건' : '') + '</span></div>';
+  if (target > 0) {
+    html += '  <div class="hi-bar-wrap"><div class="hi-bar" style="width:' + pct + '%"></div></div>';
+  }
+  if (nudge) html += '  <div class="hi-nudge">' + nudge + '</div>';
+  html += '</div>';
+
+  html += '<div class="hi-grid">';
+  html += '  <div class="hi-tile"><div class="hi-tile-label">전략상품</div><div class="hi-tile-value">' + Number(d.strategic || 0) + '건</div></div>';
+  html += '  <div class="hi-tile"><div class="hi-tile-label">처리율</div><div class="hi-tile-value">' + procRate + '</div></div>';
+  html += '  <div class="hi-tile"><div class="hi-tile-label">특판수수료</div><div class="hi-tile-value">' + specialFee.toLocaleString() + '</div></div>';
+  html += '</div>';
+
+  html += '<div class="hi-note">특판수수료는 특판 상품 건만 반영된 금액이며, 렌탈 수수료는 포함되지 않습니다.</div>';
+
+  $('hiRoot').innerHTML = html;
+}
+
+loadMyStatus();
+</script>
+</body>
+</html>
