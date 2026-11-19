@@ -500,14 +500,24 @@ function refreshSimOutputs() {
   }
 }
 
+// 실제 매출 기준 총 건수(슬라이더를 아무리 움직여도 변하지 않는 기준점) — 프리셋은 항상 이 값에서 계산
+function simActualBaseTotal() {
+  return (SIM_BASE.rentalCount || 0) + (SIM_BASE.specialCount || 0) + (SIM_BASE.installmentCount || 0);
+}
+
 function applyPreset(target) {
-  var current = simTotalCount();
+  var baseTotal = simActualBaseTotal();
   var msg = $('presetMsg');
-  if (current >= target) {
+  // 프리셋을 누를 때마다 실제 매출 기준으로 슬라이더를 되돌린 뒤 목표까지 채움(이전 프리셋 클릭의 누적값이 아님)
+  SIM_STATE.rental = SIM_BASE.rentalCount || 0;
+  SIM_STATE.special = SIM_BASE.specialCount || 0;
+  SIM_STATE.installment = SIM_BASE.installmentCount || 0;
+  if (baseTotal >= target) {
     msg.textContent = '이미 ' + target + '건 목표를 달성했어요 🎉 다음 목표에 도전해 보세요!';
+    renderSim();
     return;
   }
-  var gap = target - current;
+  var gap = target - baseTotal;
   var maxRental = Number($('rentalSlider').max);
   SIM_STATE.rental = Math.min(maxRental, SIM_STATE.rental + gap);
   var achieved = simTotalCount() >= target;
