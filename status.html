@@ -50,6 +50,56 @@ body{font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif;background:#F2
 .hist-ym{font-size:.82rem;color:#8B95A1}
 .hist-amt{font-weight:700;font-size:.86rem;text-align:right}
 .hist-meta{color:#B0B8C1;font-size:.7rem;text-align:right;margin-top:2px}
+
+/* ── 탭 전환 ── */
+.tabbar{display:flex;background:#fff;border-bottom:1px solid #EEF0F3;position:sticky;top:49px;z-index:140}
+.tab-btn{flex:1;background:none;border:none;font-family:inherit;font-size:.88rem;font-weight:700;color:#8B95A1;padding:13px 4px;cursor:pointer;border-bottom:2px solid transparent}
+.tab-btn.active{color:#3182F6;border-bottom-color:#3182F6}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+
+/* ── 수수료 시뮬레이터 ── */
+.sim-top{background:linear-gradient(135deg,#3182F6,#1b64da);border-radius:20px;padding:22px 20px;margin-bottom:14px;color:#fff}
+.sim-top-label{font-size:.78rem;opacity:.85;margin-bottom:4px}
+.sim-top-amt{font-size:1.9rem;font-weight:800;margin-bottom:10px}
+.sim-top-sub{font-size:.76rem;opacity:.85;line-height:1.5}
+.sim-section{background:#fff;border-radius:20px;box-shadow:0 2px 8px rgba(0,0,0,.04);padding:18px 20px;margin-bottom:12px}
+.sim-section-title{font-size:.9rem;font-weight:800;margin-bottom:14px;display:flex;align-items:center;gap:6px}
+.sim-row{margin-bottom:16px}
+.sim-row:last-child{margin-bottom:0}
+.sim-row-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.sim-row-label{font-size:.84rem;color:#333D4B;font-weight:600}
+.sim-row-val{font-size:.95rem;font-weight:800;color:#3182F6}
+.sim-slider{width:100%;height:6px;border-radius:999px;background:#E5E8EB;-webkit-appearance:none;appearance:none}
+.sim-slider::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:#3182F6;border:3px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.25);cursor:pointer}
+.sim-slider::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:#3182F6;border:3px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.25);cursor:pointer}
+.sim-num{width:100%;border:1px solid #E5E8EB;border-radius:10px;padding:10px 12px;font-size:.88rem;font-family:inherit;font-weight:700;color:#191F28}
+.sim-num-wrap{display:flex;align-items:center;gap:8px;margin-top:8px}
+.sim-num-wrap .sim-num{flex:1}
+.sim-unit{font-size:.78rem;color:#8B95A1;flex-shrink:0}
+.sim-check-row{display:flex;align-items:center;gap:6px;margin-top:8px;font-size:.78rem;color:#8B95A1}
+.sim-check-row input{width:15px;height:15px}
+.sim-stub-note{font-size:.72rem;color:#B0B8C1;background:#F7F8FA;border-radius:8px;padding:8px 10px;margin-top:6px}
+.sim-caption{font-size:.72rem;color:#B0B8C1;margin-top:6px}
+.sim-select{width:100%;box-sizing:border-box;appearance:none;-webkit-appearance:none;background:#fff url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="6"><path d="M0 0l5 6 5-6z" fill="%238B95A1"/></svg>') no-repeat right 14px center;border:1px solid #E5E8EB;border-radius:10px;padding:11px 36px 11px 14px;font-size:.86rem;font-weight:700;color:#191F28}
+.sim-breakdown{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.sim-bd-tile{background:#F7F8FA;border-radius:14px;padding:14px 12px}
+.sim-bd-label{font-size:.74rem;color:#8B95A1;margin-bottom:4px}
+.sim-bd-val{font-size:1rem;font-weight:800;color:#191F28}
+.sim-preset-row{display:flex;gap:8px;margin-bottom:12px}
+.sim-preset-btn{flex:1;background:#EFF6FF;color:#3182F6;border:none;border-radius:12px;padding:12px 4px;font-family:inherit;font-size:.78rem;font-weight:700;cursor:pointer;text-align:center;line-height:1.4}
+.sim-preset-btn b{display:block;font-size:.92rem;margin-bottom:2px}
+.sim-preset-msg{font-size:.78rem;color:#3182F6;font-weight:600;text-align:center;margin-top:2px;min-height:18px}
+.sim-save-btn{width:100%;background:#191F28;color:#fff;border:none;border-radius:14px;padding:16px;font-family:inherit;font-size:.92rem;font-weight:800;cursor:pointer;margin-top:4px}
+.sim-save-btn:active{opacity:.85}
+.sim-save-msg{font-size:.8rem;text-align:center;margin-top:10px;color:#3182F6;font-weight:700}
+.goal-card{background:#fff;border-radius:20px;box-shadow:0 2px 8px rgba(0,0,0,.04);padding:20px;margin-bottom:14px}
+.goal-title{font-size:.9rem;font-weight:800;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.goal-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
+.goal-label{font-size:.8rem;color:#8B95A1}
+.goal-val{font-size:.86rem;font-weight:700}
+.goal-bar-wrap{background:#F2F4F6;border-radius:999px;height:8px;overflow:hidden;margin:10px 0 4px}
+.goal-bar{background:#3182F6;height:100%;border-radius:999px;transition:width .3s}
 </style>
 </head>
 <body>
@@ -59,16 +109,30 @@ body{font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif;background:#F2
   <div class="logo">내실적현황</div>
   <div class="tb-right"></div>
 </div>
+<div class="tabbar">
+  <button class="tab-btn active" id="tabBtnSim" onclick="switchTab('sim')">수수료 시뮬레이터</button>
+  <button class="tab-btn" id="tabBtnStatus" onclick="switchTab('status')">이번달 실적</button>
+</div>
 <div class="wrap">
   <div id="plannerSelWrap"></div>
-  <div id="hiRoot">
-    <div class="state-box"><div class="state-icon">⏳</div><p>불러오는 중...</p></div>
+
+  <div id="tabSim" class="tab-panel active">
+    <div id="simRoot">
+      <div class="state-box"><div class="state-icon">⏳</div><p>불러오는 중...</p></div>
+    </div>
   </div>
-  <div id="histRoot"></div>
+
+  <div id="tabStatus" class="tab-panel">
+    <div id="goalCompareRoot"></div>
+    <div id="hiRoot">
+      <div class="state-box"><div class="state-icon">⏳</div><p>불러오는 중...</p></div>
+    </div>
+    <div id="histRoot"></div>
+  </div>
 </div>
 
 <script>
-// ── 플래너허브 앱 안 내실적현황 화면 (2026-11-18) ──────────────────────
+// ── 플래너허브 앱 안 내실적현황 화면 (2026-11-19, 수수료 시뮬레이터 탭 추가) ──
 // 로그인 정보는 허브(같은 주소 index.html)가 이 폰에 저장해 둔 것을 그대로 씀. 없으면 허브로 돌려보냄
 var INIT_NAME = '', INIT_PHONE = '', INIT_TOKEN = '', INIT_DK = '';
 (function () {
@@ -79,15 +143,17 @@ var INIT_NAME = '', INIT_PHONE = '', INIT_TOKEN = '', INIT_DK = '';
 })();
 
 function $(id) { return document.getElementById(id); }
+function authCred() { return { name: INIT_NAME, phone: INIT_PHONE, token: INIT_TOKEN, dk: INIT_DK }; }
+function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]; }); }
 </script>
 <script>
-// ── 설치형 앱(GitHub Pages)용 서버 호출 — 매출추이마스터 doPost (가망고객과 같은 주소, getMyStatus 허용목록 추가됨) ──
+// ── 설치형 앱(GitHub Pages)용 서버 호출 — 매출추이마스터 doPost (가망고객과 같은 주소) ──
 var STATUS_API_URL = 'https://script.google.com/macros/s/AKfycbxHR4Z7CQOj2lZNb4UXL2AwSWnAAZuAyTARFaYJBSChKWgr2i0saCVV78h6FA_cCvEgmA/exec';
 (function () {
   function Run(s, f) { this._s = s; this._f = f; }
   Run.prototype.withSuccessHandler = function (fn) { return new Run(fn, this._f); };
   Run.prototype.withFailureHandler = function (fn) { return new Run(this._s, fn); };
-  ['getMyStatus', 'getMyCommissionHistory'].forEach(function (fn) {
+  ['getMyStatus', 'getMyCommissionHistory', 'getCommissionSimBase', 'saveCommissionGoal', 'getCommissionGoal'].forEach(function (fn) {
     Run.prototype[fn] = function () {
       var s = this._s, f = this._f, args = [].slice.call(arguments);
       fetch(STATUS_API_URL, { method: 'POST', body: JSON.stringify({ fn: fn, args: args }) })
@@ -99,25 +165,15 @@ var STATUS_API_URL = 'https://script.google.com/macros/s/AKfycbxHR4Z7CQOj2lZNb4U
   window.google = { script: { run: new Run(null, null) } };
 })();
 
-function loadMyStatus(targetName) {
-  var root = $('hiRoot');
-  var authCred = { name: INIT_NAME, phone: INIT_PHONE, token: INIT_TOKEN, dk: INIT_DK };
-  google.script.run
-    .withSuccessHandler(function (res) {
-      if (!res || res.error) {
-        renderPlannerSelect((res && res.plannerList) || null, targetName || '');
-        root.innerHTML = '<div class="state-box"><div class="state-icon">📭</div><p>' + ((res && res.error) || '데이터가 없습니다') + '</p></div>';
-        return;
-      }
-      renderPlannerSelect(res.plannerList || null, targetName || '');
-      renderStatus(res);
-    })
-    .withFailureHandler(function (e) {
-      root.innerHTML = '<div class="error-msg">오류: ' + e.message + '</div>';
-    })
-    .getMyStatus(authCred, targetName || '');
+// ── 탭 전환 ──
+function switchTab(which) {
+  $('tabBtnSim').classList.toggle('active', which === 'sim');
+  $('tabBtnStatus').classList.toggle('active', which === 'status');
+  $('tabSim').classList.toggle('active', which === 'sim');
+  $('tabStatus').classList.toggle('active', which === 'status');
 }
 
+// ── 플래너 선택(관리자용) ──
 function renderPlannerSelect(list, current) {
   var wrap = $('plannerSelWrap');
   if (!list || !list.length) { wrap.innerHTML = ''; return; }
@@ -130,12 +186,282 @@ function renderPlannerSelect(list, current) {
   wrap.innerHTML = html;
   $('plannerSel').addEventListener('change', function (e) {
     var name = e.target.value;
+    CURRENT_TARGET = name;
     loadMyStatus(name);
     loadHistory(name);
+    loadSimBase(name);
   });
 }
 
-function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]; }); }
+var CURRENT_TARGET = '';
+
+/* ================================================================
+ * 탭1 — 수수료 시뮬레이터
+ * ================================================================ */
+
+// 판매장려수수료 요율표 (총 판매건수 기준)
+var SALES_BONUS_TABLE = [
+  { total: 4, flat: 100000 }, { total: 8, flat: 200000 }, { total: 11, flat: 300000 },
+  { total: 13, per: 30000 }, { total: 16, per: 35000 }, { total: 21, per: 40000 },
+  { total: 26, per: 45000 }, { total: 30, per: 50000 }
+];
+function calcSalesBonus(total) {
+  if (total < 4) return 0;
+  var tier = null;
+  for (var i = 0; i < SALES_BONUS_TABLE.length; i++) { if (total >= SALES_BONUS_TABLE[i].total) tier = SALES_BONUS_TABLE[i]; }
+  if (!tier) return 0;
+  var amt = tier.per ? tier.per * total : tier.flat;
+  return Math.min(amt, 2500000);
+}
+
+// 유지관리수수료 (카운터탑형 기준, 건당 단가 × 처리율 지급율)
+function careUnitRate(count) {
+  if (count < 2) return 7500;
+  if (count <= 3) return 7500;
+  if (count <= 7) return 8000;
+  if (count <= 14) return 8500;
+  if (count <= 19) return 9000;
+  return 10000;
+}
+function processPayRate(rate) {
+  if (rate >= 96) return 1.0;
+  if (rate >= 94) return 0.95;
+  return 0.90;
+}
+function calcCareFee(count, processRate) {
+  return Math.round(count * careUnitRate(count) * processPayRate(processRate));
+}
+
+// 유지계약(AS) 매출입금수수료
+var AS_TABLE = [
+  { max: 1000000, rate: 0.10 }, { max: 2000000, rate: 0.14 }, { max: 3000000, rate: 0.15 },
+  { max: 5000000, rate: 0.16 }, { max: 7000000, rate: 0.17 }, { max: 10000000, rate: 0.18 },
+  { max: 15000000, rate: 0.19 }, { max: Infinity, rate: 0.20 }
+];
+function calcAsFee(amount) {
+  for (var i = 0; i < AS_TABLE.length; i++) { if (amount < AS_TABLE[i].max) return Math.round(amount * AS_TABLE[i].rate); }
+  return Math.round(amount * 0.20);
+}
+
+// 상시시상금 (3회차 연속 달성 시 지급 — 시뮬레이터에서는 본인이 아는 구간을 직접 선택)
+var LOYALTY_BONUS = { '': 0, '8': 150000, '11': 300000, '15': 500000, '20': 600000, '25': 700000 };
+
+var SIM_BASE = { rentalCount: 0, specialCount: 0, installmentCount: 0, isTeamView: false, name: '', ym: '' };
+var SIM_STATE = { rental: 0, rentalPrice: 120000, special: 0, specialPrice: 150000, installment: 0, care: 0, processRate: 96, asAmount: 0, loyaltyTier: '' };
+
+function loadSimBase(targetName) {
+  var root = $('simRoot');
+  google.script.run
+    .withSuccessHandler(function (res) {
+      if (!res || res.error) {
+        renderPlannerSelect((res && res.plannerList) || null, targetName || '');
+        root.innerHTML = '<div class="state-box"><div class="state-icon">📭</div><p>' + ((res && res.error) || '데이터가 없습니다') + '</p></div>';
+        return;
+      }
+      renderPlannerSelect(res.plannerList || null, targetName || '');
+      SIM_BASE = res;
+      SIM_STATE.rental = res.rentalCount || 0;
+      SIM_STATE.special = res.specialCount || 0;
+      SIM_STATE.installment = res.installmentCount || 0;
+      renderSim();
+      loadGoalAndCompare(targetName);
+    })
+    .withFailureHandler(function (e) {
+      root.innerHTML = '<div class="error-msg">오류: ' + e.message + '</div>';
+    })
+    .getCommissionSimBase(authCred(), targetName || '');
+}
+
+function simTotalCount() { return SIM_STATE.rental + SIM_STATE.special + SIM_STATE.installment; }
+
+function simBreakdown() {
+  var total = simTotalCount();
+  var salesBonus = calcSalesBonus(total);
+  var careFee = calcCareFee(SIM_STATE.care, SIM_STATE.processRate);
+  var asFee = calcAsFee(SIM_STATE.asAmount);
+  var loyalty = LOYALTY_BONUS[SIM_STATE.loyaltyTier] || 0;
+  return { total: total, salesBonus: salesBonus, careFee: careFee, asFee: asFee, loyalty: loyalty, sum: salesBonus + careFee + asFee + loyalty };
+}
+
+function renderSim() {
+  var bd = simBreakdown();
+  var html = '';
+
+  html += '<div class="sim-top">';
+  html += '  <div class="sim-top-label">' + esc(SIM_BASE.ym || '') + ' 예상 수수료 합계' + (SIM_BASE.isTeamView ? ' (지사 전체)' : '') + '</div>';
+  html += '  <div class="sim-top-amt">' + bd.sum.toLocaleString() + '원</div>';
+  html += '  <div class="sim-top-sub">총 판매 ' + bd.total + '건 기준 · 판매장려 + 유지관리 + 유지계약(AS) + 상시시상금 합계예요. 실제 확정 수수료와는 다를 수 있어요.</div>';
+  html += '</div>';
+
+  html += '<div class="sim-preset-row">';
+  html += '  <button class="sim-preset-btn" onclick="applyPreset(5)"><b>입문목표</b>5건</button>';
+  html += '  <button class="sim-preset-btn" onclick="applyPreset(10)"><b>우수플래너</b>10건</button>';
+  html += '  <button class="sim-preset-btn" onclick="applyPreset(15)"><b>지사에이스</b>15건</button>';
+  html += '</div>';
+  html += '<div class="sim-preset-msg" id="presetMsg"></div>';
+
+  html += '<div class="sim-section">';
+  html += '  <div class="sim-section-title">📦 렌탈 판매</div>';
+  html += simSliderRow('rental', '렌탈 판매건수', SIM_STATE.rental, 0, 30, '건');
+  html += '  <div class="sim-num-wrap"><input type="number" class="sim-num" id="rentalPrice" value="' + SIM_STATE.rentalPrice + '" oninput="onNumInput(\'rentalPrice\')"><span class="sim-unit">원 (평균단가)</span></div>';
+  html += '  <div class="sim-check-row"><input type="checkbox" id="rentalPick" onchange="togglePick(\'rentalPick\',\'rentalPickNote\')"><label for="rentalPick">제품 직접 선택해서 넣기</label></div>';
+  html += '  <div class="sim-stub-note" id="rentalPickNote" style="display:none">상품 검색 기능은 추후 제공될 예정이에요. 지금은 평균단가로 입력해 주세요.</div>';
+  html += '</div>';
+
+  html += '<div class="sim-section">';
+  html += '  <div class="sim-section-title">🎁 특판 판매</div>';
+  html += simSliderRow('special', '특판 판매건수', SIM_STATE.special, 0, 20, '건');
+  html += '  <div class="sim-num-wrap"><input type="number" class="sim-num" id="specialPrice" value="' + SIM_STATE.specialPrice + '" oninput="onNumInput(\'specialPrice\')"><span class="sim-unit">원 (평균단가)</span></div>';
+  html += '  <div class="sim-check-row"><input type="checkbox" id="specialPick" onchange="togglePick(\'specialPick\',\'specialPickNote\')"><label for="specialPick">제품 직접 선택해서 넣기</label></div>';
+  html += '  <div class="sim-stub-note" id="specialPickNote" style="display:none">상품 검색 기능은 추후 제공될 예정이에요. 지금은 평균단가로 입력해 주세요.</div>';
+  html += '</div>';
+
+  html += '<div class="sim-section">';
+  html += '  <div class="sim-section-title">💳 일시불</div>';
+  html += simSliderRow('installment', '일시불 건수', SIM_STATE.installment, 0, 10, '건');
+  html += '  <div class="sim-caption">건수만 반영돼요 (판매장려수수료 건수에 합산)</div>';
+  html += '</div>';
+
+  html += '<div class="sim-section">';
+  html += '  <div class="sim-section-title">🔧 유지관리 (정기점검)</div>';
+  html += simSliderRow('care', '정기점검 처리건수', SIM_STATE.care, 0, 300, '건');
+  html += '  <div class="sim-caption">스마트 월납 건수는 제외돼요</div>';
+  html += simSliderRow('processRate', '처리율', SIM_STATE.processRate, 80, 100, '%');
+  html += '</div>';
+
+  html += '<div class="sim-section">';
+  html += '  <div class="sim-section-title">🧾 유지계약(AS) 매출</div>';
+  html += '  <div class="sim-num-wrap"><input type="number" class="sim-num" id="asAmount" value="' + SIM_STATE.asAmount + '" oninput="onNumInput(\'asAmount\')"><span class="sim-unit">원</span></div>';
+  html += '</div>';
+
+  html += '<div class="sim-section">';
+  html += '  <div class="sim-section-title">🏆 상시시상금 (3개월 연속 달성 구간)</div>';
+  html += '  <select class="sim-select" id="loyaltyTier" onchange="onLoyaltyChange()">';
+  html += '    <option value="">해당 없음</option>';
+  ['8', '11', '15', '20', '25'].forEach(function (k) {
+    html += '<option value="' + k + '"' + (SIM_STATE.loyaltyTier === k ? ' selected' : '') + '>' + k + '건 구간 (' + LOYALTY_BONUS[k].toLocaleString() + '원)</option>';
+  });
+  html += '  </select>';
+  html += '  <div class="sim-caption">3개월 연속 달성 여부는 직접 판단해서 본인 구간을 선택해 주세요</div>';
+  html += '</div>';
+
+  html += '<div class="sim-section">';
+  html += '  <div class="sim-section-title">💰 예상 수수료 내역</div>';
+  html += '  <div class="sim-breakdown">';
+  html += '    <div class="sim-bd-tile"><div class="sim-bd-label">판매장려수수료</div><div class="sim-bd-val">' + bd.salesBonus.toLocaleString() + '원</div></div>';
+  html += '    <div class="sim-bd-tile"><div class="sim-bd-label">유지관리수수료</div><div class="sim-bd-val">' + bd.careFee.toLocaleString() + '원</div></div>';
+  html += '    <div class="sim-bd-tile"><div class="sim-bd-label">유지계약(AS)</div><div class="sim-bd-val">' + bd.asFee.toLocaleString() + '원</div></div>';
+  html += '    <div class="sim-bd-tile"><div class="sim-bd-label">상시시상금</div><div class="sim-bd-val">' + bd.loyalty.toLocaleString() + '원</div></div>';
+  html += '  </div>';
+  html += '</div>';
+
+  html += '<button class="sim-save-btn" onclick="saveGoal()">내 목표 실적으로 저장하기</button>';
+  html += '<div class="sim-save-msg" id="simSaveMsg"></div>';
+
+  html += '<div class="hi-note">실제 적용되는 수수료 규정과는 차이가 있을 수 있는 당월 예상치예요. 정확한 수수료는 다음달 수수료 지급 시 확정돼요.</div>';
+
+  $('simRoot').innerHTML = html;
+}
+
+function simSliderRow(key, label, val, min, max, unit) {
+  var html = '<div class="sim-row">';
+  html += '  <div class="sim-row-head"><span class="sim-row-label">' + esc(label) + '</span><span class="sim-row-val" id="' + key + 'Val">' + val + unit + '</span></div>';
+  html += '  <input type="range" class="sim-slider" id="' + key + 'Slider" min="' + min + '" max="' + max + '" value="' + val + '" oninput="onSliderInput(\'' + key + '\',\'' + unit + '\')">';
+  html += '</div>';
+  return html;
+}
+
+function onSliderInput(key, unit) {
+  var v = Number($(key + 'Slider').value);
+  SIM_STATE[key] = v;
+  $(key + 'Val').textContent = v + unit;
+  refreshSimOutputs();
+}
+function onNumInput(key) {
+  SIM_STATE[key] = Number($(key).value) || 0;
+  refreshSimOutputs();
+}
+function onLoyaltyChange() {
+  SIM_STATE.loyaltyTier = $('loyaltyTier').value;
+  refreshSimOutputs();
+}
+function togglePick(checkId, noteId) {
+  $(noteId).style.display = $(checkId).checked ? 'block' : 'none';
+}
+
+// 전체를 다시 그리지 않고 금액 표시만 갱신 (슬라이더 조작감 유지)
+function refreshSimOutputs() {
+  var bd = simBreakdown();
+  var top = document.querySelector('.sim-top-amt');
+  if (top) top.textContent = bd.sum.toLocaleString() + '원';
+  var topSub = document.querySelector('.sim-top-sub');
+  if (topSub) topSub.textContent = '총 판매 ' + bd.total + '건 기준 · 판매장려 + 유지관리 + 유지계약(AS) + 상시시상금 합계예요. 실제 확정 수수료와는 다를 수 있어요.';
+  var tiles = document.querySelectorAll('.sim-bd-val');
+  if (tiles.length >= 4) {
+    tiles[0].textContent = bd.salesBonus.toLocaleString() + '원';
+    tiles[1].textContent = bd.careFee.toLocaleString() + '원';
+    tiles[2].textContent = bd.asFee.toLocaleString() + '원';
+    tiles[3].textContent = bd.loyalty.toLocaleString() + '원';
+  }
+}
+
+function applyPreset(target) {
+  var current = simTotalCount();
+  var msg = $('presetMsg');
+  if (current >= target) {
+    msg.textContent = '이미 ' + target + '건 목표를 달성했어요 🎉 다음 목표에 도전해 보세요!';
+    return;
+  }
+  var gap = target - current;
+  var maxRental = Number($('rentalSlider').max);
+  SIM_STATE.rental = Math.min(maxRental, SIM_STATE.rental + gap);
+  var achieved = simTotalCount() >= target;
+  msg.textContent = achieved
+    ? '렌탈 판매건수를 ' + gap + '건 더해서 ' + target + '건 목표에 맞춰봤어요'
+    : '렌탈 건수를 최대로 올려도 ' + (target - simTotalCount()) + '건이 모자라요. 특판/일시불도 늘려보세요';
+  renderSim();
+}
+
+function saveGoal() {
+  var bd = simBreakdown();
+  var msg = $('simSaveMsg');
+  msg.textContent = '저장 중...';
+  google.script.run
+    .withSuccessHandler(function () {
+      msg.textContent = '목표가 저장됐어요. "이번달 실적" 탭에서 진행 상황을 확인할 수 있어요.';
+      loadGoalAndCompare(CURRENT_TARGET);
+    })
+    .withFailureHandler(function (e) {
+      msg.textContent = '저장 실패: ' + e.message;
+    })
+    .saveCommissionGoal(authCred(), {
+      totalCount: bd.total, rentalCount: SIM_STATE.rental, specialCount: SIM_STATE.special,
+      installmentCount: SIM_STATE.installment, expectedAmount: bd.sum
+    }, CURRENT_TARGET || '');
+}
+
+/* ================================================================
+ * 탭2 — 이번달 실적 (기존 화면, 변경 없음) + 목표 비교 위젯
+ * ================================================================ */
+
+function loadMyStatus(targetName) {
+  var root = $('hiRoot');
+  google.script.run
+    .withSuccessHandler(function (res) {
+      if (!res || res.error) {
+        root.innerHTML = '<div class="state-box"><div class="state-icon">📭</div><p>' + ((res && res.error) || '데이터가 없습니다') + '</p></div>';
+        return;
+      }
+      LAST_STATUS = res;
+      renderStatus(res);
+    })
+    .withFailureHandler(function (e) {
+      root.innerHTML = '<div class="error-msg">오류: ' + e.message + '</div>';
+    })
+    .getMyStatus(authCred(), targetName || '');
+}
+
+var LAST_STATUS = null;
 
 function renderStatus(d) {
   var total = Number(d.total || 0);
@@ -177,6 +503,35 @@ function renderStatus(d) {
   $('hiRoot').innerHTML = html;
 }
 
+function loadGoalAndCompare(targetName) {
+  google.script.run
+    .withSuccessHandler(function (res) {
+      if (!res || res.error || !res.goal) { $('goalCompareRoot').innerHTML = ''; return; }
+      renderGoalCompare(res.goal);
+    })
+    .withFailureHandler(function () { $('goalCompareRoot').innerHTML = ''; })
+    .getCommissionGoal(authCred(), targetName || '');
+}
+
+function renderGoalCompare(goal) {
+  var actualTotal = LAST_STATUS ? Number(LAST_STATUS.total || 0) : null;
+  var pct = (actualTotal !== null && goal.totalCount > 0) ? Math.min(100, Math.round(actualTotal / goal.totalCount * 100)) : 0;
+  var remain = (actualTotal !== null) ? Math.max(0, goal.totalCount - actualTotal) : null;
+
+  var html = '<div class="goal-card">';
+  html += '  <div class="goal-title">🎯 내 목표 실적 vs 현재 실적</div>';
+  html += '  <div class="goal-row"><span class="goal-label">목표 건수</span><span class="goal-val">' + goal.totalCount + '건</span></div>';
+  if (actualTotal !== null) {
+    html += '  <div class="goal-row"><span class="goal-label">현재 실적</span><span class="goal-val">' + actualTotal + '건</span></div>';
+    html += '  <div class="goal-bar-wrap"><div class="goal-bar" style="width:' + pct + '%"></div></div>';
+    html += '  <div class="hi-nudge">' + (remain > 0 ? '목표까지 <b>' + remain + '건</b> 남았어요' : '목표를 달성했어요 🎉') + '</div>';
+  }
+  html += '  <div class="goal-row" style="margin-top:10px"><span class="goal-label">목표 예상 수수료</span><span class="goal-val">' + Number(goal.expectedAmount || 0).toLocaleString() + '원</span></div>';
+  html += '  <div class="hi-note" style="margin-top:10px">목표는 "수수료 시뮬레이터" 탭에서 다시 저장하면 갱신돼요</div>';
+  html += '</div>';
+  $('goalCompareRoot').innerHTML = html;
+}
+
 function ymShort(ym) {
   var m = /^(\d{4})-(\d{2})$/.exec(ym);
   if (!m) return ym;
@@ -184,14 +539,13 @@ function ymShort(ym) {
 }
 
 function loadHistory(targetName) {
-  var authCred = { name: INIT_NAME, phone: INIT_PHONE, token: INIT_TOKEN, dk: INIT_DK };
   google.script.run
     .withSuccessHandler(function (res) {
       if (!res || res.error || !res.history || !res.history.length) { $('histRoot').innerHTML = ''; return; }
       renderHistory(res);
     })
     .withFailureHandler(function () { $('histRoot').innerHTML = ''; })
-    .getMyCommissionHistory(authCred, targetName || '');
+    .getMyCommissionHistory(authCred(), targetName || '');
 }
 
 function renderHistory(res) {
@@ -224,6 +578,7 @@ function renderHistory(res) {
   $('histRoot').innerHTML = html;
 }
 
+loadSimBase();
 loadMyStatus();
 loadHistory();
 </script>
