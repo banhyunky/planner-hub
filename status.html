@@ -300,7 +300,8 @@ function simBreakdown() {
   var careFee = calcCareFee(SIM_STATE.care, SIM_STATE.processRate);
   var asFee = calcAsFee(SIM_STATE.asAmount);
   var loyalty = LOYALTY_BONUS[SIM_STATE.loyaltyTier] || 0;
-  return { total: total, salesBonus: salesBonus, careFee: careFee, asFee: asFee, loyalty: loyalty, sum: salesBonus + careFee + asFee + loyalty };
+  var actualRentalFee = Number(SIM_BASE.rentalCommission) || 0;
+  return { total: total, salesBonus: salesBonus, careFee: careFee, asFee: asFee, loyalty: loyalty, actualRentalFee: actualRentalFee, sum: salesBonus + careFee + asFee + loyalty + actualRentalFee };
 }
 
 function renderSim() {
@@ -310,7 +311,7 @@ function renderSim() {
   html += '<div class="sim-top">';
   html += '  <div class="sim-top-label">' + esc(SIM_BASE.ym || '') + ' 예상 수수료 합계' + (SIM_BASE.isTeamView ? ' (지사 전체)' : '') + '</div>';
   html += '  <div class="sim-top-amt">' + bd.sum.toLocaleString() + '원</div>';
-  html += '  <div class="sim-top-sub">총 판매 ' + bd.total + '건 기준 · 판매장려 + 유지관리 + 유지계약(AS) + 상시시상금 합계예요. 실제 확정 수수료와는 다를 수 있어요.</div>';
+  html += '  <div class="sim-top-sub">총 판매 ' + bd.total + '건 기준 · 렌탈수수료(확정) + 판매장려 + 유지관리 + 유지계약(AS) + 상시시상금 합계예요. 실제 확정 수수료와는 다를 수 있어요.</div>';
   html += '</div>';
 
   html += '<div class="sim-preset-row">';
@@ -376,11 +377,12 @@ function renderSim() {
   html += '  <div class="sim-section-title">💰 예상 수수료 내역</div>';
   html += '  <div class="sim-breakdown">';
   html += '    <div class="sim-bd-tile"><div class="sim-bd-label">판매장려수수료</div><div class="sim-bd-val">' + bd.salesBonus.toLocaleString() + '원</div></div>';
+  html += '    <div class="sim-bd-tile"><div class="sim-bd-label">렌탈수수료(확정 ' + (SIM_BASE.rentalCount || 0) + '건)</div><div class="sim-bd-val">' + bd.actualRentalFee.toLocaleString() + '원</div></div>';
   html += '    <div class="sim-bd-tile"><div class="sim-bd-label">유지관리수수료</div><div class="sim-bd-val">' + bd.careFee.toLocaleString() + '원</div></div>';
   html += '    <div class="sim-bd-tile"><div class="sim-bd-label">유지계약(AS)</div><div class="sim-bd-val">' + bd.asFee.toLocaleString() + '원</div></div>';
   html += '    <div class="sim-bd-tile"><div class="sim-bd-label">상시시상금</div><div class="sim-bd-val">' + bd.loyalty.toLocaleString() + '원</div></div>';
   html += '  </div>';
-  html += '  <div class="sim-caption" style="margin-top:10px">판매장려수수료는 총 판매건수 구간(4건부터)에 따른 장려금이에요. 렌탈·특판 개별 상품의 건별 수수료(수수료기준표·지시서점프구간)는 아직 이 계산에 들어가지 않았어요.</div>';
+  html += '  <div class="sim-caption" style="margin-top:10px">렌탈수수료(확정)는 이번달 실제 성사된 렌탈 ' + (SIM_BASE.rentalCount || 0) + '건에 매칭된 실제 수수료예요. 판매장려수수료는 총 판매건수 구간(4건부터)에 따른 장려금이고, 슬라이더로 건수를 늘려봐도 렌탈수수료(확정)는 바뀌지 않아요(실제 매출이 아니라서요). 특판 개별 상품의 건별 수수료는 아직 이 계산에 들어가지 않았어요.</div>';
   html += '</div>';
 
   html += '<button class="sim-save-btn" onclick="saveGoal()">내 목표 실적으로 저장하기</button>';
