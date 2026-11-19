@@ -130,7 +130,10 @@ function renderStatus(d) {
   html += '  <div class="hi-tile"><div class="hi-tile-label">특판수수료</div><div class="hi-tile-value">' + specialFee.toLocaleString() + '</div></div>';
   html += '</div>';
 
-  html += '<div class="hi-note">특판수수료는 특판 상품 건만 반영된 금액이며, 렌탈 수수료는 포함되지 않습니다.</div>';
+  var noteText = d.isTeamView
+    ? '관리자 계정은 본인 실적 대신 지사 전체 실적을 보여드려요. 특판수수료는 특판 상품 건만 반영된 금액이며, 렌탈 수수료는 포함되지 않습니다.'
+    : '특판수수료는 특판 상품 건만 반영된 금액이며, 렌탈 수수료는 포함되지 않습니다.';
+  html += '<div class="hi-note">' + noteText + '</div>';
 
   $('hiRoot').innerHTML = html;
 }
