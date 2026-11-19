@@ -283,6 +283,10 @@ function loadSimBase(targetName) {
       SIM_STATE.special = res.specialCount || 0;
       SIM_STATE.installment = res.installmentCount || 0;
       if (res.processRate != null) { SIM_STATE.processRate = res.processRate; }
+      // 렌탈 평균단가 = 건당 렌탈수수료. 이번달 실제 매칭 수수료가 있으면 그 평균으로 시작
+      if ((res.rentalCount || 0) > 0 && (Number(res.rentalCommission) || 0) > 0) {
+        SIM_STATE.rentalPrice = Math.round(Number(res.rentalCommission) / res.rentalCount);
+      }
       renderSim();
       loadGoalAndCompare(targetName);
     })
@@ -301,7 +305,27 @@ function simBreakdown() {
   var asFee = calcAsFee(SIM_STATE.asAmount);
   var loyalty = LOYALTY_BONUS[SIM_STATE.loyaltyTier] || 0;
   var actualRentalFee = Number(SIM_BASE.rentalCommission) || 0;
-  return { total: total, salesBonus: salesBonus, careFee: careFee, asFee: asFee, loyalty: loyalty, actualRentalFee: actualRentalFee, sum: salesBonus + careFee + asFee + loyalty + actualRentalFee };
+  var actualSpecialFee = Number(SIM_BASE.specialCommission) || 0;
+  var rentalExtra = Math.max(0, SIM_STATE.rental - (SIM_BASE.rentalCount || 0));
+  var specialExtra = Math.max(0, SIM_STATE.special - (SIM_BASE.specialCount || 0));
+  var virtualRentalFee = rentalExtra * (Number(SIM_STATE.rentalPrice) || 0);
+  // 특판수수료 = 특판가 ÷ 1.1 × 15% (매출추이마스터 실적 집계와 같은 공식)
+  var virtualSpecialFee = Math.round(specialExtra * (Number(SIM_STATE.specialPrice) || 0) / 1.1 * 0.15);
+  var rentalFee = actualRentalFee + virtualRentalFee;
+  var specialFee = actualSpecialFee + virtualSpecialFee;
+  return { total: total, salesBonus: salesBonus, careFee: careFee, asFee: asFee, loyalty: loyalty,
+    actualRentalFee: actualRentalFee, virtualRentalFee: virtualRentalFee, rentalExtra: rentalExtra, rentalFee: rentalFee,
+    actualSpecialFee: actualSpecialFee, virtualSpecialFee: virtualSpecialFee, specialExtra: specialExtra, specialFee: specialFee,
+    sum: salesBonus + careFee + asFee + loyalty + rentalFee + specialFee };
+}
+
+function simTopSubText(bd) {
+  return '총 판매 ' + bd.total + '건 기준 · 렌탈·특판수수료(확정+가상) + 판매장려 + 유지관리 + 유지계약(AS) + 상시시상금 합계예요. 실제 확정 수수료와는 다를 수 있어요.';
+}
+function simFeeSub(actualCnt, actualFee, extra, virtualFee) {
+  var t = '확정 ' + actualCnt + '건 ' + actualFee.toLocaleString() + '원';
+  if (extra > 0) t += ' + 가상 ' + extra + '건 ' + virtualFee.toLocaleString() + '원';
+  return t;
 }
 
 function renderSim() {
@@ -311,7 +335,7 @@ function renderSim() {
   html += '<div class="sim-top">';
   html += '  <div class="sim-top-label">' + esc(SIM_BASE.ym || '') + ' 예상 수수료 합계' + (SIM_BASE.isTeamView ? ' (지사 전체)' : '') + '</div>';
   html += '  <div class="sim-top-amt">' + bd.sum.toLocaleString() + '원</div>';
-  html += '  <div class="sim-top-sub">총 판매 ' + bd.total + '건 기준 · 렌탈수수료(확정) + 판매장려 + 유지관리 + 유지계약(AS) + 상시시상금 합계예요. 실제 확정 수수료와는 다를 수 있어요.</div>';
+  html += '  <div class="sim-top-sub">' + simTopSubText(bd) + '</div>';
   html += '</div>';
 
   html += '<div class="sim-preset-row">';
@@ -324,7 +348,8 @@ function renderSim() {
   html += '<div class="sim-section">';
   html += '  <div class="sim-section-title">📦 렌탈 판매</div>';
   html += simSliderRow('rental', '렌탈 판매건수', SIM_STATE.rental, 0, 30, '건');
-  html += '  <div class="sim-num-wrap"><input type="number" class="sim-num" id="rentalPrice" value="' + SIM_STATE.rentalPrice + '" oninput="onNumInput(\'rentalPrice\')"><span class="sim-unit">원 (평균단가)</span></div>';
+  html += '  <div class="sim-num-wrap"><input type="number" class="sim-num" id="rentalPrice" value="' + SIM_STATE.rentalPrice + '" oninput="onNumInput(\'rentalPrice\')"><span class="sim-unit">원 (건당 평균 수수료)</span></div>';
+  html += '  <div class="sim-caption">' + ((SIM_BASE.rentalCount || 0) > 0 && (Number(SIM_BASE.rentalCommission) || 0) > 0 ? '이번달 실제 렌탈 ' + SIM_BASE.rentalCount + '건의 평균 수수료로 자동 입력했어요. 실제보다 늘린 건수에 이 금액이 곱해져요.' : '실제보다 늘린 건수에 이 금액이 곱해져요. 제품을 고르면 그 제품 수수료로 바뀌어요.') + '</div>';
   html += '  <div class="sim-check-row"><input type="checkbox" id="rentalPick" onchange="togglePick(\'rentalPick\',\'rentalPickNote\')"><label for="rentalPick">제품 직접 선택해서 넣기</label></div>';
   html += '  <div class="sim-pick-panel" id="rentalPickNote" style="display:none">';
   html += '    <div class="sim-pick-row"><input type="text" id="rentalPickKw" placeholder="제품명 검색 (예: 뉴아이스)" onkeydown="if(event.key===\'Enter\'){searchPickProduct(\'rental\');return false;}"><button type="button" class="sim-pick-btn" onclick="searchPickProduct(\'rental\')">검색</button></div>';
@@ -335,7 +360,8 @@ function renderSim() {
   html += '<div class="sim-section">';
   html += '  <div class="sim-section-title">🎁 특판 판매</div>';
   html += simSliderRow('special', '특판 판매건수', SIM_STATE.special, 0, 20, '건');
-  html += '  <div class="sim-num-wrap"><input type="number" class="sim-num" id="specialPrice" value="' + SIM_STATE.specialPrice + '" oninput="onNumInput(\'specialPrice\')"><span class="sim-unit">원 (평균단가)</span></div>';
+  html += '  <div class="sim-num-wrap"><input type="number" class="sim-num" id="specialPrice" value="' + SIM_STATE.specialPrice + '" oninput="onNumInput(\'specialPrice\')"><span class="sim-unit">원 (평균 특판가)</span></div>';
+  html += '  <div class="sim-caption">실제보다 늘린 건수 × 특판가 ÷ 1.1 × 15%로 특판수수료를 계산해요.</div>';
   html += '  <div class="sim-check-row"><input type="checkbox" id="specialPick" onchange="togglePick(\'specialPick\',\'specialPickNote\')"><label for="specialPick">제품 직접 선택해서 넣기</label></div>';
   html += '  <div class="sim-pick-panel" id="specialPickNote" style="display:none">';
   html += '    <div class="sim-pick-row"><input type="text" id="specialPickKw" placeholder="제품명 검색 (예: 매트리스)" onkeydown="if(event.key===\'Enter\'){searchPickProduct(\'special\');return false;}"><button type="button" class="sim-pick-btn" onclick="searchPickProduct(\'special\')">검색</button></div>';
@@ -376,13 +402,14 @@ function renderSim() {
   html += '<div class="sim-section">';
   html += '  <div class="sim-section-title">💰 예상 수수료 내역</div>';
   html += '  <div class="sim-breakdown">';
-  html += '    <div class="sim-bd-tile"><div class="sim-bd-label">판매장려수수료</div><div class="sim-bd-val">' + bd.salesBonus.toLocaleString() + '원</div></div>';
-  html += '    <div class="sim-bd-tile"><div class="sim-bd-label">렌탈수수료(확정 ' + (SIM_BASE.rentalCount || 0) + '건)</div><div class="sim-bd-val">' + bd.actualRentalFee.toLocaleString() + '원</div></div>';
-  html += '    <div class="sim-bd-tile"><div class="sim-bd-label">유지관리수수료</div><div class="sim-bd-val">' + bd.careFee.toLocaleString() + '원</div></div>';
-  html += '    <div class="sim-bd-tile"><div class="sim-bd-label">유지계약(AS)</div><div class="sim-bd-val">' + bd.asFee.toLocaleString() + '원</div></div>';
-  html += '    <div class="sim-bd-tile"><div class="sim-bd-label">상시시상금</div><div class="sim-bd-val">' + bd.loyalty.toLocaleString() + '원</div></div>';
+  html += '    <div class="sim-bd-tile"><div class="sim-bd-label">렌탈수수료</div><div class="sim-bd-val" id="bdRental">' + bd.rentalFee.toLocaleString() + '원</div><div class="sim-caption" id="bdRentalSub">' + simFeeSub(SIM_BASE.rentalCount || 0, bd.actualRentalFee, bd.rentalExtra, bd.virtualRentalFee) + '</div></div>';
+  html += '    <div class="sim-bd-tile"><div class="sim-bd-label">특판수수료</div><div class="sim-bd-val" id="bdSpecial">' + bd.specialFee.toLocaleString() + '원</div><div class="sim-caption" id="bdSpecialSub">' + simFeeSub(SIM_BASE.specialCount || 0, bd.actualSpecialFee, bd.specialExtra, bd.virtualSpecialFee) + '</div></div>';
+  html += '    <div class="sim-bd-tile"><div class="sim-bd-label">판매장려수수료</div><div class="sim-bd-val" id="bdSalesBonus">' + bd.salesBonus.toLocaleString() + '원</div></div>';
+  html += '    <div class="sim-bd-tile"><div class="sim-bd-label">유지관리수수료</div><div class="sim-bd-val" id="bdCare">' + bd.careFee.toLocaleString() + '원</div></div>';
+  html += '    <div class="sim-bd-tile"><div class="sim-bd-label">유지계약(AS)</div><div class="sim-bd-val" id="bdAs">' + bd.asFee.toLocaleString() + '원</div></div>';
+  html += '    <div class="sim-bd-tile"><div class="sim-bd-label">상시시상금</div><div class="sim-bd-val" id="bdLoyalty">' + bd.loyalty.toLocaleString() + '원</div></div>';
   html += '  </div>';
-  html += '  <div class="sim-caption" style="margin-top:10px">렌탈수수료(확정)는 이번달 실제 성사된 렌탈 ' + (SIM_BASE.rentalCount || 0) + '건에 매칭된 실제 수수료예요. 판매장려수수료는 총 판매건수 구간(4건부터)에 따른 장려금이고, 슬라이더로 건수를 늘려봐도 렌탈수수료(확정)는 바뀌지 않아요(실제 매출이 아니라서요). 특판 개별 상품의 건별 수수료는 아직 이 계산에 들어가지 않았어요.</div>';
+  html += '  <div class="sim-caption" style="margin-top:10px">확정은 이번달 실제 성사된 건의 실제 수수료, 가상은 슬라이더로 실제보다 늘린 건수 × 평균단가예요. 판매장려수수료는 총 판매건수 구간(4건부터)에 따른 장려금이에요.</div>';
   html += '</div>';
 
   html += '<button class="sim-save-btn" onclick="saveGoal()">내 목표 실적으로 저장하기</button>';
@@ -450,9 +477,8 @@ function renderPickResult(type) {
     var price = 0, metaTxt = '';
     if (type === 'rental') {
       var r0 = p.rules && p.rules[0];
-      var raw = r0 && r0.rental && r0.rental.length ? r0.rental[0] : null;
-      price = raw != null ? Math.round(parseFloat(String(raw).split('-')[0]) * 1000) : 0;
-      metaTxt = (p.group || '') + ' · ' + (r0 ? r0.rule : '기본 규정') + ' 기준';
+      price = r0 && r0.planner ? (parseInt(r0.planner) || 0) : 0;
+      metaTxt = (p.group || '') + ' · ' + (r0 ? r0.rule : '기본 규정') + ' 수수료';
     } else {
       price = Math.round((Number(p.listPrice) || 0) * 0.6); // 40% 할인 기준가
       metaTxt = '정가 ' + (Number(p.listPrice) || 0).toLocaleString('ko-KR') + '원 · 40% 할인 기준';
@@ -472,8 +498,7 @@ function selectPickProduct(type, idx) {
   var price = 0;
   if (type === 'rental') {
     var r0 = p.rules && p.rules[0];
-    var raw = r0 && r0.rental && r0.rental.length ? r0.rental[0] : null;
-    price = raw != null ? Math.round(parseFloat(String(raw).split('-')[0]) * 1000) : 0;
+    price = r0 && r0.planner ? (parseInt(r0.planner) || 0) : 0;
     SIM_STATE.rentalPrice = price;
     $('rentalPrice').value = price;
   } else {
@@ -492,14 +517,16 @@ function refreshSimOutputs() {
   var top = document.querySelector('.sim-top-amt');
   if (top) top.textContent = bd.sum.toLocaleString() + '원';
   var topSub = document.querySelector('.sim-top-sub');
-  if (topSub) topSub.textContent = '총 판매 ' + bd.total + '건 기준 · 판매장려 + 유지관리 + 유지계약(AS) + 상시시상금 합계예요. 실제 확정 수수료와는 다를 수 있어요.';
-  var tiles = document.querySelectorAll('.sim-bd-val');
-  if (tiles.length >= 4) {
-    tiles[0].textContent = bd.salesBonus.toLocaleString() + '원';
-    tiles[1].textContent = bd.careFee.toLocaleString() + '원';
-    tiles[2].textContent = bd.asFee.toLocaleString() + '원';
-    tiles[3].textContent = bd.loyalty.toLocaleString() + '원';
-  }
+  if (topSub) topSub.textContent = simTopSubText(bd);
+  function setTxt(id, t) { var el = $(id); if (el) el.textContent = t; }
+  setTxt('bdRental', bd.rentalFee.toLocaleString() + '원');
+  setTxt('bdRentalSub', simFeeSub(SIM_BASE.rentalCount || 0, bd.actualRentalFee, bd.rentalExtra, bd.virtualRentalFee));
+  setTxt('bdSpecial', bd.specialFee.toLocaleString() + '원');
+  setTxt('bdSpecialSub', simFeeSub(SIM_BASE.specialCount || 0, bd.actualSpecialFee, bd.specialExtra, bd.virtualSpecialFee));
+  setTxt('bdSalesBonus', bd.salesBonus.toLocaleString() + '원');
+  setTxt('bdCare', bd.careFee.toLocaleString() + '원');
+  setTxt('bdAs', bd.asFee.toLocaleString() + '원');
+  setTxt('bdLoyalty', bd.loyalty.toLocaleString() + '원');
 }
 
 // 실제 매출 기준 총 건수(슬라이더를 아무리 움직여도 변하지 않는 기준점) — 프리셋은 항상 이 값에서 계산
