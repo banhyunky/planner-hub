@@ -35,6 +35,8 @@ body{font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif;background:#F2
 .hi-tile-value{font-size:1.25rem;font-weight:800;color:#191F28}
 .hi-note{font-size:.72rem;color:#B0B8C1;text-align:center;margin-top:16px;line-height:1.5}
 .hi-badge{display:inline-block;font-size:.68rem;color:#3182F6;background:#EFF6FF;padding:2px 7px;border-radius:999px;margin-left:5px;font-weight:700;vertical-align:middle}
+.planner-sel-wrap{margin-bottom:12px}
+.planner-sel{width:100%;box-sizing:border-box;appearance:none;-webkit-appearance:none;background:#fff url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="6"><path d="M0 0l5 6 5-6z" fill="%238B95A1"/></svg>') no-repeat right 14px center;border:1px solid #E5E8EB;border-radius:14px;padding:12px 36px 12px 16px;font-size:.92rem;font-weight:700;color:#191F28}
 .hist-card{background:#fff;border-radius:20px;box-shadow:0 2px 8px rgba(0,0,0,.04);padding:20px;margin-bottom:14px}
 .hist-title{font-size:.95rem;font-weight:800;margin-bottom:14px}
 .hist-bar-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
@@ -58,6 +60,7 @@ body{font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif;background:#F2
   <div class="tb-right"></div>
 </div>
 <div class="wrap">
+  <div id="plannerSelWrap"></div>
   <div id="hiRoot">
     <div class="state-box"><div class="state-icon">⏳</div><p>불러오는 중...</p></div>
   </div>
@@ -96,21 +99,40 @@ var STATUS_API_URL = 'https://script.google.com/macros/s/AKfycbxHR4Z7CQOj2lZNb4U
   window.google = { script: { run: new Run(null, null) } };
 })();
 
-function loadMyStatus() {
+function loadMyStatus(targetName) {
   var root = $('hiRoot');
   var authCred = { name: INIT_NAME, phone: INIT_PHONE, token: INIT_TOKEN, dk: INIT_DK };
   google.script.run
     .withSuccessHandler(function (res) {
       if (!res || res.error) {
+        renderPlannerSelect((res && res.plannerList) || null, targetName || '');
         root.innerHTML = '<div class="state-box"><div class="state-icon">📭</div><p>' + ((res && res.error) || '데이터가 없습니다') + '</p></div>';
         return;
       }
+      renderPlannerSelect(res.plannerList || null, targetName || '');
       renderStatus(res);
     })
     .withFailureHandler(function (e) {
       root.innerHTML = '<div class="error-msg">오류: ' + e.message + '</div>';
     })
-    .getMyStatus(authCred);
+    .getMyStatus(authCred, targetName || '');
+}
+
+function renderPlannerSelect(list, current) {
+  var wrap = $('plannerSelWrap');
+  if (!list || !list.length) { wrap.innerHTML = ''; return; }
+  var html = '<div class="planner-sel-wrap"><select class="planner-sel" id="plannerSel">';
+  html += '<option value=""' + (current ? '' : ' selected') + '>지사 전체(관리자)</option>';
+  list.forEach(function (p) {
+    html += '<option value="' + esc(p.name) + '"' + (current === p.name ? ' selected' : '') + '>' + esc(p.name) + (p.team ? ' · ' + esc(p.team) : '') + '</option>';
+  });
+  html += '</select></div>';
+  wrap.innerHTML = html;
+  $('plannerSel').addEventListener('change', function (e) {
+    var name = e.target.value;
+    loadMyStatus(name);
+    loadHistory(name);
+  });
 }
 
 function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]; }); }
@@ -161,7 +183,7 @@ function ymShort(ym) {
   return m[1].slice(2) + '년 ' + parseInt(m[2], 10) + '월';
 }
 
-function loadHistory() {
+function loadHistory(targetName) {
   var authCred = { name: INIT_NAME, phone: INIT_PHONE, token: INIT_TOKEN, dk: INIT_DK };
   google.script.run
     .withSuccessHandler(function (res) {
@@ -169,7 +191,7 @@ function loadHistory() {
       renderHistory(res);
     })
     .withFailureHandler(function () { $('histRoot').innerHTML = ''; })
-    .getMyCommissionHistory(authCred);
+    .getMyCommissionHistory(authCred, targetName || '');
 }
 
 function renderHistory(res) {
