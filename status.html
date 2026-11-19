@@ -263,6 +263,7 @@ function loadSimBase(targetName) {
       SIM_STATE.rental = res.rentalCount || 0;
       SIM_STATE.special = res.specialCount || 0;
       SIM_STATE.installment = res.installmentCount || 0;
+      if (res.processRate != null) { SIM_STATE.processRate = res.processRate; }
       renderSim();
       loadGoalAndCompare(targetName);
     })
@@ -327,6 +328,7 @@ function renderSim() {
   html += simSliderRow('care', '정기점검 처리건수', SIM_STATE.care, 0, 300, '건');
   html += '  <div class="sim-caption">스마트 월납 건수는 제외돼요</div>';
   html += simSliderRow('processRate', '처리율', SIM_STATE.processRate, 80, 100, '%');
+  html += '  <div class="sim-caption">' + (SIM_BASE.processRate != null ? '이번 달 실제 처리율로 자동 입력했어요. 필요하면 조정하세요.' : '이번 달 처리율 데이터가 아직 없어 기본값(96%)이에요. 직접 조정하세요.') + '</div>';
   html += '</div>';
 
   html += '<div class="sim-section">';
