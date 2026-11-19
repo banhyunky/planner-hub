@@ -29,7 +29,7 @@ body{font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif;background:#F2
 .hi-bar-wrap{background:#F2F4F6;border-radius:999px;height:8px;overflow:hidden;margin-bottom:8px}
 .hi-bar{background:#3182F6;height:100%;border-radius:999px;transition:width .3s}
 .hi-nudge{font-size:.82rem;color:#3182F6;font-weight:600}
-.hi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.hi-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
 .hi-tile{background:#fff;border-radius:16px;box-shadow:0 2px 8px rgba(0,0,0,.04);padding:16px 10px;text-align:center}
 .hi-tile-label{font-size:.76rem;color:#8B95A1;margin-bottom:6px}
 .hi-tile-value{font-size:1.25rem;font-weight:800;color:#191F28}
@@ -575,6 +575,7 @@ function renderStatus(d) {
   var remain = target > 0 ? Math.max(0, target - total) : null;
   var procRate = (d.process_rate === null || d.process_rate === undefined) ? '—' : (d.process_rate + '%');
   var specialFee = Number(d.special_commission || 0);
+  var rentalFee = Number(d.rental_commission || 0);
 
   var nudge = '';
   if (remain !== null) {
@@ -598,11 +599,12 @@ function renderStatus(d) {
   html += '  <div class="hi-tile"><div class="hi-tile-label">전략상품</div><div class="hi-tile-value">' + Number(d.strategic || 0) + '건</div></div>';
   html += '  <div class="hi-tile"><div class="hi-tile-label">처리율</div><div class="hi-tile-value">' + procRate + '</div></div>';
   html += '  <div class="hi-tile"><div class="hi-tile-label">특판수수료</div><div class="hi-tile-value">' + specialFee.toLocaleString() + '</div></div>';
+  html += '  <div class="hi-tile"><div class="hi-tile-label">렌탈수수료</div><div class="hi-tile-value">' + rentalFee.toLocaleString() + '</div></div>';
   html += '</div>';
 
   var noteText = d.isTeamView
-    ? '관리자 계정은 본인 실적 대신 지사 전체 실적을 보여드려요. 특판수수료는 특판 상품 건만 반영된 금액이며, 렌탈 수수료는 포함되지 않습니다.'
-    : '특판수수료는 특판 상품 건만 반영된 금액이며, 렌탈 수수료는 포함되지 않습니다.';
+    ? '관리자 계정은 본인 실적 대신 지사 전체 실적을 보여드려요. 특판수수료·렌탈수수료는 실제 매칭된 판매 건 기준 예상 금액입니다.'
+    : '특판수수료·렌탈수수료는 실제 매칭된 판매 건 기준 예상 금액입니다.';
   html += '<div class="hi-note">' + noteText + '</div>';
 
   $('hiRoot').innerHTML = html;
