@@ -80,6 +80,18 @@ body{font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif;background:#F2
 .sim-check-row{display:flex;align-items:center;gap:6px;margin-top:8px;font-size:.78rem;color:#8B95A1}
 .sim-check-row input{width:15px;height:15px}
 .sim-stub-note{font-size:.72rem;color:#B0B8C1;background:#F7F8FA;border-radius:8px;padding:8px 10px;margin-top:6px}
+.sim-pick-panel{margin-top:6px;background:#F7F8FA;border-radius:10px;padding:10px}
+.sim-pick-row{display:flex;gap:6px}
+.sim-pick-row input{flex:1;min-width:0;border:1px solid #E5E8EB;border-radius:8px;padding:8px 10px;font-size:.85rem;background:#fff}
+.sim-pick-btn{border:none;background:#3182F6;color:#fff;border-radius:8px;padding:0 14px;font-size:.85rem;font-weight:700}
+.sim-pick-result{margin-top:8px;display:flex;flex-direction:column;gap:6px;max-height:220px;overflow-y:auto}
+.sim-pick-empty{font-size:.78rem;color:#B0B8C1;text-align:center;padding:8px}
+.sim-pick-card{background:#fff;border:1px solid #E5E8EB;border-radius:8px;padding:8px 10px;cursor:pointer}
+.sim-pick-card:active{background:#EFF6FF}
+.sim-pick-name{font-size:.84rem;font-weight:700;color:#191F28}
+.sim-pick-meta{font-size:.7rem;color:#8B95A1;margin-top:2px}
+.sim-pick-price{font-size:.8rem;font-weight:700;color:#3182F6;margin-top:3px}
+.sim-pick-selected{font-size:.78rem;color:#16A34A;font-weight:700;padding:8px 2px}
 .sim-caption{font-size:.72rem;color:#B0B8C1;margin-top:6px}
 .sim-select{width:100%;box-sizing:border-box;appearance:none;-webkit-appearance:none;background:#fff url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="6"><path d="M0 0l5 6 5-6z" fill="%238B95A1"/></svg>') no-repeat right 14px center;border:1px solid #E5E8EB;border-radius:10px;padding:11px 36px 11px 14px;font-size:.86rem;font-weight:700;color:#191F28}
 .sim-breakdown{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -149,6 +161,13 @@ function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function 
 <script>
 // ── 설치형 앱(GitHub Pages)용 서버 호출 — 매출추이마스터 doPost (가망고객과 같은 주소) ──
 var STATUS_API_URL = 'https://script.google.com/macros/s/AKfycbxHR4Z7CQOj2lZNb4UXL2AwSWnAAZuAyTARFaYJBSChKWgr2i0saCVV78h6FA_cCvEgmA/exec';
+// 제품 검색용 — 견적서생성 doPost (quote.html과 같은 주소, searchRental/searchSpecial 재사용)
+var QUOTE_API_URL = 'https://script.google.com/macros/s/AKfycbxgwTPBdXZhxzf0LWUeG5wOdBFbM13xgb8dj1KYlwOxK4ATpYCDPDOrFfOMXNrd0ebV/exec';
+function callQuoteApi(fn, args) {
+  return fetch(QUOTE_API_URL, { method: 'POST', body: JSON.stringify({ fn: fn, args: args }) })
+    .then(function (r) { return r.json(); })
+    .then(function (d) { if (!d.ok) throw new Error(d.error || '오류'); return d.result; });
+}
 (function () {
   function Run(s, f) { this._s = s; this._f = f; }
   Run.prototype.withSuccessHandler = function (fn) { return new Run(fn, this._f); };
@@ -306,7 +325,10 @@ function renderSim() {
   html += simSliderRow('rental', '렌탈 판매건수', SIM_STATE.rental, 0, 30, '건');
   html += '  <div class="sim-num-wrap"><input type="number" class="sim-num" id="rentalPrice" value="' + SIM_STATE.rentalPrice + '" oninput="onNumInput(\'rentalPrice\')"><span class="sim-unit">원 (평균단가)</span></div>';
   html += '  <div class="sim-check-row"><input type="checkbox" id="rentalPick" onchange="togglePick(\'rentalPick\',\'rentalPickNote\')"><label for="rentalPick">제품 직접 선택해서 넣기</label></div>';
-  html += '  <div class="sim-stub-note" id="rentalPickNote" style="display:none">상품 검색 기능은 추후 제공될 예정이에요. 지금은 평균단가로 입력해 주세요.</div>';
+  html += '  <div class="sim-pick-panel" id="rentalPickNote" style="display:none">';
+  html += '    <div class="sim-pick-row"><input type="text" id="rentalPickKw" placeholder="제품명 검색 (예: 뉴아이스)" onkeydown="if(event.key===\'Enter\'){searchPickProduct(\'rental\');return false;}"><button type="button" class="sim-pick-btn" onclick="searchPickProduct(\'rental\')">검색</button></div>';
+  html += '    <div class="sim-pick-result" id="rentalPickResult"></div>';
+  html += '  </div>';
   html += '</div>';
 
   html += '<div class="sim-section">';
@@ -314,7 +336,10 @@ function renderSim() {
   html += simSliderRow('special', '특판 판매건수', SIM_STATE.special, 0, 20, '건');
   html += '  <div class="sim-num-wrap"><input type="number" class="sim-num" id="specialPrice" value="' + SIM_STATE.specialPrice + '" oninput="onNumInput(\'specialPrice\')"><span class="sim-unit">원 (평균단가)</span></div>';
   html += '  <div class="sim-check-row"><input type="checkbox" id="specialPick" onchange="togglePick(\'specialPick\',\'specialPickNote\')"><label for="specialPick">제품 직접 선택해서 넣기</label></div>';
-  html += '  <div class="sim-stub-note" id="specialPickNote" style="display:none">상품 검색 기능은 추후 제공될 예정이에요. 지금은 평균단가로 입력해 주세요.</div>';
+  html += '  <div class="sim-pick-panel" id="specialPickNote" style="display:none">';
+  html += '    <div class="sim-pick-row"><input type="text" id="specialPickKw" placeholder="제품명 검색 (예: 매트리스)" onkeydown="if(event.key===\'Enter\'){searchPickProduct(\'special\');return false;}"><button type="button" class="sim-pick-btn" onclick="searchPickProduct(\'special\')">검색</button></div>';
+  html += '    <div class="sim-pick-result" id="specialPickResult"></div>';
+  html += '  </div>';
   html += '</div>';
 
   html += '<div class="sim-section">';
@@ -389,6 +414,73 @@ function onLoyaltyChange() {
 }
 function togglePick(checkId, noteId) {
   $(noteId).style.display = $(checkId).checked ? 'block' : 'none';
+}
+
+// ── 제품 직접 선택해서 넣기 (견적서생성의 searchRental/searchSpecial 재사용) ──
+var PICK_RESULTS = { rental: [], special: [] };
+
+function searchPickProduct(type) {
+  var kwId = type === 'rental' ? 'rentalPickKw' : 'specialPickKw';
+  var resultId = type === 'rental' ? 'rentalPickResult' : 'specialPickResult';
+  var kw = ($(kwId).value || '').trim();
+  var rd = $(resultId);
+  if (!kw) { rd.innerHTML = '<div class="sim-pick-empty">검색어를 입력하세요</div>'; return; }
+  rd.innerHTML = '<div class="sim-pick-empty">검색 중…</div>';
+  var fn = type === 'rental' ? 'searchRental' : 'searchSpecial';
+  callQuoteApi(fn, [kw, authCred()])
+    .then(function (list) {
+      PICK_RESULTS[type] = list || [];
+      renderPickResult(type);
+    })
+    .catch(function (e) {
+      rd.innerHTML = '<div class="sim-pick-empty">오류: ' + esc(e.message) + '</div>';
+    });
+}
+
+function renderPickResult(type) {
+  var resultId = type === 'rental' ? 'rentalPickResult' : 'specialPickResult';
+  var rd = $(resultId);
+  var list = PICK_RESULTS[type] || [];
+  if (!list.length) { rd.innerHTML = '<div class="sim-pick-empty">결과 없음</div>'; return; }
+  var html = '';
+  list.forEach(function (p, i) {
+    var price = 0, metaTxt = '';
+    if (type === 'rental') {
+      var r0 = p.rules && p.rules[0];
+      var raw = r0 && r0.rental && r0.rental.length ? r0.rental[0] : null;
+      price = raw != null ? Math.round(parseFloat(String(raw).split('-')[0]) * 1000) : 0;
+      metaTxt = (p.group || '') + ' · ' + (r0 ? r0.rule : '기본 규정') + ' 기준';
+    } else {
+      price = Math.round((Number(p.listPrice) || 0) * 0.6); // 40% 할인 기준가
+      metaTxt = '정가 ' + (Number(p.listPrice) || 0).toLocaleString('ko-KR') + '원 · 40% 할인 기준';
+    }
+    html += '<div class="sim-pick-card" onclick="selectPickProduct(\'' + type + '\',' + i + ')">' +
+      '<div class="sim-pick-name">' + esc(p.name || '') + '</div>' +
+      '<div class="sim-pick-meta">' + esc(metaTxt) + '</div>' +
+      '<div class="sim-pick-price">' + price.toLocaleString('ko-KR') + '원</div>' +
+      '</div>';
+  });
+  rd.innerHTML = html;
+}
+
+function selectPickProduct(type, idx) {
+  var p = (PICK_RESULTS[type] || [])[idx];
+  if (!p) return;
+  var price = 0;
+  if (type === 'rental') {
+    var r0 = p.rules && p.rules[0];
+    var raw = r0 && r0.rental && r0.rental.length ? r0.rental[0] : null;
+    price = raw != null ? Math.round(parseFloat(String(raw).split('-')[0]) * 1000) : 0;
+    SIM_STATE.rentalPrice = price;
+    $('rentalPrice').value = price;
+  } else {
+    price = Math.round((Number(p.listPrice) || 0) * 0.6);
+    SIM_STATE.specialPrice = price;
+    $('specialPrice').value = price;
+  }
+  var resultId = type === 'rental' ? 'rentalPickResult' : 'specialPickResult';
+  $(resultId).innerHTML = '<div class="sim-pick-selected">✓ ' + esc(p.name || '') + ' 적용됨 (' + price.toLocaleString('ko-KR') + '원)</div>';
+  refreshSimOutputs();
 }
 
 // 전체를 다시 그리지 않고 금액 표시만 갱신 (슬라이더 조작감 유지)
