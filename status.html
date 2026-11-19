@@ -59,7 +59,7 @@ body{font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif;background:#F2
 .tab-panel.active{display:block}
 
 /* ── 수수료 시뮬레이터 ── */
-.sim-top{background:linear-gradient(135deg,#3182F6,#1b64da);border-radius:20px;padding:22px 20px;margin-bottom:14px;color:#fff}
+.sim-top{background:linear-gradient(135deg,#3182F6,#1b64da);border-radius:20px;padding:22px 20px;margin-bottom:14px;color:#fff;position:sticky;top:97px;z-index:130;box-shadow:0 6px 16px rgba(49,130,246,.25)}
 .sim-top-label{font-size:.78rem;opacity:.85;margin-bottom:4px}
 .sim-top-amt{font-size:1.9rem;font-weight:800;margin-bottom:10px}
 .sim-top-sub{font-size:.76rem;opacity:.85;line-height:1.5}
@@ -380,6 +380,7 @@ function renderSim() {
   html += '    <div class="sim-bd-tile"><div class="sim-bd-label">유지계약(AS)</div><div class="sim-bd-val">' + bd.asFee.toLocaleString() + '원</div></div>';
   html += '    <div class="sim-bd-tile"><div class="sim-bd-label">상시시상금</div><div class="sim-bd-val">' + bd.loyalty.toLocaleString() + '원</div></div>';
   html += '  </div>';
+  html += '  <div class="sim-caption" style="margin-top:10px">판매장려수수료는 총 판매건수 구간(4건부터)에 따른 장려금이에요. 렌탈·특판 개별 상품의 건별 수수료(수수료기준표·지시서점프구간)는 아직 이 계산에 들어가지 않았어요.</div>';
   html += '</div>';
 
   html += '<button class="sim-save-btn" onclick="saveGoal()">내 목표 실적으로 저장하기</button>';
