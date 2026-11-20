@@ -100,6 +100,7 @@ input,select,button,textarea{font-family:inherit}
 .up-desc{font-size:.74rem;color:#8B95A1;margin-top:2px;line-height:1.45}
 .file-btn{display:block;width:100%;margin-top:12px;background:#F2F4F6;color:#333D4B;border:1.5px dashed #D1D6DB;border-radius:14px;padding:14px;font-size:.88rem;font-weight:700;text-align:center;cursor:pointer}
 .file-btn input{display:none}
+.file-btn.drag{background:#EFF6FF;border-color:#3182F6;color:#3182F6}
 .pv{margin-top:12px}
 .pv-sum{background:#F7F8FA;border-radius:12px;padding:12px;font-size:.82rem;line-height:1.6}
 .pv-sum b{font-weight:800}
@@ -185,19 +186,19 @@ input,select,button,textarea{font-family:inherit}
     <div class="up-card">
       <div class="up-head"><div class="up-ico" style="background:#EFF6FF">📈</div>
         <div><div class="up-title">매출 엑셀</div><div class="up-desc">회사 전산에서 받은 매출 내역 엑셀을 그대로 올리면 바로 반영돼요. 보류·취소·출고대기 건은 빠집니다.</div></div></div>
-      <label class="file-btn">파일 선택 (.xls, .xlsx)<input type="file" accept=".xls,.xlsx" onchange="onSalesFile(this)"></label>
+      <label class="file-btn">파일 선택 또는 끌어다 놓기 (.xls, .xlsx)<input type="file" accept=".xls,.xlsx" onchange="onSalesFile(this)"></label>
       <div class="pv" id="pvSales"></div>
     </div>
     <div class="up-card">
       <div class="up-head"><div class="up-ico" style="background:#ECFDF5">✅</div>
         <div><div class="up-title">처리율 PDF</div><div class="up-desc">플래너 처리율 현황 PDF — 플래너별 목표(총계정)·실적·처리율을 읽어요.</div></div></div>
-      <label class="file-btn">파일 선택 (.pdf)<input type="file" accept=".pdf" onchange="onRateFile(this)"></label>
+      <label class="file-btn">파일 선택 또는 끌어다 놓기 (.pdf)<input type="file" accept=".pdf" onchange="onRateFile(this)"></label>
       <div class="pv" id="pvRate"></div>
     </div>
     <div class="up-card">
       <div class="up-head"><div class="up-ico" style="background:#FFF7E6">🔁</div>
         <div><div class="up-title">소유권 엑셀</div><div class="up-desc">만기재유입내역 엑셀 — 담당자별 만기 건수와, 재구매·유지계약 중 하나라도 Y인 재유입 건수를 셉니다.</div></div></div>
-      <label class="file-btn">파일 선택 (.xls, .xlsx)<input type="file" accept=".xls,.xlsx" onchange="onOwnFile(this)"></label>
+      <label class="file-btn">파일 선택 또는 끌어다 놓기 (.xls, .xlsx)<input type="file" accept=".xls,.xlsx" onchange="onOwnFile(this)"></label>
       <div class="pv" id="pvOwn"></div>
     </div>
     <div class="card">
@@ -789,6 +790,20 @@ function saveEval() {
   api('saveEvalInputs', EV.data.ym, EV.scope, vals, G.bk || null).then(function () { showToast('저장했어요'); loadEval(); })
     .catch(function (e) { b.disabled = false; b.textContent = '저장하고 다시 계산'; showToast(e.message); });
 }
+
+// 파일을 끌어다 놓기 (PC) — 각 칸의 파일 선택과 같은 처리로 넘김
+document.querySelectorAll('.file-btn').forEach(function (lb) {
+  var inp = lb.querySelector('input'), fn = inp.getAttribute('onchange').match(/^(\w+)\(/)[1];
+  ['dragenter', 'dragover'].forEach(function (ev) { lb.addEventListener(ev, function (e) { e.preventDefault(); lb.classList.add('drag'); }); });
+  ['dragleave', 'drop'].forEach(function (ev) { lb.addEventListener(ev, function (e) { e.preventDefault(); lb.classList.remove('drag'); }); });
+  lb.addEventListener('drop', function (e) {
+    var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+    if (f) window[fn]({ files: [f], value: '' });
+  });
+});
+// 칸 밖에 떨어뜨려도 창이 그 파일로 바뀌지 않게
+window.addEventListener('dragover', function (e) { e.preventDefault(); });
+window.addEventListener('drop', function (e) { e.preventDefault(); });
 
 loadDash();
 </script>
