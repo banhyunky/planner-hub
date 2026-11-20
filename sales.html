@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>지사매출실적 · 플래너허브</title>
+<meta name="theme-color" content="#ffffff">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif;background:#F2F4F6;color:#191F28;padding-bottom:40px}
+input,select,button,textarea{font-family:inherit}
+.topbar{background:#fff;position:sticky;top:0;z-index:150;padding:12px 14px;border-bottom:1px solid #EEF0F3;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.topbar .logo{font-size:1.05rem;font-weight:700}
+.topbar .back{background:#F2F4F6;color:#333D4B;border:none;padding:8px 12px;border-radius:8px;font-size:.9rem;font-weight:700;cursor:pointer}
+.tb-right{min-width:58px;display:flex;justify-content:flex-end}
+.tabbar{display:flex;background:#fff;border-bottom:1px solid #EEF0F3;position:sticky;top:57px;z-index:140}
+.tab-btn{flex:1;background:none;border:none;font-size:.88rem;font-weight:700;color:#8B95A1;padding:13px 4px;cursor:pointer;border-bottom:2px solid transparent}
+.tab-btn.active{color:#3182F6;border-bottom-color:#3182F6}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+.wrap{max-width:720px;margin:0 auto;padding:14px}
+.state-box{text-align:center;padding:40px 16px;color:#94a3b8;font-size:.88rem}
+.state-icon{font-size:28px;margin-bottom:6px}
+.error-msg{background:#fef2f2;color:#ef4444;padding:10px 14px;border-radius:10px;font-size:13px;margin-bottom:10px}
+#toast{position:fixed;bottom:40px;left:50%;transform:translateX(-50%);background:#191F28;color:#fff;font-size:13px;padding:9px 16px;border-radius:999px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:9999;white-space:nowrap}
+#toast.show{opacity:1}
+.sel{appearance:none;-webkit-appearance:none;background:#fff url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="6"><path d="M0 0l5 6 5-6z" fill="%238B95A1"/></svg>') no-repeat right 12px center;border:1px solid #E5E8EB;border-radius:10px;padding:9px 30px 9px 12px;font-size:.86rem;font-weight:700;color:#191F28}
+.ctl-row{display:flex;gap:8px;margin-bottom:12px}
+.ctl-row .sel{flex:1}
+.card{background:#fff;border-radius:20px;box-shadow:0 2px 8px rgba(0,0,0,.04);padding:18px;margin-bottom:12px}
+.card-title{font-size:.92rem;font-weight:800;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.card-sub{font-size:.72rem;color:#8B95A1;font-weight:500}
+.chips{display:flex;gap:6px;margin-bottom:12px}
+.chip{flex:1;background:#fff;border:1px solid #E5E8EB;color:#4E5968;border-radius:999px;padding:10px 4px;font-size:.86rem;font-weight:700;cursor:pointer}
+.chip.active{background:#191F28;border-color:#191F28;color:#fff}
+.big-lbl{font-size:.8rem;color:#8B95A1;margin-bottom:4px}
+.big-val{font-size:2.1rem;font-weight:800;color:#191F28}
+.big-val span{font-size:.95rem;color:#8B95A1;font-weight:600;margin-left:4px}
+.bar{background:#F2F4F6;border-radius:999px;height:8px;overflow:hidden;margin-top:10px}
+.bar>i{display:block;height:100%;border-radius:999px;background:#3182F6;transition:width .3s}
+.bar.thin{height:5px;margin-top:6px}
+.big-note{font-size:.76rem;color:#8B95A1;margin-top:6px}
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px}
+.tile{background:#F7F8FA;border-radius:14px;padding:12px 10px}
+.tile-lbl{font-size:.72rem;color:#8B95A1;margin-bottom:4px}
+.tile-val{font-size:1.15rem;font-weight:800}
+.tile-val span{font-size:.7rem;color:#B0B8C1;font-weight:600;margin-left:2px}
+.c-good{color:#16A34A}.c-warn{color:#D97706}.c-bad{color:#E5484D}.c-none{color:#191F28}
+.b-good{background:#16A34A}.b-warn{background:#F59E0B}.b-bad{background:#E5484D}.b-none{background:#3182F6}
+.teams{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.team{background:#fff;border-radius:20px;box-shadow:0 2px 8px rgba(0,0,0,.04);padding:14px}
+.team-name{display:inline-block;font-size:.76rem;font-weight:800;padding:3px 9px;border-radius:999px;margin-bottom:8px}
+.t1{background:#EFF6FF;color:#1B64DA}.t2{background:#ECFDF5;color:#0F8A5F}
+.team-total{font-size:1.4rem;font-weight:800}
+.team-total span{font-size:.76rem;color:#8B95A1;font-weight:600;margin-left:3px}
+.team-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px 6px;margin-top:8px}
+.team-grid div{font-size:.72rem;color:#8B95A1}
+.team-grid b{display:block;font-size:.9rem;color:#191F28}
+.plist{display:flex;flex-direction:column}
+.prow{display:flex;align-items:center;gap:10px;padding:12px 2px;border-bottom:1px solid #F2F4F6}
+.prow:last-child{border-bottom:none}
+.prow.click{cursor:pointer}
+.prow.click:active{background:#F7F8FA}
+.p-main{flex:1;min-width:0}
+.p-name{font-size:.95rem;font-weight:800;display:flex;align-items:center;gap:6px}
+.p-team{font-size:.66rem;font-weight:800;padding:2px 6px;border-radius:999px}
+.p-meta{font-size:.74rem;color:#8B95A1;margin-top:4px;line-height:1.5}
+.p-meta b{color:#4E5968;font-weight:700}
+.p-right{text-align:right;flex-shrink:0;width:86px}
+.p-cnt{font-size:1.15rem;font-weight:800}
+.p-cnt span{font-size:.72rem;color:#8B95A1;font-weight:600}
+.p-pct{font-size:.74rem;font-weight:800}
+.chev{color:#B0B8C1;font-size:1.1rem;flex-shrink:0}
+/* 상세 바텀시트 */
+.sheet-bg{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:300;display:none}
+.sheet-bg.show{display:block}
+.sheet{position:fixed;left:0;right:0;bottom:0;max-height:82vh;background:#fff;border-radius:22px 22px 0 0;z-index:301;transform:translateY(105%);transition:transform .25s;display:flex;flex-direction:column;max-width:720px;margin:0 auto}
+.sheet.show{transform:translateY(0)}
+.sheet-hd{padding:18px 18px 10px;display:flex;justify-content:space-between;align-items:flex-start;border-bottom:1px solid #F2F4F6}
+.sheet-name{font-size:1.1rem;font-weight:800}
+.sheet-sub{font-size:.76rem;color:#8B95A1;margin-top:3px}
+.sheet-x{background:#F2F4F6;border:none;border-radius:50%;width:32px;height:32px;font-size:14px;color:#4E5968;cursor:pointer}
+.sheet-kpi{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:12px 18px}
+.sheet-body{overflow-y:auto;padding:0 18px 24px}
+.sale{display:flex;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid #F7F8FA}
+.sale:last-child{border-bottom:none}
+.sale-type{font-size:.68rem;font-weight:800;padding:3px 7px;border-radius:7px;flex-shrink:0;background:#F2F4F6;color:#4E5968}
+.st-ice{background:#EFF6FF;color:#1B64DA}.st-summit{background:#FFF7E6;color:#B45309}.st-air{background:#ECFDF5;color:#0F8A5F}
+.st-mat{background:#FDF2F8;color:#BE185D}.st-etc{background:#FFF4ED;color:#C2410C}
+.sale-prod{font-size:.84rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sale-sub{font-size:.72rem;color:#8B95A1;margin-top:2px}
+.promo{font-size:.64rem;font-weight:800;color:#C2410C;background:#FFF4ED;padding:2px 6px;border-radius:6px;flex-shrink:0}
+/* 실적 입력 */
+.up-card{background:#fff;border-radius:20px;box-shadow:0 2px 8px rgba(0,0,0,.04);padding:18px;margin-bottom:12px}
+.up-head{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.up-ico{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.up-title{font-size:.95rem;font-weight:800}
+.up-desc{font-size:.74rem;color:#8B95A1;margin-top:2px;line-height:1.45}
+.file-btn{display:block;width:100%;margin-top:12px;background:#F2F4F6;color:#333D4B;border:1.5px dashed #D1D6DB;border-radius:14px;padding:14px;font-size:.88rem;font-weight:700;text-align:center;cursor:pointer}
+.file-btn input{display:none}
+.pv{margin-top:12px}
+.pv-sum{background:#F7F8FA;border-radius:12px;padding:12px;font-size:.82rem;line-height:1.6}
+.pv-sum b{font-weight:800}
+.pv-table{width:100%;border-collapse:collapse;margin-top:10px;font-size:.8rem}
+.pv-table th{color:#8B95A1;font-weight:700;font-size:.72rem;text-align:right;padding:6px 4px;border-bottom:1px solid #EEF0F3}
+.pv-table th:first-child,.pv-table td:first-child{text-align:left}
+.pv-table td{text-align:right;padding:7px 4px;border-bottom:1px solid #F7F8FA}
+.pv-table tr.miss td{color:#E5484D}
+.pv-warn{font-size:.76rem;color:#E5484D;margin-top:8px;line-height:1.5}
+.pv-ok{font-size:.8rem;color:#16A34A;font-weight:700;margin-top:10px}
+.btn-main{width:100%;background:#3182F6;color:#fff;border:none;border-radius:14px;padding:14px;font-size:.92rem;font-weight:800;cursor:pointer;margin-top:12px}
+.btn-main:disabled{background:#B0B8C1}
+.btn-sub{background:#F2F4F6;color:#333D4B;border:none;border-radius:10px;padding:9px 14px;font-size:.82rem;font-weight:700;cursor:pointer}
+.manual-toggle{width:100%;background:none;border:none;color:#4E5968;font-size:.84rem;font-weight:700;padding:12px;cursor:pointer}
+.mt{width:100%;border-collapse:collapse;font-size:.8rem}
+.mt th{color:#8B95A1;font-weight:700;font-size:.7rem;padding:6px 3px;border-bottom:1px solid #EEF0F3;text-align:center}
+.mt td{padding:5px 3px;border-bottom:1px solid #F7F8FA;text-align:center}
+.mt td:first-child{text-align:left;font-weight:700;white-space:nowrap}
+.mt input{width:56px;border:1px solid #E5E8EB;border-radius:8px;padding:6px 5px;font-size:.8rem;text-align:right}
+/* 플래너 관리 */
+.pm-row{display:flex;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid #F2F4F6}
+.pm-row:last-child{border-bottom:none}
+.pm-name{flex:1;font-weight:800;font-size:.9rem}
+.pm-name.off{color:#B0B8C1;text-decoration:line-through}
+.pm-row select,.pm-row input{border:1px solid #E5E8EB;border-radius:8px;padding:7px 6px;font-size:.8rem;background:#fff}
+.pm-row input{width:58px;text-align:right}
+.pm-act{border:none;border-radius:8px;padding:7px 10px;font-size:.76rem;font-weight:700;cursor:pointer}
+.pm-act.on{background:#F2F4F6;color:#4E5968}
+.pm-act.off{background:#EFF6FF;color:#3182F6}
+.pm-add{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.pm-add input,.pm-add select{flex:1;min-width:70px;border:1px solid #E5E8EB;border-radius:10px;padding:10px;font-size:.84rem}
+.pm-add button{background:#3182F6;color:#fff;border:none;border-radius:10px;padding:0 16px;font-weight:800;font-size:.84rem;cursor:pointer}
+@media(max-width:380px){ .tiles{grid-template-columns:repeat(2,1fr)} .teams{grid-template-columns:1fr} }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <button class="back" onclick="location.href='./'">‹ 홈</button>
+  <div class="logo" id="topTitle">지사매출실적</div>
+  <div class="tb-right"></div>
+</div>
+<div class="tabbar" id="tabbar" style="display:none">
+  <button class="tab-btn active" data-tab="dash" onclick="switchTab('dash')">대시보드</button>
+  <button class="tab-btn" data-tab="input" onclick="switchTab('input')" style="display:none">실적 입력</button>
+  <button class="tab-btn" data-tab="planner" onclick="switchTab('planner')" style="display:none">플래너 관리</button>
+</div>
+
+<div class="wrap">
+  <div class="ctl-row">
+    <select class="sel" id="ymSel" onchange="onYmChange()"></select>
+    <select class="sel" id="bkSel" onchange="onBranchChange()" style="display:none"></select>
+  </div>
+
+  <div class="tab-panel active" id="tab-dash">
+    <div id="dashRoot"><div class="state-box"><div class="state-icon">⏳</div>불러오는 중...</div></div>
+  </div>
+
+  <div class="tab-panel" id="tab-input">
+    <div class="up-card">
+      <div class="up-head"><div class="up-ico" style="background:#EFF6FF">📈</div>
+        <div><div class="up-title">매출 엑셀</div><div class="up-desc">회사 전산에서 받은 매출 내역 엑셀을 그대로 올리면 바로 반영돼요. 보류·취소·출고대기 건은 빠집니다.</div></div></div>
+      <label class="file-btn">파일 선택 (.xls, .xlsx)<input type="file" accept=".xls,.xlsx" onchange="onSalesFile(this)"></label>
+      <div class="pv" id="pvSales"></div>
+    </div>
+    <div class="up-card">
+      <div class="up-head"><div class="up-ico" style="background:#ECFDF5">✅</div>
+        <div><div class="up-title">처리율 PDF</div><div class="up-desc">플래너 처리율 현황 PDF — 플래너별 목표(총계정)·실적·처리율을 읽어요.</div></div></div>
+      <label class="file-btn">파일 선택 (.pdf)<input type="file" accept=".pdf" onchange="onRateFile(this)"></label>
+      <div class="pv" id="pvRate"></div>
+    </div>
+    <div class="up-card">
+      <div class="up-head"><div class="up-ico" style="background:#FFF7E6">🔁</div>
+        <div><div class="up-title">소유권 엑셀</div><div class="up-desc">만기재유입내역 엑셀 — 담당자별 만기 건수와, 재구매·유지계약 중 하나라도 Y인 재유입 건수를 셉니다.</div></div></div>
+      <label class="file-btn">파일 선택 (.xls, .xlsx)<input type="file" accept=".xls,.xlsx" onchange="onOwnFile(this)"></label>
+      <div class="pv" id="pvOwn"></div>
+    </div>
+    <div class="card">
+      <button class="manual-toggle" onclick="toggleManual()" id="manualBtn">직접 입력·수정 열기 ▾</button>
+      <div id="manualRoot" style="display:none"></div>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="tab-planner">
+    <div class="card">
+      <div class="card-title">실적 대상 플래너 <span class="card-sub">대시보드에 나오는 명단</span></div>
+      <div class="pm-add">
+        <input id="pmName" placeholder="이름">
+        <select id="pmTeam"><option>1팀</option><option>2팀</option></select>
+        <input id="pmTarget" type="number" placeholder="목표" style="max-width:80px">
+        <button onclick="addPlanner()">추가</button>
+      </div>
+      <div id="pmRoot"><div class="state-box">불러오는 중...</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="sheet-bg" id="sheetBg" onclick="closeSheet()"></div>
+<div class="sheet" id="sheet">
+  <div class="sheet-hd"><div><div class="sheet-name" id="shName"></div><div class="sheet-sub" id="shSub"></div></div>
+    <button class="sheet-x" onclick="closeSheet()">✕</button></div>
+  <div class="sheet-kpi" id="shKpi"></div>
+  <div class="sheet-body" id="shBody"></div>
+</div>
+<div id="toast"></div>
+
+<script>
+// ── 플래너허브 앱 안 지사매출실적 화면 (2026-11-20) ──
+// 예전 매출추이마스터 GAS 화면(Index.html)을 옮긴 것 — 그 화면은 지웠고 이 파일 하나만 씀.
+// 서버: 매출추이마스터 doPost (getSalesDashboard 등, Code.gs 'API' 구역). 로그인 정보는 허브가 이 폰에 저장해 둔 것.
+var INIT_NAME = '', INIT_PHONE = '', INIT_TOKEN = '', INIT_DK = '';
+(function () {
+  var u = null;
+  try { u = JSON.parse(localStorage.getItem('rentalUser') || 'null'); INIT_DK = localStorage.getItem('rentalDeviceKey') || ''; } catch (e) {}
+  if (!u || !u.sessionToken) { location.replace('./'); return; }
+  INIT_NAME = u.name || ''; INIT_PHONE = u.phone || ''; INIT_TOKEN = u.sessionToken;
+})();
+var API_URL = 'https://script.google.com/macros/s/AKfycbxHR4Z7CQOj2lZNb4UXL2AwSWnAAZuAyTARFaYJBSChKWgr2i0saCVV78h6FA_cCvEgmA/exec';
+function $(id) { return document.getElementById(id); }
+function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]; }); }
+function authCred() { return { name: INIT_NAME, phone: INIT_PHONE, token: INIT_TOKEN, dk: INIT_DK }; }
+function api(fn) {
+  var args = [authCred()].concat([].slice.call(arguments, 1));
+  return fetch(API_URL, { method: 'POST', body: JSON.stringify({ fn: fn, args: args }) })
+    .then(function (r) { return r.json(); }, function () { throw new Error('인터넷 연결을 확인하고 다시 시도해 주세요.'); })
+    .then(function (d) {
+      if (!d.ok) throw new Error(d.error || '오류');
+      if (d.result && d.result.error) throw new Error(d.result.error);
+      return d.result;
+    });
+}
+function showToast(msg) {
+  var t = $('toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(showToast._t); showToast._t = setTimeout(function () { t.classList.remove('show'); }, 2200);
+}
+function fmt(n) { return (Number(n) || 0).toLocaleString(); }
+function rateCls(r) { return r == null ? 'none' : r >= 98 ? 'good' : r >= 96 ? 'warn' : 'bad'; }
+function pctCls(p) { return p == null ? 'none' : p >= 100 ? 'good' : p >= 70 ? 'warn' : 'bad'; }
+
+var G = { ym: '', bk: '', who: null, dash: null, team: 'all', input: null };
+
+// ── 월·지사 선택 ──
+(function initYm() {
+  var now = new Date(), html = '';
+  for (var i = 0; i < 12; i++) {
+    var d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    var ym = d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2);
+    if (i === 0) G.ym = ym;
+    html += '<option value="' + ym + '">' + d.getFullYear() + '년 ' + (d.getMonth() + 1) + '월</option>';
+  }
+  html += '<option value="all">전체(누적)</option>';
+  $('ymSel').innerHTML = html;
+})();
+function onYmChange() { G.ym = $('ymSel').value; loadDash(); if (G.input) { G.input = null; loadInput().catch(function () {}); } }
+function onBranchChange() { G.bk = $('bkSel').value; G.team = 'all'; G.input = null; loadDash(); if ($('tab-input').classList.contains('active')) loadInput().catch(function () {}); if ($('tab-planner').classList.contains('active')) loadPlanners(); }
+
+function switchTab(t) {
+  document.querySelectorAll('.tab-btn').forEach(function (b) { b.classList.toggle('active', b.dataset.tab === t); });
+  document.querySelectorAll('.tab-panel').forEach(function (p) { p.classList.toggle('active', p.id === 'tab-' + t); });
+  if (t === 'input' && !G.input) loadInput().catch(function () {});
+  if (t === 'planner') loadPlanners();
+}
+
+// ── 대시보드 ──
+function loadDash() {
+  $('dashRoot').innerHTML = '<div class="state-box"><div class="state-icon">⏳</div>불러오는 중...</div>';
+  api('getSalesDashboard', G.ym, G.bk || null).then(function (d) {
+    G.dash = d; G.who = d.who || {};
+    if (!G.bk) G.bk = G.who.branchKey;
+    setupRole();
+    renderDash();
+  }).catch(function (e) {
+    $('dashRoot').innerHTML = '<div class="state-box"><div class="state-icon">📭</div>' + esc(e.message) + '</div>';
+  });
+}
+var _roleDone = false;
+function setupRole() {
+  if (_roleDone) return; _roleDone = true;
+  var w = G.who, isMgr = w.role === 'admin' || w.role === 'manager';
+  $('topTitle').textContent = (w.branchName || '지사') + ' 매출실적';
+  if (isMgr || w.role === 'admin') {
+    $('tabbar').style.display = 'flex';
+    document.querySelector('[data-tab="input"]').style.display = isMgr ? '' : 'none';
+    document.querySelector('[data-tab="planner"]').style.display = w.role === 'admin' ? '' : 'none';
+  }
+  if (w.isSuperAdmin && w.branches && w.branches.length > 1) {
+    $('bkSel').innerHTML = w.branches.map(function (b) { return '<option value="' + b.branchKey + '">' + esc(b.branchName) + '</option>'; }).join('');
+    $('bkSel').value = G.bk; $('bkSel').style.display = '';
+  }
+}
+function teamsOf() {
+  return (G.dash.teamStats || []).map(function (t) { return t.team; });
+}
+function stats() {
+  var s = G.dash.plannerStats || [];
+  return G.team === 'all' ? s : s.filter(function (p) { return p.team === G.team; });
+}
+function teamTarget(team) {
+  var tt = G.dash.teamTargets || {};
+  var k = Object.keys(tt).find(function (x) { return x === team || x.indexOf(team) >= 0 || team.indexOf(x) >= 0; });
+  return k ? tt[k] : (G.dash.target || {});
+}
+function avgRate(list) {
+  var r = list.filter(function (p) { return p.process_rate != null; });
+  return r.length ? Math.round(r.reduce(function (s, p) { return s + p.process_rate; }, 0) / r.length * 10) / 10 : null;
+}
+function renderDash() {
+  var d = G.dash;
+  if (!d.plannerStats || !d.plannerStats.length) { $('dashRoot').innerHTML = '<div class="state-box"><div class="state-icon">📭</div>실적 대상 플래너가 없습니다</div>'; return; }
+  var teams = teamsOf(), html = '';
+  if (teams.length > 1) {
+    html += '<div class="chips"><button class="chip' + (G.team === 'all' ? ' active' : '') + '" onclick="setTeam(\'all\')">전체</button>' +
+      teams.map(function (t) { return '<button class="chip' + (G.team === t ? ' active' : '') + '" onclick="setTeam(\'' + esc(t) + '\')">' + esc(t) + '</button>'; }).join('') + '</div>';
+  }
+  var list = stats(), tgt = G.team === 'all' ? (d.target || {}) : teamTarget(G.team);
+  var sum = function (k) { return list.reduce(function (s, p) { return s + ((p.counts || {})[k] || 0); }, 0); };
+  var own = list.reduce(function (s, p) { return s + (p.ownership_count || 0); }, 0);
+  var ownTot = list.reduce(function (s, p) { return s + (p.ownership_total || 0); }, 0);
+  var total = sum('total'), rate = avgRate(list);
+  var pct = tgt.total_target ? Math.round(total / tgt.total_target * 100) : null;
+  html += '<div class="card"><div class="big-lbl">' + (d.ym === 'all' ? '누적 매출' : '이번 달 매출') + (G.team === 'all' ? '' : ' · ' + esc(G.team)) + '</div>' +
+    '<div class="big-val">' + total + '<span>/ ' + (tgt.total_target || '-') + '대</span></div>' +
+    '<div class="bar"><i class="b-' + pctCls(pct) + '" style="width:' + Math.min(pct || 0, 100) + '%"></i></div>' +
+    '<div class="big-note">' + (pct != null ? '목표의 ' + pct + '% 달성' : '목표 미입력') + '</div>' +
+    '<div class="tiles">' +
+      tile('정수기군', sum('purifier'), tgt.purifier_target, '대') +
+      tile('전략상품', sum('strategic'), tgt.strategic_target, '건') +
+      tile('매트리스', sum('mattress'), tgt.mattress_target, '대') +
+      tile('특판', sum('special'), tgt.special_target, '건') +
+      tile('소유권 재유입', own, tgt.ownership_target, '건', ownTot ? '만기 ' + ownTot + '건' : '') +
+      '<div class="tile"><div class="tile-lbl">평균 처리율</div><div class="tile-val c-' + rateCls(rate) + '">' + (rate != null ? rate + '%' : '-') + '<span>/98%</span></div></div>' +
+    '</div></div>';
+  if (G.team === 'all' && teams.length > 1) {
+    html += '<div class="teams">' + (d.teamStats || []).map(function (t, i) {
+      var mem = (d.plannerStats || []).filter(function (p) { return p.team === t.team; });
+      var tg = teamTarget(t.team), tp = tg.total_target ? Math.round(t.total / tg.total_target * 100) : null, tr = avgRate(mem);
+      return '<div class="team"><span class="team-name ' + (i === 0 ? 't1' : 't2') + '">' + esc(t.team) + '</span>' +
+        '<div class="team-total">' + t.total + '<span>/ ' + (tg.total_target || '-') + '</span></div>' +
+        '<div class="bar thin"><i class="b-' + pctCls(tp) + '" style="width:' + Math.min(tp || 0, 100) + '%"></i></div>' +
+        '<div class="team-grid"><div>정수기<b>' + t.purifier + '</b></div><div>전략<b>' + t.strategic + '</b></div><div>매트<b>' + t.mattress + '</b></div>' +
+        '<div>특판<b>' + t.special + '</b></div><div>소유권<b>' + t.ownership + '</b></div><div>처리율<b class="c-' + rateCls(tr) + '">' + (tr != null ? tr + '%' : '-') + '</b></div></div></div>';
+    }).join('') + '</div>';
+  }
+  var canClick = G.who.role === 'admin' || G.who.role === 'manager';
+  var sorted = list.slice().sort(function (a, b) { return (b.counts.total || 0) - (a.counts.total || 0); });
+  html += '<div class="card"><div class="card-title">플래너별 실적' + (canClick ? ' <span class="card-sub">눌러서 판매 내역 보기</span>' : '') + '</div><div class="plist">' +
+    sorted.map(function (p) {
+      var c = p.counts || {}, pp = p.monthly_target ? Math.round(c.total / p.monthly_target * 100) : null;
+      var ti = teams.indexOf(p.team);
+      return '<div class="prow' + (canClick ? ' click' : '') + '"' + (canClick ? ' onclick="openDetail(\'' + esc(p.planner_id) + '\')"' : '') + '>' +
+        '<div class="p-main"><div class="p-name">' + esc(p.name) + (p.team ? '<span class="p-team ' + (ti === 0 ? 't1' : 't2') + '">' + esc(p.team) + '</span>' : '') + '</div>' +
+        '<div class="p-meta">전략 <b>' + (c.strategic || 0) + '</b> · 정수기 <b>' + (c.purifierOther || 0) + '</b> · 매트 <b>' + (c.mattress || 0) + '</b> · 특판 <b>' + (c.special || 0) + '</b><br>' +
+        '처리율 <b class="c-' + rateCls(p.process_rate) + '">' + (p.process_rate != null ? p.process_rate + '%' : '-') + '</b> · 소유권 <b>' + (p.ownership_count || 0) + '/' + (p.ownership_total || 0) + '</b></div></div>' +
+        '<div class="p-right"><div class="p-cnt">' + (c.total || 0) + '<span> / ' + (p.monthly_target || '-') + '</span></div>' +
+        '<div class="bar thin"><i class="b-' + pctCls(pp) + '" style="width:' + Math.min(pp || 0, 100) + '%"></i></div>' +
+        '<div class="p-pct c-' + pctCls(pp) + '">' + (pp != null ? pp + '%' : '') + '</div></div>' +
+        (canClick ? '<div class="chev">›</div>' : '') + '</div>';
+    }).join('') + '</div></div>';
+  $('dashRoot').innerHTML = html;
+}
+function tile(lbl, val, target, unit, note) {
+  var p = target ? Math.round((val || 0) / target * 100) : null;
+  return '<div class="tile"><div class="tile-lbl">' + lbl + '</div><div class="tile-val c-' + (p == null ? 'none' : pctCls(p)) + '">' + (val || 0) +
+    '<span>/' + (target || '-') + unit + '</span></div>' +
+    (note ? '<div class="tile-lbl" style="margin:3px 0 0">' + note + '</div>' : '') + '</div>';
+}
+function setTeam(t) { G.team = t; renderDash(); }
+
+// ── 플래너 판매 내역 (팀장·관리자) ──
+var TYPE_CLS = { '얼음정수기': 'st-ice', '정수기': 'st-ice', '서밋': 'st-summit', '공기청정기': 'st-air', '매트리스': 'st-mat', '비데': 'st-etc', '렌탈기타': 'st-etc' };
+function openDetail(pid) {
+  var p = (G.dash.plannerStats || []).find(function (x) { return x.planner_id === pid; });
+  if (!p) return;
+  var c = p.counts || {}, pp = p.monthly_target ? Math.round(c.total / p.monthly_target * 100) : null;
+  $('shName').textContent = p.name;
+  $('shSub').textContent = (p.team || '') + ' · 목표 ' + (p.monthly_target || '-') + '건';
+  $('shKpi').innerHTML =
+    '<div class="tile"><div class="tile-lbl">총 건수</div><div class="tile-val">' + (c.total || 0) + '</div></div>' +
+    '<div class="tile"><div class="tile-lbl">처리율</div><div class="tile-val c-' + rateCls(p.process_rate) + '">' + (p.process_rate != null ? p.process_rate + '%' : '-') + '</div></div>' +
+    '<div class="tile"><div class="tile-lbl">달성률</div><div class="tile-val c-' + pctCls(pp) + '">' + (pp != null ? pp + '%' : '-') + '</div></div>';
+  $('shBody').innerHTML = '<div class="state-box">⏳ 판매 내역 불러오는 중...</div>';
+  $('sheetBg').classList.add('show'); $('sheet').classList.add('show');
+  api('getSalesPlannerDetail', p.name, G.dash.ym, G.bk || null).then(function (res) {
+    var list = res.detail || [];
+    $('shBody').innerHTML = !list.length ? '<div class="state-box">판매 내역이 없습니다</div>' : list.map(function (s) {
+      return '<div class="sale"><span class="sale-type ' + (TYPE_CLS[s.saleType] || '') + '">' + esc(s.saleType) + '</span>' +
+        '<div style="flex:1;min-width:0"><div class="sale-prod">' + esc(s.상품명 || '-') + '</div>' +
+        '<div class="sale-sub">' + esc(s.고객명 || '') + (s.접수일자 ? ' · ' + esc(s.접수일자) : '') + (s.진행상태 ? ' · ' + esc(s.진행상태) : '') + '</div></div>' +
+        (s.isPromo ? '<span class="promo">프로모션</span>' : '') + '</div>';
+    }).join('');
+  }).catch(function (e) { $('shBody').innerHTML = '<div class="error-msg">' + esc(e.message) + '</div>'; });
+}
+function closeSheet() { $('sheetBg').classList.remove('show'); $('sheet').classList.remove('show'); }
+
+// ── 실적 입력 (팀장·관리자) ──
+var _inputP = null;
+function loadInput() {
+  if (_inputP) return _inputP;
+  _inputP = api('getProcessInput', G.ym === 'all' ? '' : G.ym, G.bk || null).then(function (d) {
+    _inputP = null; G.input = d; if ($('manualRoot').style.display !== 'none') renderManual();
+    return d;
+  }, function (e) { _inputP = null; showToast(e.message); throw e; });
+  return _inputP;
+}
+function plannerIdByName(name) {
+  var list = (G.input && G.input.planners) || [];
+  var n = String(name || '').replace(/\s/g, '');
+  var hit = list.filter(function (p) { return p.name.replace(/\s/g, '') === n; });
+  return hit.length === 1 ? hit[0].planner_id : '';
+}
+function needInput() { return G.input ? Promise.resolve(G.input) : loadInput(); }
+function loadScript(src, globalName) {
+  if (window[globalName]) return Promise.resolve(window[globalName]);
+  return new Promise(function (ok, no) {
+    var s = document.createElement('script'); s.src = src;
+    s.onload = function () { ok(window[globalName]); };
+    s.onerror = function () { no(new Error('파일 읽기 도구를 불러오지 못했습니다. 인터넷 연결을 확인해 주세요.')); };
+    document.head.appendChild(s);
+  });
+}
+function readExcel(file) {
+  return loadScript('https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js', 'XLSX').then(function (XLSX) {
+    return file.arrayBuffer().then(function (buf) {
+      var wb = XLSX.read(buf, { type: 'array' });
+      return XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1, raw: false, defval: '' });
+    });
+  });
+}
+function readPdfLines(file) {
+  return loadScript('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js', 'pdfjsLib').then(function (lib) {
+    lib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    return file.arrayBuffer().then(function (buf) { return lib.getDocument({ data: new Uint8Array(buf) }).promise; }).then(function (pdf) {
+      var lines = [], p = Promise.resolve();
+      for (var i = 1; i <= pdf.numPages; i++) {
+        (function (n) {
+          p = p.then(function () { return pdf.getPage(n); }).then(function (pg) { return pg.getTextContent(); })
+            .then(function (tc) { lines = lines.concat(pdfItemsToLines(tc.items)); });
+        })(i);
+      }
+      return p.then(function () { return lines; });
+    });
+  });
+}
+// ── 파일 읽기 (화면에서 실행, 서버로는 정리된 값만 보냄) ──
+// pdf.js 텍스트 조각을 줄 단위로 묶음 (같은 높이 = 한 줄, 왼쪽부터)
+function pdfItemsToLines(items) {
+  var rows = [];
+  items.forEach(function (it) {
+    var s = String(it.str || '');
+    if (!s.trim()) return;
+    var x = it.transform[4], y = it.transform[5];
+    var row = null;
+    for (var i = 0; i < rows.length; i++) { if (Math.abs(rows[i].y - y) < 3) { row = rows[i]; break; } }
+    if (!row) { row = { y: y, parts: [] }; rows.push(row); }
+    row.parts.push({ x: x, w: Number(it.width) || 0, h: Math.abs(it.transform[3]) || 8, s: s });
+  });
+  rows.sort(function (a, b) { return b.y - a.y; });
+  return rows.map(function (r) {
+    r.parts.sort(function (a, b) { return a.x - b.x; });
+    // 글자가 한 자씩 따로 오는 PDF가 있어, 앞 글자 끝과 다음 글자 사이가 벌어졌을 때만 띄어 씀
+    var out = '', end = null;
+    r.parts.forEach(function (p) {
+      if (end !== null && p.x - end > p.h * 0.3) out += ' ';
+      out += p.s;
+      end = p.x + p.w;
+    });
+    return out.replace(/\s+/g, ' ').trim();
+  });
+}
+
+// 처리율 PDF(플래너 처리율 현황) → { ym, rows:[{empNo, name, total(목표=총계정), done(실적), rate(처리율)}] }
+function parseRateLines(lines) {
+  var flat = lines.join('\n').replace(/[ \t]/g, '');
+  var ym = '';
+  var m = flat.match(/년월:?(20\d{2})-(\d{1,2})(?![\d-])/);
+  if (m) ym = m[1] + '-' + ('0' + m[2]).slice(-2);
+  var rows = [], seen = {};
+  var re = /([0-9A-Z]{8})\s+([가-힣]{2,5})\s+([\d,]+)\s+([\d,]+)\s+([\d.]+)\s*%/;
+  lines.forEach(function (l) {
+    var r = l.match(re);
+    if (!r || seen[r[1]]) return;
+    seen[r[1]] = true;
+    rows.push({ empNo: r[1], name: r[2], total: parseInt(r[3].replace(/,/g, ''), 10) || 0,
+      done: parseInt(r[4].replace(/,/g, ''), 10) || 0, rate: parseFloat(r[5]) || 0 });
+  });
+  return { ym: ym, rows: rows };
+}
+
+// 소유권 엑셀(만기재유입내역) → { ym, rows:[{empNo, name, total(만기 건수), reinflow(재구매·유지계약 중 하나라도 Y)}] }
+function parseOwnAoa(aoa) {
+  var h = -1;
+  for (var i = 0; i < Math.min(aoa.length, 10); i++) {
+    var r = aoa[i].map(function (c) { return String(c).trim(); });
+    if (r.indexOf('재구매') >= 0 && r.indexOf('유지계약') >= 0 && r.indexOf('담당자') >= 0) { h = i; break; }
+  }
+  if (h < 0) return { error: '재구매·유지계약·담당자 열을 찾을 수 없습니다. 만기재유입내역 엑셀이 맞는지 확인해 주세요.' };
+  var head = aoa[h].map(function (c) { return String(c).trim(); });
+  var cEmp = head.indexOf('담당자'), cRe = head.indexOf('재구매'), cKeep = head.indexOf('유지계약'), cYm = head.indexOf('만기월');
+  var by = {}, order = [], yms = {};
+  for (var j = h + 1; j < aoa.length; j++) {
+    var row = aoa[j];
+    var emp = String(row[cEmp] == null ? '' : row[cEmp]).trim();
+    if (!emp) continue;
+    var name = String(row[cEmp + 1] == null ? '' : row[cEmp + 1]).trim();
+    if (!by[emp]) { by[emp] = { empNo: emp, name: name, total: 0, reinflow: 0 }; order.push(emp); }
+    by[emp].total++;
+    var yes = function (v) { return String(v == null ? '' : v).trim().toUpperCase() === 'Y'; };
+    if (yes(row[cRe]) || yes(row[cKeep])) by[emp].reinflow++;
+    if (cYm >= 0) {
+      var ym = String(row[cYm] == null ? '' : row[cYm]).replace(/[^0-9]/g, '');
+      if (ym.length >= 6) { ym = ym.slice(0, 4) + '-' + ym.slice(4, 6); yms[ym] = (yms[ym] || 0) + 1; }
+    }
+  }
+  var best = Object.keys(yms).sort(function (a, b) { return yms[b] - yms[a]; })[0] || '';
+  return { ym: best, months: Object.keys(yms), rows: order.map(function (k) { return by[k]; }) };
+}
+
+// 매출 엑셀 → 머리줄(계약번호·성명 있는 줄)부터 잘라 [머리줄, …행] (빈 줄 제외)
+function pickSalesTable(aoa) {
+  for (var i = 0; i < Math.min(aoa.length, 10); i++) {
+    var r = aoa[i].map(function (c) { return String(c).trim(); });
+    if (r.indexOf('계약번호') >= 0 && r.indexOf('성명') >= 0) {
+      var out = [r];
+      for (var j = i + 1; j < aoa.length; j++) {
+        var row = aoa[j].map(function (c) { return c == null ? '' : String(c); });
+        if (row.join('').trim()) out.push(row);
+      }
+      return { table: out };
+    }
+  }
+  return { error: '계약번호·성명 열을 찾을 수 없습니다. 회사 전산에서 받은 매출 엑셀이 맞는지 확인해 주세요.' };
+}
+
+
+// 매출 엑셀: 화면에서 읽어 서버로 미리보기(dryRun) → 확인 후 BQ에 넣기
+var _salesTable = null;
+function onSalesFile(inp) {
+  var f = inp.files[0]; inp.value = ''; if (!f) return;
+  var box = $('pvSales'); box.innerHTML = '<div class="state-box">⏳ 읽는 중...</div>'; _salesTable = null;
+  readExcel(f).then(function (aoa) {
+    var t = pickSalesTable(aoa);
+    if (t.error) throw new Error(t.error);
+    _salesTable = t.table;
+    return api('uploadSalesFile', G.bk || null, t.table, true);
+  }).then(function (s) {
+    var names = Object.keys(s.byPlanner).sort(function (a, b) { return s.byPlanner[b] - s.byPlanner[a]; });
+    var html = '<div class="pv-sum"><b>' + esc(f.name) + '</b><br>전체 <b>' + s.total + '</b>건 · 반영 <b>' + s.valid + '</b>건' +
+      (s.excluded.length ? ' · 제외 <b class="c-bad">' + s.excluded.length + '</b>건' : '') +
+      '<br>접수월: ' + Object.keys(s.byMonth).sort().map(function (m) { return esc(m) + ' ' + s.byMonth[m] + '건'; }).join(', ') + '</div>';
+    if (s.excluded.length) html += '<div class="pv-warn">제외: ' + s.excluded.map(function (x) { return esc(x.planner) + ' ' + esc(x.customer) + '(' + esc(x.reason) + ')'; }).join(', ') + '</div>';
+    html += '<table class="pv-table"><tr><th>플래너</th><th>건수</th></tr>' + names.map(function (n) { return '<tr><td>' + esc(n) + '</td><td>' + s.byPlanner[n] + '</td></tr>'; }).join('') + '</table>';
+    html += '<button class="btn-main" id="salesGo" onclick="commitSales()">' + esc(s.branchName) + ' 매출로 올리기</button>';
+    box.innerHTML = html;
+  }).catch(function (e) { box.innerHTML = '<div class="error-msg">' + esc(e.message) + '</div>'; });
+}
+function commitSales() {
+  if (!_salesTable) return;
+  var b = $('salesGo'); b.disabled = true; b.textContent = '올리는 중... (10~30초)';
+  api('uploadSalesFile', G.bk || null, _salesTable, false).then(function (s) {
+    _salesTable = null;
+    $('pvSales').innerHTML = '<div class="pv-ok">✅ ' + s.valid + '건 반영 완료 (전체 ' + s.total + '건)</div>';
+    showToast('매출 반영 완료'); loadDash();
+  }).catch(function (e) { b.disabled = false; b.textContent = '다시 올리기'; showToast(e.message); });
+}
+
+// 처리율 PDF / 소유권 엑셀: 화면에서 읽어 플래너 이름으로 맞춘 뒤 미리보기 → 저장
+var _ratePending = null, _ownPending = null;
+function onRateFile(inp) {
+  var f = inp.files[0]; inp.value = ''; if (!f) return;
+  var box = $('pvRate'); box.innerHTML = '<div class="state-box">⏳ 읽는 중...</div>'; _ratePending = null;
+  Promise.all([readPdfLines(f), needInput()]).then(function (r) {
+    var p = parseRateLines(r[0]);
+    if (!p.rows.length) throw new Error('PDF에서 플래너 처리율을 찾지 못했습니다. 「플래너 처리율 현황」 PDF가 맞는지 확인해 주세요.');
+    var ym = p.ym || G.ym, miss = 0;
+    var items = p.rows.map(function (x) { var id = plannerIdByName(x.name); if (!id) miss++; return { x: x, planner_id: id }; });
+    _ratePending = { ym: ym, items: items };
+    box.innerHTML = '<div class="pv-sum"><b>' + esc(ym) + '</b> 처리율 · ' + items.length + '명' + (miss ? ' · <b class="c-bad">명단에 없는 ' + miss + '명은 저장 안 됨</b>' : '') + '</div>' +
+      '<table class="pv-table"><tr><th>플래너</th><th>총계정</th><th>처리</th><th>처리율</th></tr>' +
+      items.map(function (it) { return '<tr' + (it.planner_id ? '' : ' class="miss"') + '><td>' + esc(it.x.name) + '</td><td>' + it.x.total + '</td><td>' + it.x.done + '</td><td class="c-' + rateCls(it.x.rate) + '">' + it.x.rate + '%</td></tr>'; }).join('') + '</table>' +
+      ymWarn(ym) + '<button class="btn-main" id="rateGo" onclick="commitRate()">' + esc(ym) + ' 처리율 저장</button>';
+  }).catch(function (e) { box.innerHTML = '<div class="error-msg">' + esc(e.message) + '</div>'; });
+}
+function commitRate() {
+  var P = _ratePending; if (!P) return;
+  var b = $('rateGo'); b.disabled = true; b.textContent = '저장 중...';
+  var rates = P.items.filter(function (it) { return it.planner_id; }).map(function (it) { return { planner_id: it.planner_id, process_rate: it.x.rate, total_account: it.x.total }; });
+  api('saveProcessInput', P.ym, rates, null, G.bk || null, { replace: true }).then(function (r) {
+    _ratePending = null; $('pvRate').innerHTML = '<div class="pv-ok">✅ ' + esc(r.ym) + ' 처리율 ' + r.rates + '명 저장 완료</div>';
+    showToast('처리율 저장 완료'); G.input = null; loadDash();
+  }).catch(function (e) { b.disabled = false; b.textContent = '다시 저장'; showToast(e.message); });
+}
+function onOwnFile(inp) {
+  var f = inp.files[0]; inp.value = ''; if (!f) return;
+  var box = $('pvOwn'); box.innerHTML = '<div class="state-box">⏳ 읽는 중...</div>'; _ownPending = null;
+  Promise.all([readExcel(f), needInput()]).then(function (r) {
+    var p = parseOwnAoa(r[0]);
+    if (p.error) throw new Error(p.error);
+    if (!p.rows.length) throw new Error('담당자별 만기 건이 없습니다.');
+    var ym = p.ym || G.ym, miss = 0;
+    var items = p.rows.map(function (x) { var id = plannerIdByName(x.name); if (!id) miss++; return { x: x, planner_id: id }; });
+    _ownPending = { ym: ym, items: items };
+    var tot = items.reduce(function (s, it) { return s + it.x.total; }, 0), re = items.reduce(function (s, it) { return s + it.x.reinflow; }, 0);
+    box.innerHTML = '<div class="pv-sum"><b>' + esc(ym) + '</b> 소유권 · 만기 <b>' + tot + '</b>건 중 재유입 <b>' + re + '</b>건' +
+      (p.months.length > 1 ? '<br><span class="c-warn">파일에 여러 달(' + p.months.map(esc).join(', ') + ')이 섞여 있어 가장 많은 달로 저장합니다</span>' : '') +
+      (miss ? '<br><b class="c-bad">명단에 없는 ' + miss + '명은 저장 안 됨</b>' : '') + '</div>' +
+      '<table class="pv-table"><tr><th>담당자</th><th>만기</th><th>재유입</th><th>비율</th></tr>' +
+      items.map(function (it) { return '<tr' + (it.planner_id ? '' : ' class="miss"') + '><td>' + esc(it.x.name) + '</td><td>' + it.x.total + '</td><td>' + it.x.reinflow + '</td><td>' + (it.x.total ? Math.round(it.x.reinflow / it.x.total * 100) : 0) + '%</td></tr>'; }).join('') + '</table>' +
+      ymWarn(ym) + '<button class="btn-main" id="ownGo" onclick="commitOwn()">' + esc(ym) + ' 소유권 저장</button>';
+  }).catch(function (e) { box.innerHTML = '<div class="error-msg">' + esc(e.message) + '</div>'; });
+}
+function commitOwn() {
+  var P = _ownPending; if (!P) return;
+  var b = $('ownGo'); b.disabled = true; b.textContent = '저장 중...';
+  var owns = P.items.filter(function (it) { return it.planner_id; }).map(function (it) { return { planner_id: it.planner_id, total_count: it.x.total, ownership_count: it.x.reinflow }; });
+  api('saveProcessInput', P.ym, null, owns, G.bk || null, { replace: true }).then(function (r) {
+    _ownPending = null; $('pvOwn').innerHTML = '<div class="pv-ok">✅ ' + esc(r.ym) + ' 소유권 ' + r.owns + '명 저장 완료</div>';
+    showToast('소유권 저장 완료'); G.input = null; loadDash();
+  }).catch(function (e) { b.disabled = false; b.textContent = '다시 저장'; showToast(e.message); });
+}
+function ymWarn(ym) {
+  return (G.ym !== 'all' && ym !== G.ym) ? '<div class="pv-warn">지금 화면은 ' + esc(G.ym) + '이지만, 파일 기준인 ' + esc(ym) + '로 저장됩니다.</div>' : '';
+}
+
+// 직접 입력·수정 (파일이 없을 때나 고칠 때)
+function toggleManual() {
+  var r = $('manualRoot'), open = r.style.display === 'none';
+  r.style.display = open ? '' : 'none';
+  $('manualBtn').textContent = open ? '직접 입력·수정 닫기 ▴' : '직접 입력·수정 열기 ▾';
+  if (open) { if (G.input) renderManual(); else { r.innerHTML = '<div class="state-box">불러오는 중...</div>'; loadInput().catch(function () {}); } }
+}
+function renderManual() {
+  var d = G.input; if (!d) return;
+  var rate = {}, own = {};
+  (d.rates || []).forEach(function (r) { rate[r.planner_id] = r; });
+  (d.owns || []).forEach(function (o) { own[o.planner_id] = o; });
+  var list = d.planners.filter(function (p) { return p.active || rate[p.planner_id] || own[p.planner_id]; });
+  var v = function (n) { return n ? n : ''; };
+  $('manualRoot').innerHTML = '<div class="card-sub" style="margin-bottom:8px">' + esc(d.ym) + ' · 처리 = 총계정 × 처리율로 계산해 보여줍니다</div>' +
+    '<div style="overflow-x:auto"><table class="mt"><tr><th>이름</th><th>총계정</th><th>처리</th><th>처리율</th><th>만기</th><th>재유입</th></tr>' +
+    list.map(function (p) {
+      var r = rate[p.planner_id] || {}, o = own[p.planner_id] || {}, id = esc(p.planner_id);
+      var done = r.total_account ? Math.round(r.total_account * (r.process_rate || 0) / 100) : '';
+      return '<tr><td>' + esc(p.name) + '</td>' +
+        '<td><input type="number" id="mt-t-' + id + '" value="' + v(r.total_account) + '" oninput="mtRate(\'' + id + '\')"></td>' +
+        '<td><input type="number" id="mt-d-' + id + '" value="' + done + '" oninput="mtRate(\'' + id + '\')"></td>' +
+        '<td id="mt-r-' + id + '">' + (r.total_account ? r.process_rate + '%' : '-') + '</td>' +
+        '<td><input type="number" id="mt-o-' + id + '" value="' + v(o.total_count) + '"></td>' +
+        '<td><input type="number" id="mt-c-' + id + '" value="' + v(o.ownership_count) + '"></td></tr>';
+    }).join('') + '</table></div><button class="btn-main" id="mtGo" onclick="saveManual()">입력한 값 저장</button>';
+}
+function mtRate(id) {
+  var t = parseInt($('mt-t-' + id).value, 10) || 0, d = parseInt($('mt-d-' + id).value, 10) || 0;
+  $('mt-r-' + id).textContent = t ? (Math.round(d / t * 1000) / 10) + '%' : '-';
+}
+function saveManual() {
+  var d = G.input; if (!d) return;
+  var rates = [], owns = [];
+  d.planners.forEach(function (p) {
+    var id = p.planner_id, te = $('mt-t-' + id); if (!te) return;
+    var t = parseInt(te.value, 10) || 0, dn = parseInt($('mt-d-' + id).value, 10) || 0;
+    if (te.value !== '' || $('mt-d-' + id).value !== '') rates.push({ planner_id: id, total_account: t, process_rate: t ? Math.round(dn / t * 1000) / 10 : 0 });
+    var o = $('mt-o-' + id).value, c = $('mt-c-' + id).value;
+    if (o !== '' || c !== '') owns.push({ planner_id: id, total_count: parseInt(o, 10) || 0, ownership_count: parseInt(c, 10) || 0 });
+  });
+  var b = $('mtGo'); b.disabled = true; b.textContent = '저장 중...';
+  api('saveProcessInput', d.ym, rates, owns, G.bk || null).then(function () {
+    b.disabled = false; b.textContent = '입력한 값 저장'; showToast('저장 완료'); loadDash(); loadInput().catch(function () {});
+  }).catch(function (e) { b.disabled = false; b.textContent = '입력한 값 저장'; showToast(e.message); });
+}
+
+// ── 플래너 관리 (관리자) ──
+function loadPlanners() {
+  $('pmRoot').innerHTML = '<div class="state-box">불러오는 중...</div>';
+  api('getPlannerAdmin', G.bk || null).then(function (d) {
+    var rows = d.rows.slice().sort(function (a, b) { return (b.is_active - a.is_active) || a.team.localeCompare(b.team) || a.name.localeCompare(b.name); });
+    var teams = teamsOf().length ? teamsOf() : ['1팀', '2팀'];
+    $('pmTeam').innerHTML = teams.map(function (t) { return '<option>' + esc(t) + '</option>'; }).join('');
+    $('pmRoot').innerHTML = rows.map(function (p) {
+      var id = esc(p.planner_id);
+      return '<div class="pm-row"><div class="pm-name' + (p.is_active ? '' : ' off') + '">' + esc(p.name) + '</div>' +
+        '<select onchange="updPlanner(\'' + id + '\',{team:this.value})">' + teams.concat(teams.indexOf(p.team) < 0 && p.team ? [p.team] : []).map(function (t) { return '<option' + (t === p.team ? ' selected' : '') + '>' + esc(t) + '</option>'; }).join('') + '</select>' +
+        '<input type="number" value="' + (p.monthly_target || 0) + '" title="월 목표" onchange="updPlanner(\'' + id + '\',{monthly_target:this.value})">' +
+        '<button class="pm-act ' + (p.is_active ? 'on' : 'off') + '" onclick="updPlanner(\'' + id + '\',{is_active:' + (!p.is_active) + '},true)">' + (p.is_active ? '빼기' : '넣기') + '</button></div>';
+    }).join('') || '<div class="state-box">명단이 비어 있습니다</div>';
+  }).catch(function (e) { $('pmRoot').innerHTML = '<div class="error-msg">' + esc(e.message) + '</div>'; });
+}
+function updPlanner(id, changes, reload) {
+  api('updatePlannerAdmin', G.bk || null, id, changes).then(function () {
+    showToast('저장했어요'); G.input = null; loadDash(); if (reload) loadPlanners();
+  }).catch(function (e) { showToast(e.message); });
+}
+function addPlanner() {
+  var name = $('pmName').value.trim(); if (!name) { showToast('이름을 입력해 주세요'); return; }
+  api('addPlannerAdmin', G.bk || null, { name: name, team: $('pmTeam').value, monthly_target: $('pmTarget').value }).then(function () {
+    $('pmName').value = ''; $('pmTarget').value = ''; showToast('추가했어요'); G.input = null; loadPlanners(); loadDash();
+  }).catch(function (e) { showToast(e.message); });
+}
+
+loadDash();
+</script>
+</body>
+</html>
