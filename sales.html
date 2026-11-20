@@ -132,6 +132,24 @@ input,select,button,textarea{font-family:inherit}
 .pm-add{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
 .pm-add input,.pm-add select{flex:1;min-width:70px;border:1px solid #E5E8EB;border-radius:10px;padding:10px;font-size:.84rem}
 .pm-add button{background:#3182F6;color:#fff;border:none;border-radius:10px;padding:0 16px;font-weight:800;font-size:.84rem;cursor:pointer}
+/* 평가·인센티브 */
+.inc-line{display:flex;justify-content:space-between;font-size:.84rem;padding:7px 0;border-bottom:1px solid #F7F8FA}
+.inc-line span{color:#8B95A1;font-size:.74rem;margin-left:4px}
+.gr-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.gr{background:#F7F8FA;border-radius:12px;padding:10px 6px;text-align:center}
+.gr-g{font-size:.95rem;font-weight:800;color:#3182F6}
+.gr-a{font-size:.68rem;color:#8B95A1;margin:2px 0}
+.gr-t{font-size:.86rem;font-weight:800}
+.ev-group{font-size:.74rem;color:#8B95A1;font-weight:800;margin:14px 0 2px}
+.ev-row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid #F2F4F6}
+.ev-name{font-weight:700;font-size:.86rem}
+.ev-sub{font-size:.72rem;color:#8B95A1;margin-top:2px}
+.ev-hint{font-size:.7rem;color:#3182F6;margin-top:2px;font-weight:700}
+.ev-score{font-weight:800;font-size:.95rem;text-align:right;white-space:nowrap}
+.ev-score span{font-size:.7rem;color:#B0B8C1;font-weight:600}
+.in-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.in-grid label{font-size:.74rem;color:#4E5968;font-weight:700}
+.in-grid input{width:100%;border:1px solid #E5E8EB;border-radius:10px;padding:9px;font-size:.88rem;margin-top:4px}
 @media(max-width:380px){ .tiles{grid-template-columns:repeat(2,1fr)} .teams{grid-template-columns:1fr} }
 </style>
 </head>
@@ -144,6 +162,7 @@ input,select,button,textarea{font-family:inherit}
 </div>
 <div class="tabbar" id="tabbar" style="display:none">
   <button class="tab-btn active" data-tab="dash" onclick="switchTab('dash')">대시보드</button>
+  <button class="tab-btn" data-tab="eval" onclick="switchTab('eval')" style="display:none">평가</button>
   <button class="tab-btn" data-tab="input" onclick="switchTab('input')" style="display:none">실적 입력</button>
   <button class="tab-btn" data-tab="planner" onclick="switchTab('planner')" style="display:none">플래너 관리</button>
 </div>
@@ -156,6 +175,10 @@ input,select,button,textarea{font-family:inherit}
 
   <div class="tab-panel active" id="tab-dash">
     <div id="dashRoot"><div class="state-box"><div class="state-icon">⏳</div>불러오는 중...</div></div>
+  </div>
+
+  <div class="tab-panel" id="tab-eval">
+    <div id="evalRoot"><div class="state-box">불러오는 중...</div></div>
   </div>
 
   <div class="tab-panel" id="tab-input">
@@ -253,7 +276,7 @@ var G = { ym: '', bk: '', who: null, dash: null, team: 'all', input: null };
   html += '<option value="all">전체(누적)</option>';
   $('ymSel').innerHTML = html;
 })();
-function onYmChange() { G.ym = $('ymSel').value; loadDash(); if (G.input) { G.input = null; loadInput().catch(function () {}); } }
+function onYmChange() { G.ym = $('ymSel').value; loadDash(); if (G.input) { G.input = null; loadInput().catch(function () {}); } if ($('tab-eval').classList.contains('active')) loadEval(); }
 function onBranchChange() { G.bk = $('bkSel').value; G.team = 'all'; G.input = null; loadDash(); if ($('tab-input').classList.contains('active')) loadInput().catch(function () {}); if ($('tab-planner').classList.contains('active')) loadPlanners(); }
 
 function switchTab(t) {
@@ -261,6 +284,7 @@ function switchTab(t) {
   document.querySelectorAll('.tab-panel').forEach(function (p) { p.classList.toggle('active', p.id === 'tab-' + t); });
   if (t === 'input' && !G.input) loadInput().catch(function () {});
   if (t === 'planner') loadPlanners();
+  if (t === 'eval') loadEval();
 }
 
 // ── 대시보드 ──
@@ -280,8 +304,9 @@ function setupRole() {
   if (_roleDone) return; _roleDone = true;
   var w = G.who, isMgr = w.role === 'admin' || w.role === 'manager';
   $('topTitle').textContent = (w.branchName || '지사') + ' 매출실적';
-  if (isMgr || w.role === 'admin') {
+  if (isMgr || w.canEval) {
     $('tabbar').style.display = 'flex';
+    document.querySelector('[data-tab="eval"]').style.display = w.canEval ? '' : 'none';
     document.querySelector('[data-tab="input"]').style.display = isMgr ? '' : 'none';
     document.querySelector('[data-tab="planner"]').style.display = w.role === 'admin' ? '' : 'none';
   }
@@ -504,10 +529,11 @@ function parseOwnAoa(aoa) {
     var emp = String(row[cEmp] == null ? '' : row[cEmp]).trim();
     if (!emp) continue;
     var name = String(row[cEmp + 1] == null ? '' : row[cEmp + 1]).trim();
-    if (!by[emp]) { by[emp] = { empNo: emp, name: name, total: 0, reinflow: 0 }; order.push(emp); }
+    if (!by[emp]) { by[emp] = { empNo: emp, name: name, total: 0, reinflow: 0, rerental: 0 }; order.push(emp); }
     by[emp].total++;
     var yes = function (v) { return String(v == null ? '' : v).trim().toUpperCase() === 'Y'; };
     if (yes(row[cRe]) || yes(row[cKeep])) by[emp].reinflow++;
+    if (yes(row[cRe])) by[emp].rerental++;   // 재렌탈 = 재구매 Y (평가·인센티브용)
     if (cYm >= 0) {
       var ym = String(row[cYm] == null ? '' : row[cYm]).replace(/[^0-9]/g, '');
       if (ym.length >= 6) { ym = ym.slice(0, 4) + '-' + ym.slice(4, 6); yms[ym] = (yms[ym] || 0) + 1; }
@@ -605,15 +631,15 @@ function onOwnFile(inp) {
     box.innerHTML = '<div class="pv-sum"><b>' + esc(ym) + '</b> 소유권 · 만기 <b>' + tot + '</b>건 중 재유입 <b>' + re + '</b>건' +
       (p.months.length > 1 ? '<br><span class="c-warn">파일에 여러 달(' + p.months.map(esc).join(', ') + ')이 섞여 있어 가장 많은 달로 저장합니다</span>' : '') +
       (miss ? '<br><b class="c-bad">명단에 없는 ' + miss + '명은 저장 안 됨</b>' : '') + '</div>' +
-      '<table class="pv-table"><tr><th>담당자</th><th>만기</th><th>재유입</th><th>비율</th></tr>' +
-      items.map(function (it) { return '<tr' + (it.planner_id ? '' : ' class="miss"') + '><td>' + esc(it.x.name) + '</td><td>' + it.x.total + '</td><td>' + it.x.reinflow + '</td><td>' + (it.x.total ? Math.round(it.x.reinflow / it.x.total * 100) : 0) + '%</td></tr>'; }).join('') + '</table>' +
+      '<table class="pv-table"><tr><th>담당자</th><th>만기</th><th>재유입</th><th>재렌탈</th><th>재유입률</th></tr>' +
+      items.map(function (it) { return '<tr' + (it.planner_id ? '' : ' class="miss"') + '><td>' + esc(it.x.name) + '</td><td>' + it.x.total + '</td><td>' + it.x.reinflow + '</td><td>' + it.x.rerental + '</td><td>' + (it.x.total ? Math.round(it.x.reinflow / it.x.total * 100) : 0) + '%</td></tr>'; }).join('') + '</table>' +
       ymWarn(ym) + '<button class="btn-main" id="ownGo" onclick="commitOwn()">' + esc(ym) + ' 소유권 저장</button>';
   }).catch(function (e) { box.innerHTML = '<div class="error-msg">' + esc(e.message) + '</div>'; });
 }
 function commitOwn() {
   var P = _ownPending; if (!P) return;
   var b = $('ownGo'); b.disabled = true; b.textContent = '저장 중...';
-  var owns = P.items.filter(function (it) { return it.planner_id; }).map(function (it) { return { planner_id: it.planner_id, total_count: it.x.total, ownership_count: it.x.reinflow }; });
+  var owns = P.items.filter(function (it) { return it.planner_id; }).map(function (it) { return { planner_id: it.planner_id, total_count: it.x.total, ownership_count: it.x.reinflow, rerental_count: it.x.rerental }; });
   api('saveProcessInput', P.ym, null, owns, G.bk || null, { replace: true }).then(function (r) {
     _ownPending = null; $('pvOwn').innerHTML = '<div class="pv-ok">✅ ' + esc(r.ym) + ' 소유권 ' + r.owns + '명 저장 완료</div>';
     showToast('소유권 저장 완료'); G.input = null; loadDash();
@@ -696,6 +722,72 @@ function addPlanner() {
   api('addPlannerAdmin', G.bk || null, { name: name, team: $('pmTeam').value, monthly_target: $('pmTarget').value }).then(function () {
     $('pmName').value = ''; $('pmTarget').value = ''; showToast('추가했어요'); G.input = null; loadPlanners(); loadDash();
   }).catch(function (e) { showToast(e.message); });
+}
+
+// ── 평가·인센티브 예상 (지사장·팀장 3명만, 2026-11-20) ──
+// 점수·인센티브 계산은 서버(getEvalData, Code.gs EVAL_RULES) 한 곳에서. 여기는 보여주기와 직접 입력만.
+var EV = { data: null, scope: null };
+var EVAL_INPUTS = [
+  ['new_target', '신규계정 목표', '계정'], ['new_count', '신규계정 실적', '계정'], ['safekey_count', '신규 Safe-Key 매출', '건'],
+  ['rerental_adj', '재렌탈 추가 (파일 외)', '건'], ['voc', 'VOC 확정', '건'], ['recruit', '모집 인원', '명'],
+  ['net_change', '순증 인원 (등록-해약)', '명'], ['reg_count', '등록 인원 (평가 대상)', '명'], ['active_count', '활동 인원', '명']
+];
+function loadEval() {
+  if (G.ym === 'all') { $('evalRoot').innerHTML = '<div class="state-box">평가는 월을 골라서 볼 수 있어요</div>'; return; }
+  $('evalRoot').innerHTML = '<div class="state-box"><div class="state-icon">⏳</div>계산하는 중...</div>';
+  api('getEvalData', G.ym, G.bk || null).then(function (d) {
+    EV.data = d;
+    if (!EV.scope || !d.scopes.some(function (s) { return s.scope === EV.scope; })) {
+      var me = d.scopes.find(function (s) { return s.isMe; }); EV.scope = (me || d.scopes[0]).scope;
+    }
+    renderEval();
+  }).catch(function (e) { $('evalRoot').innerHTML = '<div class="state-box"><div class="state-icon">📭</div>' + esc(e.message) + '</div>'; });
+}
+function won(n) { return (Number(n) || 0).toLocaleString() + '원'; }
+function renderEval() {
+  var d = EV.data, s = d.scopes.find(function (x) { return x.scope === EV.scope; }), inc = s.incentive;
+  var html = '<div class="chips">' + d.scopes.map(function (x) {
+    return '<button class="chip' + (x.scope === EV.scope ? ' active' : '') + '" onclick="EV.scope=\'' + esc(x.scope) + '\';renderEval()">' + esc(x.label) + '<br><span style="font-size:.7rem;font-weight:600;opacity:.75">' + esc(x.name) + '</span></button>';
+  }).join('') + '</div>';
+  html += '<div class="card"><div class="big-lbl">' + esc(s.name) + ' ' + esc(s.label) + ' · 예상 인센티브 (평가 등급 제외)</div>' +
+    '<div class="big-val">' + won(inc.base) + '</div>' +
+    '<div style="margin-top:10px">' +
+      '<div class="inc-line"><div>목표달성률<span>' + s.total + '건 · ' + (s.targetPct != null ? s.targetPct + '%' : '목표 없음') + '</span></div><b>' + won(inc.target) + '</b></div>' +
+      '<div class="inc-line"><div>재렌탈 목표달성률<span>' + (s.rerentalPct != null ? s.rerentalPct + '%' : '만기 자료 없음') + '</span></div><b>' + won(inc.rerental) + '</b></div>' +
+      '<div class="inc-line" style="border-bottom:none"><div>매출건수<span>' + s.total + '건</span></div><b>' + won(inc.count) + '</b></div>' +
+    '</div>' +
+    '<div class="card-sub" style="margin-top:12px">평가 등급별 합계 (등급은 전국 상대평가로 정해져요)</div>' +
+    '<div class="gr-grid">' + inc.grades.map(function (g) {
+      return '<div class="gr"><div class="gr-g">' + g.grade + '</div><div class="gr-a">+' + won(g.amount) + '</div><div class="gr-t">' + won(g.total) + '</div></div>';
+    }).join('') + '</div></div>';
+  var groups = [];
+  s.items.forEach(function (it) { if (groups.indexOf(it.group) < 0) groups.push(it.group); });
+  html += '<div class="card"><div class="card-title">평가 점수 <span class="card-sub">규정 ' + esc(d.version) + ' · ' + esc(d.ym) + '</span></div>' +
+    '<div class="big-val">' + s.score + '<span>/ ' + s.maxScore.toLocaleString() + '점</span></div>' +
+    groups.map(function (g) {
+      return '<div class="ev-group">' + esc(g) + '</div>' + s.items.filter(function (it) { return it.group === g; }).map(function (it) {
+        var sub;
+        if (it.perUnit) sub = it.num + it.unit + ' × ' + it.perUnit + '점';
+        else if (it.den !== undefined) sub = it.noTarget ? (it.no === 13 ? '등록 인원 입력 필요' : it.no === 1 ? '신규 목표 입력 필요' : '목표·자료 없음') : (Math.round(it.num) + ' / ' + it.den + it.unit + ' · ' + it.pct + '%');
+        else sub = it.num + it.unit;
+        var hint = it.next ? '<div class="ev-hint">+' + it.next.need + it.unit + '이면 ' + it.next.score + '점</div>' : '';
+        return '<div class="ev-row"><div><div class="ev-name">' + esc(it.name) + '</div><div class="ev-sub">' + sub + '</div>' + hint + '</div>' +
+          '<div class="ev-score' + (it.score < 0 ? ' c-bad' : '') + '">' + it.score + (it.max ? '<span> / ' + it.max + '</span>' : '') + '</div></div>';
+      }).join('');
+    }).join('') + '</div>';
+  html += '<div class="card"><div class="card-title">직접 입력 <span class="card-sub">' + esc(s.label) + ' · ' + esc(d.ym) + '</span></div><div class="in-grid">' +
+    EVAL_INPUTS.map(function (k) {
+      var v = s.inputs[k[0]];
+      return '<div><label>' + k[1] + '</label><input type="number" id="ev-' + k[0] + '" value="' + (v || v === 0 ? v : '') + '" placeholder="' + k[2] + '"></div>';
+    }).join('') + '</div><button class="btn-main" id="evGo" onclick="saveEval()">저장하고 다시 계산</button></div>';
+  $('evalRoot').innerHTML = html;
+}
+function saveEval() {
+  var vals = {};
+  EVAL_INPUTS.forEach(function (k) { var v = $('ev-' + k[0]).value; if (v !== '') vals[k[0]] = v; });
+  var b = $('evGo'); b.disabled = true; b.textContent = '저장 중...';
+  api('saveEvalInputs', EV.data.ym, EV.scope, vals, G.bk || null).then(function () { showToast('저장했어요'); loadEval(); })
+    .catch(function (e) { b.disabled = false; b.textContent = '저장하고 다시 계산'; showToast(e.message); });
 }
 
 loadDash();
