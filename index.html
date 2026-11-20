@@ -1103,15 +1103,10 @@ function openStatusApp() {
 }
 
 function openTrendApp() {
-  // 지사매출실적 (구 수수료 추이, 2026-11-18 이름 변경만 — 화면·로직은 그대로)
+  // 지사매출실적 (2026-11-20): 플래너허브 앱 안 sales.html — 예전 매출추이마스터 GAS 화면은 지움
+  if (!currentUser) { alert('로그인이 필요합니다'); return; }
   if (!_hasBranchData()) { alert('데이터가 없습니다'); return; }
-  var name  = currentUser ? encodeURIComponent(currentUser.name)  : '';
-  var phone = currentUser ? encodeURIComponent(currentUser.phone) : '';
-  var email = currentUser ? encodeURIComponent(currentUser.email || '') : '';
-  
-  var url = 'https://script.google.com/macros/s/AKfycbxHR4Z7CQOj2lZNb4UXL2AwSWnAAZuAyTARFaYJBSChKWgr2i0saCVV78h6FA_cCvEgmA/exec'
-    + '?name=' + name + '&phone=' + phone + _authQuery();
-  window.open(url, '_blank');
+  location.href = 'https://banhyunky.github.io/planner-hub/sales.html';
 }
 
 // ── 설치형 앱(GitHub Pages)용 서버 호출 (2026-10-27) ──────────────────
