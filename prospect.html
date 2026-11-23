@@ -22,6 +22,7 @@ body{font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif;background:#F2
 #toast{position:fixed;bottom:40px;left:50%;transform:translateX(-50%);background:#191F28;color:#fff;font-size:13px;padding:9px 16px;border-radius:999px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:9999;white-space:nowrap}
 #toast.show{opacity:1}
 input,select,button,textarea{font-family:inherit}
+:root{--pc-bg:#F2F4F6;--pc-top:59px}
 </style>
 </head>
 <body>
@@ -125,16 +126,29 @@ function buildProspectShell() {
           style="flex:0 0 44px;height:40px;background:#3b82f6;color:#fff;border:none;border-radius:8px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center">🔍</button>
       </div>
 
-      <!-- 2행: 긴급도 + 카테고리 칩 -->
-      <div style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;align-items:center">
-        <button class="pc-chip active" onclick="pcChip(this,'')">전체</button>
-        <button class="pc-chip" onclick="pcChip(this,'정수기')">정수기</button>
-        <button class="pc-chip" onclick="pcChip(this,'청정기')">청정기</button>
-        <button class="pc-chip" onclick="pcChip(this,'비데')">비데</button>
-        <button class="pc-chip" onclick="pcChip(this,'기타')">기타</button>
+      <!-- 2행: 카테고리 칩 + 회차 범위 슬라이더 (스크롤해도 위에 고정, 2026-11-23) -->
+      <div class="pc-sticky">
+        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+          <button class="pc-chip active" onclick="pcChip(this,'')">전체</button>
+          <button class="pc-chip" onclick="pcChip(this,'정수기')">정수기</button>
+          <button class="pc-chip" onclick="pcChip(this,'청정기')">청정기</button>
+          <button class="pc-chip" onclick="pcChip(this,'비데')">비데</button>
+          <button class="pc-chip" onclick="pcChip(this,'기타')">기타</button>
+        </div>
+        <div id="pc-range-box" style="display:none;margin-top:8px">
+          <div style="display:flex;justify-content:space-between;align-items:center;height:26px">
+            <span style="font-size:12px;color:#475569;font-weight:600">회차 <b id="pc-range-label" style="color:#1d4ed8"></b></span>
+            <button type="button" id="pc-range-reset" onclick="pcRangeReset()" style="display:none;background:none;border:none;font-size:12px;color:#475569;font-weight:600;height:30px;padding:0 2px;cursor:pointer">초기화</button>
+          </div>
+          <div class="pc-dual">
+            <div class="pc-dual-track"></div>
+            <div class="pc-dual-fill" id="pc-range-fill"></div>
+            <input type="range" id="pc-range-lo" aria-label="최소 회차" oninput="pcRangeInput('lo')">
+            <input type="range" id="pc-range-hi" aria-label="최대 회차" oninput="pcRangeInput('hi')">
+          </div>
+        </div>
       </div>
 
-    
       <div id="pc-list">
         <div class="state-box"><div class="state-icon">⏳</div><p>불러오는 중...</p></div>
       </div>
@@ -146,6 +160,16 @@ function buildProspectShell() {
     <style>
       .pc-chip{font-size:11px;padding:4px 10px;border-radius:999px;border:1px solid #e2e8f0;background:#fff;color:#64748b;cursor:pointer}
       .pc-chip.active{background:#dbeafe;color:#1d4ed8;border-color:#93c5fd}
+      .pc-sticky{position:sticky;top:var(--pc-top,0px);z-index:100;background:var(--pc-bg,#fff);margin:0 -14px 12px;padding:8px 14px 6px;border-bottom:1px solid #EEF0F3}
+      .pc-dual{position:relative;height:28px}
+      .pc-dual-track,.pc-dual-fill{position:absolute;top:11px;height:6px;border-radius:999px}
+      .pc-dual-track{left:0;right:0;background:#e2e8f0}
+      .pc-dual-fill{background:#3b82f6}
+      .pc-dual input[type=range]{-webkit-appearance:none;appearance:none;position:absolute;left:0;top:0;width:100%;height:28px;margin:0;background:transparent;pointer-events:none;outline:none}
+      .pc-dual input[type=range]::-webkit-slider-runnable-track{background:transparent;height:28px}
+      .pc-dual input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;pointer-events:auto;width:26px;height:26px;margin-top:1px;border-radius:999px;background:#fff;border:3px solid #3b82f6;box-shadow:0 1px 4px rgba(0,0,0,.25);cursor:grab}
+      .pc-dual input[type=range]::-moz-range-track{background:transparent}
+      .pc-dual input[type=range]::-moz-range-thumb{pointer-events:auto;width:20px;height:20px;border-radius:999px;background:#fff;border:3px solid #3b82f6;box-shadow:0 1px 4px rgba(0,0,0,.25);cursor:grab}
       .pc-card{background:#fff;border:1px solid #e8eaed;border-radius:0 12px 12px 0;padding:12px 14px;margin-bottom:8px;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.04)}
       .pc-card.red{border-left:3px solid #ef4444}
       .pc-card.amber{border-left:3px solid #f59e0b}
@@ -189,6 +213,7 @@ var _pcData = [];
 var _pcMemos = {};   // key: contract_no + '|' + planner_name → memo 객체
 var _pcCatFilter = '';
 var _pcUrgFilter = '';
+var _pcRange = null;   // 회차 범위 {min,max,lo,hi} — 목록의 최소·최대 current_usage (2026-11-23)
 var _pcMemoEditing = null;  // 편집 중인 계약 정보
 
 function loadProspectData() {
@@ -227,6 +252,7 @@ function loadProspectData() {
 
     // 4. 메모는 같은 응답(res.memos)에서 바로 받는다 (키: 계약번호|플래너명)
     _pcMemos = (res && res.memos) || {};
+    pcInitRange();
     pcFilter();
     })
     .withFailureHandler(function(e) {
@@ -308,6 +334,51 @@ function pcChip(btn, cat) {
   pcFilter();
 }
 
+// ── 회차 범위 슬라이더 (2026-11-23) ── 양 끝 = 불러온 목록의 최소·최대 회차
+function pcInitRange() {
+  var box = $('pc-range-box');
+  if (!box) return;
+  var us = _pcData.map(function(r){ return Number(r.current_usage); }).filter(function(n){ return isFinite(n); });
+  if (!us.length) { _pcRange = null; box.style.display = 'none'; return; }
+  var mn = us[0], mx = us[0];
+  us.forEach(function(n){ if (n < mn) mn = n; if (n > mx) mx = n; });
+  _pcRange = { min: mn, max: mx, lo: mn, hi: mx };
+  ['lo','hi'].forEach(function(k){ var el = $('pc-range-' + k); el.min = mn; el.max = mx; el.step = 1; });
+  box.style.display = mx > mn ? '' : 'none';
+  pcRangeSync();
+}
+
+function pcRangeSync() {
+  if (!_pcRange) return;
+  var R = _pcRange, span = (R.max - R.min) || 1;
+  $('pc-range-lo').value = R.lo;
+  $('pc-range-hi').value = R.hi;
+  // 두 핸들이 겹쳤을 때 움직일 수 있는 쪽을 위로
+  $('pc-range-lo').style.zIndex = R.lo > R.min + span / 2 ? 3 : 1;
+  $('pc-range-hi').style.zIndex = 2;
+  $('pc-range-label').textContent = R.lo + '회 ~ ' + R.hi + '회';
+  var fill = $('pc-range-fill');
+  fill.style.left = ((R.lo - R.min) / span * 100) + '%';
+  fill.style.width = ((R.hi - R.lo) / span * 100) + '%';
+  $('pc-range-reset').style.display = (R.lo !== R.min || R.hi !== R.max) ? '' : 'none';
+}
+
+function pcRangeInput(which) {
+  if (!_pcRange) return;
+  var lo = Number($('pc-range-lo').value), hi = Number($('pc-range-hi').value);
+  if (which === 'lo') _pcRange.lo = Math.min(lo, _pcRange.hi);
+  else _pcRange.hi = Math.max(hi, _pcRange.lo);
+  pcRangeSync();
+  pcFilter();
+}
+
+function pcRangeReset() {
+  if (!_pcRange) return;
+  _pcRange.lo = _pcRange.min; _pcRange.hi = _pcRange.max;
+  pcRangeSync();
+  pcFilter();
+}
+
 function pcFilter() {
   var kw  = ($('pc-search') ? $('pc-search').value : '').trim().toLowerCase();
   var urg = _pcUrgFilter;
@@ -316,6 +387,7 @@ function pcFilter() {
   var filtered = _pcData.filter(function(r) {
     if (_pcCatFilter && _pcCatOf(r) !== _pcCatFilter) return false;
     if (urg && r.urgency !== urg) return false;
+    if (_pcRange) { var u = Number(r.current_usage); if (u < _pcRange.lo || u > _pcRange.hi) return false; }
     if (pln && (r.planner_name || '미배정') !== pln) return false;
     if (kw) {
       var hay = [r.customer_name, r.planner_name, r.product_name, r.dong].join(' ').toLowerCase();
@@ -518,6 +590,8 @@ function pcCopyContract(contractNo) {
 
 // ── 시작 ──
 $('pcRoot').innerHTML = buildProspectShell();
+// 칩·슬라이더 고정 줄이 상단바 바로 아래 붙도록 상단바 높이를 잰다
+(function(){ var tb = document.querySelector('.topbar'); if (tb) document.documentElement.style.setProperty('--pc-top', tb.offsetHeight + 'px'); })();
 loadProspectData();
 </script>
 </body>
