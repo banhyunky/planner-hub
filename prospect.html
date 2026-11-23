@@ -297,10 +297,11 @@ function pcPopulatePlannerFilter() {
     + 'border-radius:8px;outline:none;background:#fff">' + opts + '</select>';
 }
 
-function pcRenderSummary() {
-  var total = _pcData.length;
-  var red   = _pcData.filter(function(r){ return r.urgency === 'red'; }).length;
-  var amber = _pcData.filter(function(r){ return r.urgency === 'amber'; }).length;
+function pcRenderSummary(list) {
+  list = list || _pcData;
+  var total = list.length;
+  var red   = list.filter(function(r){ return r.urgency === 'red'; }).length;
+  var amber = list.filter(function(r){ return r.urgency === 'amber'; }).length;
   var el;
   el = $('pc-cnt-total'); if(el) el.textContent = total;
   el = $('pc-cnt-red');   if(el) el.textContent = red;
@@ -384,9 +385,9 @@ function pcFilter() {
   var urg = _pcUrgFilter;
   var pln = $('pc-filter-planner') ? $('pc-filter-planner').value : '';
 
-  var filtered = _pcData.filter(function(r) {
+  // 숫자 카드는 임박/가망 선택만 빼고 지금 조건(플래너·카테고리·회차·검색) 기준으로 센다 (2026-11-23)
+  var base = _pcData.filter(function(r) {
     if (_pcCatFilter && _pcCatOf(r) !== _pcCatFilter) return false;
-    if (urg && r.urgency !== urg) return false;
     if (_pcRange) { var u = Number(r.current_usage); if (u < _pcRange.lo || u > _pcRange.hi) return false; }
     if (pln && (r.planner_name || '미배정') !== pln) return false;
     if (kw) {
@@ -395,6 +396,9 @@ function pcFilter() {
     }
     return true;
   });
+  pcRenderSummary(base);
+
+  var filtered = urg ? base.filter(function(r) { return r.urgency === urg; }) : base;
 
   pcRenderList(filtered);
 }
