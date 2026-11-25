@@ -137,8 +137,15 @@ function buildProspectShell() {
         </div>
         <div id="pc-range-box" style="display:none;margin-top:8px">
           <div style="display:flex;justify-content:space-between;align-items:center;height:26px">
-            <span style="font-size:12px;color:#475569;font-weight:600">회차 <b id="pc-range-label" style="color:#1d4ed8"></b></span>
+            <span style="font-size:12px;color:#475569;font-weight:600;display:inline-flex;align-items:center">회차&nbsp;<b id="pc-range-label" style="color:#1d4ed8"></b>
+              <button type="button" aria-label="가망고객 기준 보기" onclick="pcToggleRule(event)" style="margin-left:2px;width:30px;height:30px;border:none;background:none;color:#64748b;font-size:14px;cursor:pointer;padding:0">ⓘ</button>
+            </span>
             <button type="button" id="pc-range-reset" onclick="pcRangeReset()" style="display:none;background:none;border:none;font-size:12px;color:#475569;font-weight:600;height:30px;padding:0 2px;cursor:pointer">초기화</button>
+          </div>
+          <div id="pc-rule" style="display:none;margin:2px 0 6px;padding:8px 10px;background:#f1f5f9;border-radius:8px;font-size:11px;line-height:1.6;color:#475569">
+            <b style="color:#1e293b">가망고객 기준</b><br>
+            정수기·청정기: 의무 36개월 → 33회~ / 48·60개월 → 48회~ (프로모션 교체)<br>
+            비데·기타: 의무 끝나기 6개월 전부터
           </div>
           <div class="pc-dual">
             <div class="pc-dual-track"></div>
@@ -292,7 +299,7 @@ function pcPopulatePlannerFilter() {
   });
 
   slot.innerHTML =
-    '<select id="pc-filter-planner" onchange="pcFilter()" '
+    '<select id="pc-filter-planner" onchange="pcInitRange();pcFilter()" '
     + 'style="width:100%;font-size:13px;padding:0 8px;height:40px;border:1.5px solid #cbd5e1;'
     + 'border-radius:8px;outline:none;background:#fff">' + opts + '</select>';
 }
@@ -335,11 +342,14 @@ function pcChip(btn, cat) {
   pcFilter();
 }
 
-// ── 회차 범위 슬라이더 (2026-11-23) ── 양 끝 = 불러온 목록의 최소·최대 회차
+// ── 회차 범위 슬라이더 (2026-11-23) ── 양 끝 = 불러온 목록(플래너 선택 시 그 플래너)의 최소·최대 회차
 function pcInitRange() {
   var box = $('pc-range-box');
   if (!box) return;
-  var us = _pcData.map(function(r){ return Number(r.current_usage); }).filter(function(n){ return isFinite(n); });
+  // 플래너를 골랐으면 그 플래너 고객의 최소·최대 회차로 (2026-11-24)
+  var pln = $('pc-filter-planner') ? $('pc-filter-planner').value : '';
+  var src = pln ? _pcData.filter(function(r){ return (r.planner_name || '미배정') === pln; }) : _pcData;
+  var us = src.map(function(r){ return Number(r.current_usage); }).filter(function(n){ return isFinite(n); });
   if (!us.length) { _pcRange = null; box.style.display = 'none'; return; }
   var mn = us[0], mx = us[0];
   us.forEach(function(n){ if (n < mn) mn = n; if (n > mx) mx = n; });
@@ -372,6 +382,16 @@ function pcRangeInput(which) {
   pcRangeSync();
   pcFilter();
 }
+
+function pcToggleRule(e) {
+  if (e) e.stopPropagation();
+  var el = $('pc-rule');
+  if (el) el.style.display = el.style.display === 'none' ? '' : 'none';
+}
+document.addEventListener('click', function(e) {
+  var el = document.getElementById('pc-rule');
+  if (el && el.style.display !== 'none' && !el.contains(e.target)) el.style.display = 'none';
+});
 
 function pcRangeReset() {
   if (!_pcRange) return;
@@ -412,7 +432,7 @@ function pcRenderList(list) {
     return;
   }
 
-  var isAdmin = G.user && (G.user.role === 'admin' || G.user.isSuperAdmin);
+  var isAdmin = G.user && (G.user.role === 'admin' || G.user.isSuperAdmin || G.user.role === 'manager');
   var html = '';
 
   if (isAdmin) {
@@ -454,9 +474,6 @@ var baseDuration = r.contract_duration > 0 ? r.contract_duration : 60;
 var remaining = baseDuration - r.current_usage;
 var remainText = r.customer_type === '렌탈'
   ? (remaining < 0 ? '의무초과 · ' + r.current_usage + '회차' : '잔여 ' + remaining + '개월 · ' + r.current_usage + '회차')
-  : r.current_usage + '회차';
-var remainText = r.customer_type === '렌탈'
-  ? '잔여 ' + remaining + '개월 · ' + r.current_usage + '회차'
   : r.current_usage + '회차';
   var contractNo  = r.contract_no || '';
   var plannerName = r.planner_name || '';
@@ -502,7 +519,7 @@ var remainText = r.customer_type === '렌탈'
     +     '<span>·</span><span>' + _pcEsc(r.dong || '') + '</span>'
     +     '<span>·</span><span>' + _pcEsc(r.latest_month || '') + '</span>'
     +   '</div>'
-    +   '<span style="font-size:10px;color:#94a3b8">탭하여 복사</span>'
+    +   '<span style="font-size:10px;color:#94a3b8">터치하면 계약번호 복사</span>'
     + '</div>'
     + '</div>';
 }
