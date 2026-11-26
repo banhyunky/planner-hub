@@ -717,6 +717,8 @@ h1{text-align:center;font-size:1.4rem;color:#1e3a8a;margin-bottom:18px}
     <img id="flyResult" class="fly-canvas" style="display:none" alt="완성된 전단지">
     <div class="fly-msg" id="flyMsg"></div>
     <div class="mbtns" style="margin-top:10px"><button class="mbtn-send" onclick="flySave()">저장하기</button></div>
+    <div class="mbtns" style="margin-top:8px"><button class="mbtn-send" onclick="flyPrint()">인쇄하기 (A4)</button></div>
+    <div class="mbtns" style="margin-top:8px"><button class="mbtn-cancel" onclick="flyDownload()">PC에 파일로 저장</button></div>
     <div class="mbtns"><button class="mbtn-cancel" onclick="closeFlyerModal()">닫기</button></div>
   </div>
 </div>
@@ -999,6 +1001,41 @@ function flySave(){
   } catch(e){
     flyEl('flyMsg').textContent = '이미지를 만들지 못했습니다. 잠시 후 다시 시도해 주세요.';
   }
+}
+
+function flyCheckInfo(){
+  var name = flyEl('flyName').value.trim(), phone = flyEl('flyPhone').value.trim();
+  if (!name || !phone){ flyEl('flyMsg').textContent = '이름과 전화번호를 입력해 주세요.'; return null; }
+  return { name:name, phone:phone };
+}
+function flyDownload(){
+  var info = flyCheckInfo(); if (!info) return;
+  var fname = '청호_' + FLY_LIST[flyCur].title + '_' + info.name + '.png';
+  try {
+    flyEl('flyCanvas').toBlob(function(blob){
+      if (!blob){ flyShowResult('이미지를 만들지 못했습니다. 다시 시도해 주세요.'); return; }
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob); a.download = fname;
+      document.body.appendChild(a); a.click();
+      setTimeout(function(){ document.body.removeChild(a); }, 500);
+      flyShowResult('다운로드 폴더에 저장했어요: ' + fname);
+    }, 'image/png');
+  } catch(e){ flyEl('flyMsg').textContent = '이미지를 만들지 못했습니다. 잠시 후 다시 시도해 주세요.'; }
+}
+function flyPrint(){
+  var info = flyCheckInfo(); if (!info) return;
+  var url;
+  try { url = flyEl('flyCanvas').toDataURL('image/png'); } catch(e){ flyEl('flyMsg').textContent = '이미지를 만들지 못했습니다. 잠시 후 다시 시도해 주세요.'; return; }
+  var old = document.getElementById('flyPrintFrame'); if (old) old.parentNode.removeChild(old);
+  var fr = document.createElement('iframe');
+  fr.id = 'flyPrintFrame';
+  fr.style.cssText = 'position:fixed;left:-9999px;top:0;width:210mm;height:297mm;border:0';
+  fr.onload = function(){
+    setTimeout(function(){ try { fr.contentWindow.focus(); fr.contentWindow.print(); } catch(e){} }, 400);
+  };
+  fr.srcdoc = '<!doctype html><html><head><meta charset="utf-8"><style>@page{size:A4;margin:0}html,body{margin:0;padding:0}img{display:block;width:210mm;height:297mm;object-fit:contain}</style></head><body><img src="' + url + '"></body></html>';
+  document.body.appendChild(fr);
+  flyEl('flyMsg').textContent = '인쇄 창이 열리면 용지를 A4로 두고 인쇄하세요.';
 }
 
 function openCardApp() {
