@@ -1033,7 +1033,7 @@ function flyPrint(){
   fr.onload = function(){
     setTimeout(function(){ try { fr.contentWindow.focus(); fr.contentWindow.print(); } catch(e){} }, 400);
   };
-  fr.srcdoc = '<!doctype html><html><head><meta charset="utf-8"><style>@page{size:A4;margin:0}html,body{margin:0;padding:0}img{display:block;width:210mm;height:297mm;object-fit:contain}</style></head><body><img src="' + url + '"></body></html>';
+  fr.srcdoc = '<!doctype html><html><head><meta charset="utf-8"><style>@page{size:A4;margin:0}html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden}img{display:block;width:100%;height:100%;object-fit:contain;page-break-after:avoid;page-break-inside:avoid}</style></head><body><img src="' + url + '"></body></html>';
   document.body.appendChild(fr);
   flyEl('flyMsg').textContent = '인쇄 창이 열리면 용지를 A4로 두고 인쇄하세요.';
 }
